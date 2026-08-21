@@ -205,10 +205,12 @@ const io     = new Server(server, { cors: { origin: '*' } });
 // ─────────────────────────────────────────────
 // CONFIGURACIÓN TURSO DB (LibSQL)
 // ─────────────────────────────────────────────
-const db = createClient({
-    url: process.env.TURSO_DATABASE_URL || 'libsql://iptv-db-aminejilal.aws-eu-west-1.turso.io',
-    authToken: process.env.TURSO_AUTH_TOKEN || ''
-});
+const dbUrl = process.env.TURSO_DATABASE_URL || 'libsql://iptv-db-aminejilal.aws-eu-west-1.turso.io';
+const dbToken = process.env.TURSO_AUTH_TOKEN || '';
+
+const db = dbToken 
+    ? createClient({ url: dbUrl, authToken: dbToken })
+    : createClient({ url: 'file:local.db' });
 
 async function initDb() {
     try {
@@ -294,7 +296,7 @@ async function syncAllLists() {
                     total++;
                 }
             }
-        } catch(e){}
+        } catch(e){ console.error('[Sync] Error en TDT España:', e.message); }
 
         // 2. Iberoamericana
         try {
@@ -308,7 +310,7 @@ async function syncAllLists() {
                     total++;
                 }
             }
-        } catch(e){}
+        } catch(e){ console.error('[Sync] Error en Iberoamericana:', e.message); }
 
         // 3. Arabic
         try {
@@ -323,7 +325,7 @@ async function syncAllLists() {
                     total++;
                 }
             }
-        } catch(e){}
+        } catch(e){ console.error('[Sync] Error en Arabic:', e.message); }
 
         // 4. BeIN
         for (const c of BEIN_CHANNELS.concat(BEIN_CHANNELS_720)) {
