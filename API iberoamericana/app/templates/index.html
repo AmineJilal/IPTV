@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fútbol Libre TV - REST API & Live Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #070d0a;
+            --card-bg: rgba(18, 34, 25, 0.7);
+            --card-border: rgba(0, 230, 118, 0.15);
+            --accent-green: #00e676;
+            --accent-glow: rgba(0, 230, 118, 0.4);
+            --text-main: #f0f7f3;
+            --text-muted: #8fa89b;
+            --gold: #ffd700;
+            --primary-gradient: linear-gradient(135deg, #00e676 0%, #00b0ff 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 230, 118, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 176, 255, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        header {
+            background: rgba(7, 13, 10, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--primary-gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #000;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--accent-green);
+        }
+
+        .port-badge {
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-green);
+        }
+
+        .main-container {
+            max-width: 1280px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Player Section */
+        .player-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            margin-bottom: 35px;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .player-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #ff3d00;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px #ff3d00;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 61, 0, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 61, 0, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 61, 0, 0); }
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .player-controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stream-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--accent-green);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Grid for Channels */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 18px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-green);
+            box-shadow: 0 10px 25px rgba(0, 230, 118, 0.2);
+        }
+
+        .card-logo {
+            height: 55px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .btn-card {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            justify-content: center;
+        }
+
+        /* Agenda Section */
+        .agenda-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .agenda-item {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .agenda-time {
+            background: rgba(0, 230, 118, 0.1);
+            color: var(--accent-green);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+        }
+
+        .agenda-info {
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .agenda-event-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .agenda-category {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .agenda-channels {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #00e676;
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">FL</div>
+            <div class="logo-text">FútbolLibre <span>API</span></div>
+            <div class="port-badge">PORT {{ port }}</div>
+        </div>
+        <div class="nav-links">
+            <a href="/playlist.m3u" class="btn btn-outline">📥 Playlist M3U</a>
+            <a href="/docs" target="_blank" class="btn btn-primary">⚡ API Docs (Swagger)</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Live Player Section -->
+        <section class="player-section">
+            <div class="player-header">
+                <div class="player-title">
+                    <span class="live-dot"></span>
+                    <span id="now-playing-title">Reproductor en Vivo: Selecciona un canal</span>
+                </div>
+            </div>
+
+            <div class="video-wrapper">
+                <video id="video-player" controls poster="https://futbollibretv.sx/img/banner.jpg"></video>
+            </div>
+
+            <div class="player-controls">
+                <span style="color: var(--text-muted); font-size: 0.85rem;">STREAM PROXY URL:</span>
+                <input type="text" id="stream-url-display" class="stream-input" readonly value="Selecciona un canal abajo para reproducir...">
+                <button class="btn btn-outline" onclick="copyCurrentStream()">📋 Copiar Link</button>
+            </div>
+        </section>
+
+        <!-- Channels Catalog Grid -->
+        <section>
+            <div class="section-title">📺 Canales En Vivo</div>
+            <div class="grid" id="channels-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+
+        <!-- Agenda Section -->
+        <section>
+            <div class="section-title">📅 Agenda Deportiva de Hoy</div>
+            <div class="agenda-list" id="agenda-list">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast">¡Enlace copiado al portapapeles!</div>
+
+    <script>
+        let hls = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadChannels();
+            loadAgenda();
+        });
+
+        function playStream(url, channelName) {
+            const video = document.getElementById('video-player');
+            const titleEl = document.getElementById('now-playing-title');
+            const inputEl = document.getElementById('stream-url-display');
+
+            const fullUrl = window.location.origin + url;
+            titleEl.textContent = `Reproduciendo: ${channelName}`;
+            inputEl.value = fullUrl;
+
+            if (Hls.isSupported()) {
+                if (hls) hls.destroy();
+                hls = new Hls({
+                    enableWorker: true,
+                    lowLatencyMode: true
+                });
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.play().catch(e => console.log('Autoplay blocked:', e));
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.addEventListener('loadedmetadata', () => {
+                    video.play();
+                });
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function loadChannels() {
+            const grid = document.getElementById('channels-grid');
+            try {
+                const res = await fetch('/api/channels');
+                const channels = await res.json();
+
+                grid.innerHTML = channels.map(ch => `
+                    <div class="card">
+                        <img src="${ch.logo}" alt="${ch.name}" class="card-logo" onerror="this.src='https://futbollibretv.sx/img/favi.jpg'">
+                        <div class="card-title">${ch.name}</div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary btn-card" onclick="playStream('${ch.stream_proxy}', '${ch.name}')">▶ Reproducir</button>
+                            <button class="btn btn-outline btn-card" onclick="copyText('${window.location.origin}${ch.stream_proxy}')">🔗 Copiar</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                grid.innerHTML = `<div style="color:red">Error cargando canales: ${e}</div>`;
+            }
+        }
+
+        async function loadAgenda() {
+            const agendaEl = document.getElementById('agenda-list');
+            try {
+                const res = await fetch('/api/agenda');
+                const agenda = await res.json();
+
+                if (agenda.length === 0) {
+                    agendaEl.innerHTML = '<div style="color:var(--text-muted); padding:20px;">No hay eventos programados en este momento.</div>';
+                    return;
+                }
+
+                agendaEl.innerHTML = agenda.map(item => `
+                    <div class="agenda-item">
+                        <div class="agenda-time">⏰ ${item.time}</div>
+                        <div class="agenda-info">
+                            <div class="agenda-event-title">${item.title}</div>
+                            <div class="agenda-category">${item.category}</div>
+                        </div>
+                        <div class="agenda-channels">
+                            ${item.channels.map(ch => `
+                                <button class="btn btn-outline btn-card" onclick="playStream('${ch.stream_proxy}', '${item.title} - ${ch.name}')">
+                                    📺 ${ch.name} (${ch.quality})
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                agendaEl.innerHTML = `<div style="color:red">Error cargando agenda: ${e}</div>`;
+            }
+        }
+
+        function copyCurrentStream() {
+            const inputEl = document.getElementById('stream-url-display');
+            if (inputEl.value && !inputEl.value.includes('Selecciona')) {
+                copyText(inputEl.value);
+            }
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

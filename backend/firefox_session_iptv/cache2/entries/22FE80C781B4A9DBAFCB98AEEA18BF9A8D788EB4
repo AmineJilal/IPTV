@@ -1,0 +1,680 @@
+var bxs_width = parent.window.screen.width;
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) || (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.platform))){
+// the object contens the same ID which uses in diferents groups of sites
+	if (!sc_gruop_of_sites) {
+		var sc_gruop_of_sites = {
+			prensaIberica: "movil-div-gpt-ad_728"
+		}
+	}
+
+	if (document.location.href.indexOf("elperiodico") != -1) {
+		if (document.location.href.indexOf("woman.elperiodico.com") != -1) {
+			var element = document.getElementById("csticky_movil-div-gpt-ad_728");
+			element ? element.classList.add("bxs-bb") : false;
+		} else if (document.location.href.indexOf("elperiodicodearagon.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+		} else if (document.location.href.indexOf("elperiodicoextremadura.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+		} else if (document.location.href.indexOf("elperiodico.com/cuore") != -1) {
+
+			var element = document.getElementById("csticky_movil-div-gpt-ad_728");
+				element.classList.add("bxs-bb");
+
+		} else if (document.location.href.indexOf("viajar.elperiodico.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+		} else if (document.location.href.indexOf("elperiodico.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+		}else{
+			var element = document.getElementById(sc_gruop_of_sites.prensaIberica);
+			element.classList.add("bxs-bb");
+		}
+	} else if (document.location.href.indexOf("los40") != -1) {
+
+		if (bxs_width < 600) {
+			var element = document.getElementById("los40_gpt-MLDB1");
+				element.classList.add("bxs-bb");
+
+		} else {
+			var element = document.getElementById("los40_gpt-LDB1");
+				element.classList.add("bxs-bb");
+		}
+
+	} else if (document.location.href.indexOf("cadenaser") != -1) {
+		console.log('bxs_width ', bxs_width)
+
+		if (bxs_width < 600) {
+			var element = document.getElementById("cadenaser_gpt-MLDB1");
+				element.classList.add("bxs-bb");
+
+		} else {
+			var element = document.getElementById("cadenaser_gpt-LDB1");
+				element.classList.add("bxs-bb");
+		}
+
+	} else if (document.location.href.indexOf("20minutos") != -1) {
+
+		var element = document.getElementById("Top");
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("diarioinformacion") != -1) {
+
+		var element = document.getElementById("pc-div-gpt-ad_728");
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("miarevista.es") != -1) {
+
+		var element = document.getElementById("top");
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("serpadres.es") != -1) {
+
+		var element = document.getElementById("top");
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("sport.es") != -1) {
+
+		var element = document.querySelector("#movil-div-gpt-ad_728");
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("marie-claire.es") != -1) {
+
+		var element = document.getElementById("top");
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("woman.es") != -1) {
+
+		var element = document.getElementById("div-gpt-ad-ldb1");
+			element ? element.classList.add("bxs-bb") : false;
+
+	} else if (document.location.href.indexOf("lavanguardia.com") != -1) {
+
+		var element = document.getElementsByClassName("megabanner-top-adv")[0]; 
+				element.classList.add("bxs-bb");
+				element.style.zIndex = "auto"; 
+
+	} else if (document.location.href.indexOf("stilo.es") != -1) {
+
+		var element = document.getElementById("csticky_movil-div-gpt-ad_728"); 
+				element.classList.add("bxs-bb");
+				element.style.zIndex = "auto"; 
+
+	} else if (document.location.href.indexOf("epe.es") != -1) {
+
+		var element = document.getElementById("movil-div-gpt-ad_728"); 
+				element.classList.add("bxs-bb");
+
+	//	var element = document.getElementById("pc-div-gpt-ad_728"); 
+	//			element.classList.add("bxs-bb");			
+
+	} else if (document.location.href.indexOf("laopiniondemalaga.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("informacion.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("levante-emv.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("diariodemallorca.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("diariodeibiza.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("laopinioncoruna.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("farodevigo.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("eldia.es") != -1) {
+
+		var element = document.getElementById('pc-div-gpt-ad_728'); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("laprovincia.es") != -1) {
+
+		var element = document.getElementById('pc-div-gpt-ad_728'); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("diariodeleon.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("laopiniondezamora.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("lagacetadesalamanca.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("laopiniondemurcia.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("diariodenoticias.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("noticiasdegipuzkoa.eus") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("deia.eus") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("noticiasdealava.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("superdeporte.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("lagrada.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("mallorcazeitung.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("emporda.info") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("diaridegirona.cat") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("regio7.cat") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("segre.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("diariocordoba.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("elcorreogallego.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("codigonuevo.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("noticiasdenavarra.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("noticiasdealava.eus") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("ondavasca.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("vanitatis.elconfidencial.com") != -1) {
+
+		var element = document.getElementById("mega_C1565j6860Z651f5d93"); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("elconfidencial.com") != -1) {
+
+		var element = document.getElementById("mega_C1565j6860Z651f5d93"); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("ecartelera.com") != -1) {
+
+		var element = document.getElementById("sc-top"); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("filmaffinity.com") != -1) {
+
+		var element = document.getElementById("sc-top"); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("lne.es") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("muyinteresante.com") != -1) {
+
+		var element = document.querySelector("main > #top");
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("elespanol.com") != -1) {
+
+		var element = document.querySelector("#megasuperior");
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("antena3.com") != -1) {
+
+		var element = document.querySelector(".sc-bxs");
+				element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("lasexta.com") != -1) {
+
+		var element = document.querySelector(".mod-ad-top");
+				element.classList.add("bxs-bb");
+
+	}else  {
+		var div = document.createElement('div');
+			div.className = 'bxs-bb';
+		if (document.body.firstChild)
+		document.body.insertBefore(div, document.body.firstChild);
+		else
+		document.body.appendChild(div);
+	}
+
+	// End mobile extention 
+
+} else {
+
+// Desktop vertion
+	
+// the object contens the same ID which uses in diferents groups of sites
+if (!sc_gruop_of_sites) {
+	var sc_gruop_of_sites = {
+		prensaIberica: "pc-div-gpt-ad_728"
+	}
+}
+
+if (document.location.href.indexOf("elperiodico") != -1) {
+	if (document.location.href.indexOf("woman.elperiodico.com") != -1) {
+		var element = document.getElementById("csticky_movil-div-gpt-ad_728");
+		element ? element.classList.add("bxs-bb") : false;
+	} else if (document.location.href.indexOf("elperiodicodearagon.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("elperiodicoextremadura.com") != -1) {
+
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+		element.classList.add("bxs-bb");
+
+	} 
+	// 	else if (document.location.href.indexOf("elperiodico.com/cuore") != -1) {
+
+	// //	var element = document.getElementsByClassName("header")[0]; 
+	// //			element.classList.add("bxs-bb");
+
+	// //use window.scrollY
+	// var scrollpos = window.scrollY;
+	// var header = document.getElementsByClassName("header")[0];
+
+	// function add_class_on_scroll() {
+	// 	header.classList.add("fadein");
+	// }
+
+	// function remove_class_on_scroll() {
+	// 	header.classList.remove("fadein");
+	// }
+
+	// window.addEventListener('scroll', function(){ 
+	// 	//Here you forgot to update the value
+	// 	scrollpos = window.scrollY;
+
+	// 	if(scrollpos > 200){
+	// 		add_class_on_scroll();
+	// 	}
+	// 	else {
+	// 		remove_class_on_scroll();
+	// 	}
+	// 	console.log(scrollpos);
+	// });						
+
+	// } 
+	else if (document.location.href.indexOf("viajar.elperiodico.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+	} else if (document.location.href.indexOf("elperiodico.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+	}else{
+		var element = document.getElementById(sc_gruop_of_sites.prensaIberica);
+		element.classList.add("bxs-bb");
+	}
+} else if (document.location.href.indexOf("los40") != -1) {
+
+	if (bxs_width < 600) {
+		var element = document.getElementById("los40_gpt-MLDB1");
+			element.classList.add("bxs-bb");
+
+	} else {
+		var element = document.getElementById("los40_gpt-LDB1");
+			element.classList.add("bxs-bb");
+	}
+
+} else if (document.location.href.indexOf("cadenaser") != -1) {
+	if (bxs_width < 600) {
+		var element = document.getElementById("cadenaser_gpt-MLDB1");
+			element.classList.add("bxs-bb");
+
+	} else {
+		var element = document.getElementById("cadenaser_gpt-LDB1");
+			element.classList.add("bxs-bb");
+	}
+
+} else if (document.location.href.indexOf("20minutos") != -1) {
+
+	var element = document.getElementById("Top");
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("diarioinformacion") != -1) {
+
+	var element = document.getElementById("pc-div-gpt-ad_728");
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("miarevista.es") != -1) {
+
+	var element = document.getElementById("top");
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("serpadres.es") != -1) {
+
+	var element = document.getElementById("top");
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("sport.es") != -1) {
+
+	var element = document.getElementById("div-gpt-ad-ldb1m");
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("marie-claire.es") != -1) {
+
+	var element = document.getElementById("top");
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("woman.es") != -1) {
+
+	var element = document.getElementById("div-gpt-ad-ldb1");
+	element ? element.classList.add("bxs-bb") : false;
+
+} else if (document.location.href.indexOf("lavanguardia.com") != -1) {
+
+	var element = document.getElementsByClassName("megabanner-top-adv")[0]; 
+			element.classList.add("bxs-bb");
+			element.style.zIndex = "auto"; 
+
+} else if (document.location.href.indexOf("stilo.es") != -1) {
+
+	var element = document.getElementById("csticky_movil-div-gpt-ad_728"); 
+			element.classList.add("bxs-bb");
+			element.style.zIndex = "auto"; 
+
+} else if (document.location.href.indexOf("epe.es") != -1) {
+
+//	var element = document.getElementById("movil-div-gpt-ad_728"); 
+//			element.classList.add("bxs-bb");
+
+	var element = document.getElementById("pc-div-gpt-ad_728"); 
+			element.classList.add("bxs-bb");			
+
+} else if (document.location.href.indexOf("laopiniondemalaga.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("informacion.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("levante-emv.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("diariodemallorca.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("diariodeibiza.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("laopinioncoruna.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("farodevigo.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("laprovincia.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("eldia.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("diariodeleon.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("laopiniondezamora.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("lagacetadesalamanca.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("laopiniondemurcia.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("diariodenoticias.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("noticiasdegipuzkoa.eus") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("deia.eus") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("noticiasdealava.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("superdeporte.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("lagrada.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("mallorcazeitung.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("emporda.info") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("diaridegirona.cat") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("regio7.cat") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("segre.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("diariocordoba.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("elcorreogallego.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("codigonuevo.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("noticiasdenavarra.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("noticiasdealava.eus") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("ondavasca.com") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("vanitatis.elconfidencial.com") != -1) {
+
+	var element = document.getElementById("mega_C1565j6860Z651f5d93"); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("elconfidencial.com") != -1) {
+
+	var element = document.getElementById("mega_C1565j6860Z651f5d93"); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("ecartelera.com") != -1) {
+
+	var element = document.getElementById("sc-top"); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("filmaffinity.com") != -1) {
+
+	var element = document.getElementById("sc-top"); 
+			element.classList.add("bxs-bb");
+
+} else if (document.location.href.indexOf("lne.es") != -1) {
+
+	var element = document.getElementById(sc_gruop_of_sites.prensaIberica); 
+			element.classList.add("bxs-bb");
+
+} else  {
+    var div = document.createElement('div');
+    	div.className = 'bxs-bb';
+    if (document.body.firstChild)
+      document.body.insertBefore(div, document.body.firstChild);
+    else
+      document.body.appendChild(div);
+}
+}òV¤Î%      j{Ì•j{Ì•IÏŒj…   m    O^partitionKey=%28https%2Ccuatro.com%29,:https://s3.eu-central-1.amazonaws.com/brandxsite/libs/bxs_a_class.js strongly-framed 1 security-info FnhllAKWRHGAlo+ESXykKAAAAAAAAAAAwAAAAAAAAEaphjojH6pBabDSgSnsfLHeAAAAAgAAAAAAAAAAAAAAAAAAAAEAOQFmCjImkVxP+7sgiYWmMt8FvcOXmlQiTNWFiWlrbpbqgwAAAAAAAAgqMIIIJjCCBw6gAwIBAgIQAr3r/YNlG37hEju7YbRkxzANBgkqhkiG9w0BAQsFADA8MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRwwGgYDVQQDExNBbWF6b24gUlNBIDIwNDggTTA0MB4XDTI1MDkxNjAwMDAwMFoXDTI2MDkwOTIzNTk1OVowKjEoMCYGA1UEAwwfKi5zMy5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOe/zXCLzKtWPFaXsVUM17ovf7VNQ+v3bUE2GYlddTz/X7l8WNdWpMmlZyzps/9jMlpdBwi/V2ohJIZheoOmYtlESfEacImRRGzkPlfduxFQbsFAJ9ygc71gtfc0QshF0BYwGWoeK11Zg1zoKIoaPQGUZgUaWcTu6l3Rk2BF0CVtYsxNHnVX3gV50ndkp6c+xpn1ZTtdnmjQtghJoWFCIljurbDMOTTPNCKv5bvpK0KJj09vMm6yBrXGorC9jK3mkDiD3mQ9FVC38HwunHkagvZsUhry/z0OXrLDa46XJXEnWUEF5WI6WEecyHYaLr8YY17ske7BqiRiMgRjYb43oPsCAwEAAaOCBTQwggUwMB8GA1UdIwQYMBaAFB9SkmFWglR/gWbYHT0KqjJch90IMB0GA1UdDgQWBBRswYV8ROpjby6S+JeGEajCZEC3mzCCAmMGA1UdEQSCAlowggJWgh8qLnMzLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tghIqLnMzLmFtYXpvbmF3cy5jb22CKSouczMuZHVhbHN0YWNrLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgh1zMy1ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYI1Ki5zMy1hY2Nlc3Nwb2ludC5kdWFsc3RhY2suZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CMSouczMtY29udHJvbC5kdWFsc3RhY2suZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CKyouczMtYWNjZXNzcG9pbnQuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CJyouczMtY29udHJvbC5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYInczMuZHVhbHN0YWNrLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgioqLnMzLWRlcHJlY2F0ZWQuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CL3MzLWNvbnRyb2wuZHVhbHN0YWNrLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgihzMy1kZXByZWNhdGVkLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgh8qLnMzLWV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgiVzMy1jb250cm9sLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgh1zMy5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbTATBgNVHSAEDDAKMAgGBmeBDAECATAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMDsGA1UdHwQ0MDIwMKAuoCyGKmh0dHA6Ly9jcmwucjJtMDQuYW1hem9udHJ1c3QuY29tL3IybTA0LmNybDB1BggrBgEFBQcBAQRpMGcwLQYIKwYBBQUHMAGGIWh0dHA6Ly9vY3NwLnIybTA0LmFtYXpvbnRydXN0LmNvbTA2BggrBgEFBQcwAoYqaHR0cDovL2NydC5yMm0wNC5hbWF6b250cnVzdC5jb20vcjJtMDQuY2VyMAwGA1UdEwEB/wQCMAAwggF/BgorBgEEAdZ5AgQCBIIBbwSCAWsBaQB3ANgJVTuUT3r/yBYZb5RPhauw+Pxeh1UmDxXRLnK7RUsUAAABmVAcydgAAAQDAEgwRgIhANZugkkc+d5yPElk2KIe4MoQ8vh6yBXZcMSfCSS1BN8yAiEA77ROMj6UKkx8HYkkuNi6MK7xI9L9kmR6z+MvBGipA4QAdwDCMX5XRRmjRe5/ON6ykEHrx8IhWiK/f9W1rXaa2Q5SzQAAAZlQHMnLAAAEAwBIMEYCIQDo4O43QLjmRSvgWrnCnf02IVi/xCSwnO4NlUtcE7lz8QIhAPUGeTsgAUy3u7uXGeVjGfKQ1gVg/IMdFf3AJ2PZBVqyAHUAlE5Dh/rswe+B8xkkJqgYZQHH0184AgE/cmd9VTcuGdgAAAGZUBzJ2gAABAMARjBEAiBsZM3YVGR09xnZdvlAuix6gm+Cfe0WvsmP0kA0p5UTKgIgCy6LUHSp9J5Aj6JG3wjHvN+JpZthhQ4tZKT5k7KKZqAwDQYJKoZIhvcNAQELBQADggEBAJyoE30M60iGBYj7dohkD7rqleqDSxeyRDGky10I78bCkOMjHfh1X5iTfON+0EvPfrYSVPqpJS+P2ROnPYFE7GFxgIjcUYix6Chem224/nQhbTjG5YvSbyCyH+f6uI8nAFm2xycErgvFLqKp3IyhNyLPO0jG7BSu5hEiYMK9PHF2cgHujIZxfBrTIZbgdaPE69J1e5yQbl5ZgGhS3FCIZPpt3HVWD1eFiu4cto6T8X6EMfSpeJUGzzWEBnLvmtX1GMla3pRj62cnudGw83+yPgrM4aUbfiw6L6vqc/6pncXTYX+i5ThXvv3oUW7pZppt5ZzXxjeRAFS/7akqzUD0BEYTAwAEAAAAAAABAQAABQAAAA5tbGtlbTc2OHgyNTUxOQAAAA5SU0EtUFNTLVNIQTI1NgADZgoyJpFcT/u7IImFpjLfBb3Dl5pUIkzVhYlpa26W6oMAAAAAAAAIKjCCCCYwggcOoAMCAQICEAK96/2DZRt+4RI7u2G0ZMcwDQYJKoZIhvcNAQELBQAwPDELMAkGA1UEBhMCVVMxDzANBgNVBAoTBkFtYXpvbjEcMBoGA1UEAxMTQW1hem9uIFJTQSAyMDQ4IE0wNDAeFw0yNTA5MTYwMDAwMDBaFw0yNjA5MDkyMzU5NTlaMCoxKDAmBgNVBAMMHyouczMuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDnv81wi8yrVjxWl7FVDNe6L3+1TUPr921BNhmJXXU8/1+5fFjXVqTJpWcs6bP/YzJaXQcIv1dqISSGYXqDpmLZREnxGnCJkURs5D5X3bsRUG7BQCfcoHO9YLX3NELIRdAWMBlqHitdWYNc6CiKGj0BlGYFGlnE7upd0ZNgRdAlbWLMTR51V94FedJ3ZKenPsaZ9WU7XZ5o0LYISaFhQiJY7q2wzDk0zzQir+W76StCiY9PbzJusga1xqKwvYyt5pA4g95kPRVQt/B8Lpx5GoL2bFIa8v89Dl6yw2uOlyVxJ1lBBeViOlhHnMh2Gi6/GGNe7JHuwaokYjIEY2G+N6D7AgMBAAGjggU0MIIFMDAfBgNVHSMEGDAWgBQfUpJhVoJUf4Fm2B09CqoyXIfdCDAdBgNVHQ4EFgQUbMGFfETqY28ukviXhhGowmRAt5swggJjBgNVHREEggJaMIICVoIfKi5zMy5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYISKi5zMy5hbWF6b25hd3MuY29tgikqLnMzLmR1YWxzdGFjay5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYIdczMtZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CNSouczMtYWNjZXNzcG9pbnQuZHVhbHN0YWNrLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgjEqLnMzLWNvbnRyb2wuZHVhbHN0YWNrLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgisqLnMzLWFjY2Vzc3BvaW50LmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgicqLnMzLWNvbnRyb2wuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CJ3MzLmR1YWxzdGFjay5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYIqKi5zMy1kZXByZWNhdGVkLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgi9zMy1jb250cm9sLmR1YWxzdGFjay5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYIoczMtZGVwcmVjYXRlZC5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYIfKi5zMy1ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYIlczMtY29udHJvbC5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYIdczMuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb20wEwYDVR0gBAwwCjAIBgZngQwBAgEwDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjA7BgNVHR8ENDAyMDCgLqAshipodHRwOi8vY3JsLnIybTA0LmFtYXpvbnRydXN0LmNvbS9yMm0wNC5jcmwwdQYIKwYBBQUHAQEE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YW1hem9uYXdzLmNvbYIxKi5zMy1jb250cm9sLmR1YWxzdGFjay5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYIrKi5zMy1hY2Nlc3Nwb2ludC5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYInKi5zMy1jb250cm9sLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tgidzMy5kdWFsc3RhY2suZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CKiouczMtZGVwcmVjYXRlZC5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbYIvczMtY29udHJvbC5kdWFsc3RhY2suZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CKHMzLWRlcHJlY2F0ZWQuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CHyouczMtZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CJXMzLWNvbnRyb2wuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb22CHXMzLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tMBMGA1UdIAQMMAowCAYGZ4EMAQIBMA4GA1UdDwEB/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwOwYDVR0fBDQwMjAwoC6gLIYqaHR0cDovL2NybC5yMm0wNC5hbWF6b250cnVzdC5jb20vcjJtMDQuY3JsMHUGCCsGAQUFBwEBBGkwZzAtBggrBgEFBQcwAYYhaHR0cDovL29jc3AucjJtMDQuYW1hem9udHJ1c3QuY29tMDYGCCsGAQUFBzAChipodHRwOi8vY3J0LnIybTA0LmFtYXpvbnRydXN0LmNvbS9yMm0wNC5jZXIwDAYDVR0TAQH/BAIwADCCAX8GCisGAQQB1nkCBAIEggFvBIIBawFpAHcA2AlVO5RPev/IFhlvlE+Fq7D4/F6HVSYPFdEucrtFSxQAAAGZUBzJ2AAABAMASDBGAiEA1m6CSRz53nI8SWTYoh7gyhDy+HrIFdlwxJ8JJLUE3zICIQDvtE4yPpQqTHwdiSS42LowrvEj0v2SZHrP4y8EaKkDhAB3AMIxfldFGaNF7n843rKQQevHwiFaIr9/1bWtdprZDlLNAAABmVAcycsAAAQDAEgwRgIhAOjg7jdAuOZF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 request-method GET response-head HTTP/1.1 200 OK
+x-amz-id-2: c1sPxLHJ/hdTxTP81fqa1RBjvwiLw9Aan/HbX9Dwe99YehI/cXhteOy59YWdESin0MfTO6k3KYBA7SUjyOW/jriQO8wfVgcv
+x-amz-request-id: 51J2C2H49G9YR23N
+Date: Wed, 12 Aug 2026 01:29:58 GMT
+Last-Modified: Thu, 04 Jul 2024 08:31:00 GMT
+ETag: "74054e46a7bf56873f34fd95bec0d188"
+x-amz-server-side-encryption: AES256
+x-amz-version-id: null
+Accept-Ranges: bytes
+Content-Type: application/javascript
+Content-Length: 23307
+Server: AmazonS3
+ original-response-headers x-amz-id-2: c1sPxLHJ/hdTxTP81fqa1RBjvwiLw9Aan/HbX9Dwe99YehI/cXhteOy59YWdESin0MfTO6k3KYBA7SUjyOW/jriQO8wfVgcv
+x-amz-request-id: 51J2C2H49G9YR23N
+Date: Wed, 12 Aug 2026 01:29:58 GMT
+Last-Modified: Thu, 04 Jul 2024 08:31:00 GMT
+ETag: "74054e46a7bf56873f34fd95bec0d188"
+x-amz-server-side-encryption: AES256
+x-amz-version-id: null
+Accept-Ranges: bytes
+Content-Type: application/javascript
+Content-Length: 23307
+Server: AmazonS3
+ ctid 2 net-response-time-onstart 80 net-response-time-onstop 80      [

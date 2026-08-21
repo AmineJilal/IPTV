@@ -1,0 +1,1821 @@
+========================================================================
+GUÍA DE PETICIONES Y LISTA DE CANALES TDT ESPAÑA
+========================================================================
+
+1. CÓMO HACER PETICIONES A LA API:
+
+  - Listar todos los canales:
+    curl -s http://localhost:8080/canales
+
+  - Obtener información de un canal específico:
+    curl -s http://localhost:8080/canales/<ID_CANAL>
+
+  - Resolver enlace en directo (stream .m3u8 / .mpd):
+    curl -s http://localhost:8080/canales/<ID_CANAL>/stream
+
+  - Descargar lista de reproducción IPTV (M3U8):
+    curl -s http://localhost:8080/playlist.m3u8
+
+========================================================================
+2. LISTA COMPLETA DE CANALES E IDS PARA PETICIONES:
+========================================================================
+
+[001] NOMBRE: La 1
+      ID CANAL: La1.TV
+      GRUPO   : Nacionales
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La1.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La1.TV/stream
+------------------------------------------------------------------------
+[002] NOMBRE: La 2
+      ID CANAL: La2.TV
+      GRUPO   : Nacionales
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La2.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La2.TV/stream
+------------------------------------------------------------------------
+[003] NOMBRE: Antena 3
+      ID CANAL: Antena3.TV
+      GRUPO   : Nacionales
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Antena3.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Antena3.TV/stream
+------------------------------------------------------------------------
+[004] NOMBRE: Cuatro
+      ID CANAL: Cuatro.TV
+      GRUPO   : Nacionales
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Cuatro.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Cuatro.TV/stream
+------------------------------------------------------------------------
+[005] NOMBRE: Telecinco
+      ID CANAL: Telecinco.TV
+      GRUPO   : Nacionales
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Telecinco.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Telecinco.TV/stream
+------------------------------------------------------------------------
+[006] NOMBRE: laSexta
+      ID CANAL: LaSexta.TV
+      GRUPO   : Nacionales
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/LaSexta.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/LaSexta.TV/stream
+------------------------------------------------------------------------
+[007] NOMBRE: Neox
+      ID CANAL: Neox.TV
+      GRUPO   : Nacionales
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Neox.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Neox.TV/stream
+------------------------------------------------------------------------
+[008] NOMBRE: Nova
+      ID CANAL: Nova.TV
+      GRUPO   : Nacionales
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Nova.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Nova.TV/stream
+------------------------------------------------------------------------
+[009] NOMBRE: Mega
+      ID CANAL: Mega.TV
+      GRUPO   : Nacionales
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Mega.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Mega.TV/stream
+------------------------------------------------------------------------
+[010] NOMBRE: Atreseries
+      ID CANAL: Atreseries.TV
+      GRUPO   : Nacionales
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Atreseries.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Atreseries.TV/stream
+------------------------------------------------------------------------
+[011] NOMBRE: FDF
+      ID CANAL: FDF.TV
+      GRUPO   : Nacionales
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/FDF.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/FDF.TV/stream
+------------------------------------------------------------------------
+[012] NOMBRE: Energy
+      ID CANAL: Energy.TV
+      GRUPO   : Nacionales
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Energy.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Energy.TV/stream
+------------------------------------------------------------------------
+[013] NOMBRE: Divinity
+      ID CANAL: Divinity.TV
+      GRUPO   : Nacionales
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Divinity.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Divinity.TV/stream
+------------------------------------------------------------------------
+[014] NOMBRE: Be Mad
+      ID CANAL: Bemad.TV
+      GRUPO   : Nacionales
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Bemad.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Bemad.TV/stream
+------------------------------------------------------------------------
+[015] NOMBRE: DMAX
+      ID CANAL: DMax.TV
+      GRUPO   : Nacionales
+      STREAM  : stream2
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/DMax.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/DMax.TV/stream
+------------------------------------------------------------------------
+[016] NOMBRE: La casa de los Gemelos 3
+      ID CANAL: Gemelos.TV
+      GRUPO   : Nacionales
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Gemelos.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Gemelos.TV/stream
+------------------------------------------------------------------------
+[017] NOMBRE: TRECE
+      ID CANAL: 13.TV
+      GRUPO   : Nacionales
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/13.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/13.TV/stream
+------------------------------------------------------------------------
+[018] NOMBRE: El Toro TV
+      ID CANAL: ElToroTV.TV
+      GRUPO   : Nacionales
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ElToroTV.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ElToroTV.TV/stream
+------------------------------------------------------------------------
+[019] NOMBRE: RNE para todos
+      ID CANAL: RNE para todos
+      GRUPO   : Informativos;Nacionales
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RNE para todos
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RNE para todos/stream
+------------------------------------------------------------------------
+[020] NOMBRE: 24h
+      ID CANAL: 24Horas.TV
+      GRUPO   : Informativos;Nacionales
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/24Horas.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/24Horas.TV/stream
+------------------------------------------------------------------------
+[021] NOMBRE: Euronews
+      ID CANAL: Euronews.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Euronews.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Euronews.TV/stream
+------------------------------------------------------------------------
+[022] NOMBRE: Sky News
+      ID CANAL: SkyNews.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/SkyNews.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/SkyNews.TV/stream
+------------------------------------------------------------------------
+[023] NOMBRE: GB News
+      ID CANAL: GBNews.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/GBNews.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/GBNews.TV/stream
+------------------------------------------------------------------------
+[024] NOMBRE: CGTN Europe
+      ID CANAL: CGTNEurope.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/CGTNEurope.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/CGTNEurope.TV/stream
+------------------------------------------------------------------------
+[025] NOMBRE: ABC News
+      ID CANAL: ABCNews.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ABCNews.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ABCNews.TV/stream
+------------------------------------------------------------------------
+[026] NOMBRE: ABC News Australia
+      ID CANAL: ABCNewsAus.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ABCNewsAus.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ABCNewsAus.TV/stream
+------------------------------------------------------------------------
+[027] NOMBRE: América TV
+      ID CANAL: America.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/America.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/America.TV/stream
+------------------------------------------------------------------------
+[028] NOMBRE: Telefe Noticias
+      ID CANAL: Telefe.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Telefe.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Telefe.TV/stream
+------------------------------------------------------------------------
+[029] NOMBRE: Noticias Caracol
+      ID CANAL: Caracol.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Caracol.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Caracol.TV/stream
+------------------------------------------------------------------------
+[030] NOMBRE: Todo Noticias
+      ID CANAL: Todo.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Todo.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Todo.TV/stream
+------------------------------------------------------------------------
+[031] NOMBRE: Canal 26
+      ID CANAL: Canal26.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Canal26.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Canal26.TV/stream
+------------------------------------------------------------------------
+[032] NOMBRE: FRANCE 24 Español
+      ID CANAL: FRANCEEspañol.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/FRANCEEspañol.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/FRANCEEspañol.TV/stream
+------------------------------------------------------------------------
+[033] NOMBRE: FRANCE 24
+      ID CANAL: FRANCE24.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/FRANCE24.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/FRANCE24.TV/stream
+------------------------------------------------------------------------
+[034] NOMBRE: DW Español
+      ID CANAL: DWEspañol.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/DWEspañol.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/DWEspañol.TV/stream
+------------------------------------------------------------------------
+[035] NOMBRE: Al Jazeera
+      ID CANAL: AlJazeera.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/AlJazeera.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/AlJazeera.TV/stream
+------------------------------------------------------------------------
+[036] NOMBRE: Record News
+      ID CANAL: RecordNews.TV
+      GRUPO   : Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RecordNews.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RecordNews.TV/stream
+------------------------------------------------------------------------
+[037] NOMBRE: Negocios TV
+      ID CANAL: Negocios.TV
+      GRUPO   : Informativos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Negocios.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Negocios.TV/stream
+------------------------------------------------------------------------
+[038] NOMBRE: Teledeporte
+      ID CANAL: TDP.TV
+      GRUPO   : Deportivos
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TDP.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TDP.TV/stream
+------------------------------------------------------------------------
+[039] NOMBRE: Teledeporte 2
+      ID CANAL: TDP2.TV
+      GRUPO   : Deportivos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TDP2.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TDP2.TV/stream
+------------------------------------------------------------------------
+[040] NOMBRE: Teledeporte 3
+      ID CANAL: TDP3.TV
+      GRUPO   : Deportivos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TDP3.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TDP3.TV/stream
+------------------------------------------------------------------------
+[041] NOMBRE: Teledeporte 4
+      ID CANAL: TDP4.TV
+      GRUPO   : Deportivos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TDP4.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TDP4.TV/stream
+------------------------------------------------------------------------
+[042] NOMBRE: TDP Play
+      ID CANAL: TDPPlay.TV
+      GRUPO   : Deportivos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TDPPlay.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TDPPlay.TV/stream
+------------------------------------------------------------------------
+[043] NOMBRE: Esport 3
+      ID CANAL: E3.TV
+      GRUPO   : Deportivos;Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/E3.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/E3.TV/stream
+------------------------------------------------------------------------
+[044] NOMBRE: ETB Deportes
+      ID CANAL: ETBD.TV
+      GRUPO   : Deportivos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ETBD.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ETBD.TV/stream
+------------------------------------------------------------------------
+[045] NOMBRE: ETB Deportes 2
+      ID CANAL: ETBD2.TV
+      GRUPO   : Deportivos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ETBD2.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ETBD2.TV/stream
+------------------------------------------------------------------------
+[046] NOMBRE: Vinx TV Asturias
+      ID CANAL: Vinx TV Asturias
+      GRUPO   : Deportivos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Vinx TV Asturias
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Vinx TV Asturias/stream
+------------------------------------------------------------------------
+[047] NOMBRE: GOL TV
+      ID CANAL: GOL.TV
+      GRUPO   : Deportivos
+      STREAM  : stream12
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/GOL.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/GOL.TV/stream
+------------------------------------------------------------------------
+[048] NOMBRE: Real Madrid TV
+      ID CANAL: RMTV.TV
+      GRUPO   : Deportivos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RMTV.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RMTV.TV/stream
+------------------------------------------------------------------------
+[049] NOMBRE: Real Betis TV
+      ID CANAL: Betis.TV
+      GRUPO   : Deportivos
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Betis.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Betis.TV/stream
+------------------------------------------------------------------------
+[050] NOMBRE: Boing
+      ID CANAL: Boing.TV
+      GRUPO   : Infantiles
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Boing.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Boing.TV/stream
+------------------------------------------------------------------------
+[051] NOMBRE: Clan
+      ID CANAL: Clan.TV
+      GRUPO   : Infantiles
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Clan.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Clan.TV/stream
+------------------------------------------------------------------------
+[052] NOMBRE: Kidz
+      ID CANAL: Kidz.TV
+      GRUPO   : Infantiles
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Kidz.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Kidz.TV/stream
+------------------------------------------------------------------------
+[053] NOMBRE: SX3
+      ID CANAL: SX3.TV
+      GRUPO   : Infantiles;Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/SX3.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/SX3.TV/stream
+------------------------------------------------------------------------
+[054] NOMBRE: TVG Xabarín
+      ID CANAL: Xavarin.TV
+      GRUPO   : Infantiles;Galicia
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Xavarin.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Xavarin.TV/stream
+------------------------------------------------------------------------
+[055] NOMBRE: TVG Pequerrech@s
+      ID CANAL: Pequerrech@s.TV
+      GRUPO   : Infantiles;Galicia
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Pequerrech@s.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Pequerrech@s.TV/stream
+------------------------------------------------------------------------
+[056] NOMBRE: TVG Cativ@s
+      ID CANAL: Cativ@s.TV
+      GRUPO   : Infantiles;Galicia
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Cativ@s.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Cativ@s.TV/stream
+------------------------------------------------------------------------
+[057] NOMBRE: TVG Mociñ@s
+      ID CANAL: Mociñ@s.TV
+      GRUPO   : Infantiles;Galicia
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Mociñ@s.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Mociñ@s.TV/stream
+------------------------------------------------------------------------
+[058] NOMBRE: Flooxer
+      ID CANAL: Flooxer.TV
+      GRUPO   : Temáticos A3media
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Flooxer.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Flooxer.TV/stream
+------------------------------------------------------------------------
+[059] NOMBRE: Atresplayer Multicine
+      ID CANAL: A3P_Multicine.TV
+      GRUPO   : Temáticos A3media
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/A3P_Multicine.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/A3P_Multicine.TV/stream
+------------------------------------------------------------------------
+[060] NOMBRE: Atresplayer Clásicos
+      ID CANAL: A3P_Clasicos.TV
+      GRUPO   : Temáticos A3media
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/A3P_Clasicos.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/A3P_Clasicos.TV/stream
+------------------------------------------------------------------------
+[061] NOMBRE: Atresplayer Comedia
+      ID CANAL: A3P_Comedia.TV
+      GRUPO   : Temáticos A3media
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/A3P_Comedia.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/A3P_Comedia.TV/stream
+------------------------------------------------------------------------
+[062] NOMBRE: Atresplayer Mentes Inquietas
+      ID CANAL: A3P_MentesInqui.TV
+      GRUPO   : Temáticos A3media
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/A3P_MentesInqui.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/A3P_MentesInqui.TV/stream
+------------------------------------------------------------------------
+[063] NOMBRE: El Hormiguero
+      ID CANAL: A3P_Hormiguero.TV
+      GRUPO   : Temáticos A3media
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/A3P_Hormiguero.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/A3P_Hormiguero.TV/stream
+------------------------------------------------------------------------
+[064] NOMBRE: El club de la comedia
+      ID CANAL: A3P_ClubComedia.TV
+      GRUPO   : Temáticos A3media
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/A3P_ClubComedia.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/A3P_ClubComedia.TV/stream
+------------------------------------------------------------------------
+[065] NOMBRE: Equipo de investigación
+      ID CANAL: A3P_EqInvestigacion.TV
+      GRUPO   : Temáticos A3media
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/A3P_EqInvestigacion.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/A3P_EqInvestigacion.TV/stream
+------------------------------------------------------------------------
+[066] NOMBRE: Aquí no hay quién viva
+      ID CANAL: A3P_AquiNoHayQ.TV
+      GRUPO   : Temáticos A3media
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/A3P_AquiNoHayQ.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/A3P_AquiNoHayQ.TV/stream
+------------------------------------------------------------------------
+[067] NOMBRE: Física o química
+      ID CANAL: A3P_FisicaOQuimica.TV
+      GRUPO   : Temáticos A3media
+      STREAM  : stream11
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/A3P_FisicaOQuimica.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/A3P_FisicaOQuimica.TV/stream
+------------------------------------------------------------------------
+[068] NOMBRE: RTVE en Play
+      ID CANAL: RTVE_EnPlay.TV
+      GRUPO   : Temáticos RTVE
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RTVE_EnPlay.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RTVE_EnPlay.TV/stream
+------------------------------------------------------------------------
+[069] NOMBRE: RTVE Al Cielo con Ella
+      ID CANAL: RTVE_ElCielo.TV
+      GRUPO   : Temáticos RTVE
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RTVE_ElCielo.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RTVE_ElCielo.TV/stream
+------------------------------------------------------------------------
+[070] NOMBRE: RTVE Cocina
+      ID CANAL: RTVE_Cocina.TV
+      GRUPO   : Temáticos RTVE
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RTVE_Cocina.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RTVE_Cocina.TV/stream
+------------------------------------------------------------------------
+[071] NOMBRE: RTVE Cuéntame
+      ID CANAL: RTVE_Cuentame.TV
+      GRUPO   : Temáticos RTVE
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RTVE_Cuentame.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RTVE_Cuentame.TV/stream
+------------------------------------------------------------------------
+[072] NOMBRE: RTVE Somos Cine
+      ID CANAL: RTVE_SomosCine.TV
+      GRUPO   : Temáticos RTVE
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RTVE_SomosCine.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RTVE_SomosCine.TV/stream
+------------------------------------------------------------------------
+[073] NOMBRE: RTVE La promesa
+      ID CANAL: RTVE_Promesa.TV
+      GRUPO   : Temáticos RTVE
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RTVE_Promesa.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RTVE_Promesa.TV/stream
+------------------------------------------------------------------------
+[074] NOMBRE: RTVE La Revuelta
+      ID CANAL: RTVE_LaRevuelta.TV
+      GRUPO   : Temáticos RTVE
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RTVE_LaRevuelta.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RTVE_LaRevuelta.TV/stream
+------------------------------------------------------------------------
+[075] NOMBRE: RTVE Conciertos Radio 3
+      ID CANAL: RTVE_Conciertos_R3.TV
+      GRUPO   : Temáticos RTVE
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RTVE_Conciertos_R3.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RTVE_Conciertos_R3.TV/stream
+------------------------------------------------------------------------
+[076] NOMBRE: Infinity Eventos
+      ID CANAL: EventosInfinity.TV
+      GRUPO   : Temáticos Infinity
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/EventosInfinity.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/EventosInfinity.TV/stream
+------------------------------------------------------------------------
+[077] NOMBRE: Infinity Eventos 2
+      ID CANAL: Eventos2Infinity.TV
+      GRUPO   : Temáticos Infinity
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Eventos2Infinity.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Eventos2Infinity.TV/stream
+------------------------------------------------------------------------
+[078] NOMBRE: Infinity Comedia
+      ID CANAL: Mitele_Comedia.TV
+      GRUPO   : Temáticos Infinity
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Mitele_Comedia.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Mitele_Comedia.TV/stream
+------------------------------------------------------------------------
+[079] NOMBRE: Infinity Viajes
+      ID CANAL: Mitele_Viajes.TV
+      GRUPO   : Temáticos Infinity
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Mitele_Viajes.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Mitele_Viajes.TV/stream
+------------------------------------------------------------------------
+[080] NOMBRE: Infinity En la Calle
+      ID CANAL: Mitele_Calle.TV
+      GRUPO   : Temáticos Infinity
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Mitele_Calle.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Mitele_Calle.TV/stream
+------------------------------------------------------------------------
+[081] NOMBRE: Infinity Top Series
+      ID CANAL: Mitele_Series.TV
+      GRUPO   : Temáticos Infinity
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Mitele_Series.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Mitele_Series.TV/stream
+------------------------------------------------------------------------
+[082] NOMBRE: mtmad 24h
+      ID CANAL: mtmad24h.TV
+      GRUPO   : Temáticos Infinity
+      STREAM  : stream10
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/mtmad24h.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/mtmad24h.TV/stream
+------------------------------------------------------------------------
+[083] NOMBRE: Canal Sur Andalucía
+      ID CANAL: CanalSurA.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/CanalSurA.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/CanalSurA.TV/stream
+------------------------------------------------------------------------
+[084] NOMBRE: Canal Sur 2 Accesible
+      ID CANAL: Canal Sur 2 Accesible
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Canal Sur 2 Accesible
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Canal Sur 2 Accesible/stream
+------------------------------------------------------------------------
+[085] NOMBRE: Canal Sur Más Noticias
+      ID CANAL: Canal Sur Más Noticias
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Canal Sur Más Noticias
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Canal Sur Más Noticias/stream
+------------------------------------------------------------------------
+[086] NOMBRE: Andalucía Cocina
+      ID CANAL: AndaluciaCocina
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/AndaluciaCocina
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/AndaluciaCocina/stream
+------------------------------------------------------------------------
+[087] NOMBRE: Andalucía Turismo
+      ID CANAL: AndaluciaTurismo
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/AndaluciaTurismo
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/AndaluciaTurismo/stream
+------------------------------------------------------------------------
+[088] NOMBRE: Castilla-La Mancha Media
+      ID CANAL: CMM.TV
+      GRUPO   : Castilla-La Mancha
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/CMM.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/CMM.TV/stream
+------------------------------------------------------------------------
+[089] NOMBRE: TeleToledo
+      ID CANAL: TeleToledo.TV
+      GRUPO   : Castilla-La Mancha
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TeleToledo.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TeleToledo.TV/stream
+------------------------------------------------------------------------
+[090] NOMBRE: TV Hellín
+      ID CANAL: Hellin.TV
+      GRUPO   : Castilla-La Mancha
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Hellin.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Hellin.TV/stream
+------------------------------------------------------------------------
+[091] NOMBRE: Visión 6
+      ID CANAL: vision6.TV
+      GRUPO   : Castilla-La Mancha
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/vision6.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/vision6.TV/stream
+------------------------------------------------------------------------
+[092] NOMBRE: Guada TV Media
+      ID CANAL: Guada.TV
+      GRUPO   : Castilla-La Mancha
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Guada.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Guada.TV/stream
+------------------------------------------------------------------------
+[093] NOMBRE: Aragón TV
+      ID CANAL: AragonTV.TV
+      GRUPO   : Aragón
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/AragonTV.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/AragonTV.TV/stream
+------------------------------------------------------------------------
+[094] NOMBRE: De Laredu Lin TV
+      ID CANAL: De Laredu Lin TV
+      GRUPO   : Cantabria
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/De Laredu Lin TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/De Laredu Lin TV/stream
+------------------------------------------------------------------------
+[095] NOMBRE: Televisión Canaria
+      ID CANAL: Canarias.TV
+      GRUPO   : Canarias
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Canarias.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Canarias.TV/stream
+------------------------------------------------------------------------
+[096] NOMBRE: La 1 Canarias
+      ID CANAL: La1_CAN.TV
+      GRUPO   : Canarias
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La1_CAN.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La1_CAN.TV/stream
+------------------------------------------------------------------------
+[097] NOMBRE: La 2 Canarias
+      ID CANAL: La2_CAN.TV
+      GRUPO   : Canarias
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La2_CAN.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La2_CAN.TV/stream
+------------------------------------------------------------------------
+[098] NOMBRE: 24h Canarias
+      ID CANAL: 24H_CAN.TV
+      GRUPO   : Canarias
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/24H_CAN.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/24H_CAN.TV/stream
+------------------------------------------------------------------------
+[099] NOMBRE: Mírame TV
+      ID CANAL: MirameTV.TV
+      GRUPO   : Canarias
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/MirameTV.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/MirameTV.TV/stream
+------------------------------------------------------------------------
+[100] NOMBRE: Canal 4 Tenerife
+      ID CANAL: Canal 4 Tenerife.TV
+      GRUPO   : Canarias
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Canal 4 Tenerife.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Canal 4 Tenerife.TV/stream
+------------------------------------------------------------------------
+[101] NOMBRE: Lancelot TV
+      ID CANAL: Lancelot.TV
+      GRUPO   : Canarias
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Lancelot.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Lancelot.TV/stream
+------------------------------------------------------------------------
+[102] NOMBRE: Tenerife Plus+ TV
+      ID CANAL: Tenerife Plus+ TV
+      GRUPO   : Canarias
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Tenerife Plus+ TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Tenerife Plus+ TV/stream
+------------------------------------------------------------------------
+[103] NOMBRE: RTV Mogán
+      ID CANAL: RTV Mogán
+      GRUPO   : Canarias
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RTV Mogán
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RTV Mogán/stream
+------------------------------------------------------------------------
+[104] NOMBRE: Noroeste TV
+      ID CANAL: Noroeste TV
+      GRUPO   : Canarias
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Noroeste TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Noroeste TV/stream
+------------------------------------------------------------------------
+[105] NOMBRE: Fuerteventura TV
+      ID CANAL: Fuerteventura TV
+      GRUPO   : Canarias
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Fuerteventura TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Fuerteventura TV/stream
+------------------------------------------------------------------------
+[106] NOMBRE: Radio Calima TV
+      ID CANAL: Radio Calima TV
+      GRUPO   : Canarias
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Radio Calima TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Radio Calima TV/stream
+------------------------------------------------------------------------
+[107] NOMBRE: La 7
+      ID CANAL: La7.TV
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La7.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La7.TV/stream
+------------------------------------------------------------------------
+[108] NOMBRE: La 8 Avila
+      ID CANAL: La8CYL.TV1
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8CYL.TV1
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8CYL.TV1/stream
+------------------------------------------------------------------------
+[109] NOMBRE: La 8 Bierzo
+      ID CANAL: La8CYL.TV2
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8CYL.TV2
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8CYL.TV2/stream
+------------------------------------------------------------------------
+[110] NOMBRE: La 8 Burgos
+      ID CANAL: La8CYL.TV3
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8CYL.TV3
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8CYL.TV3/stream
+------------------------------------------------------------------------
+[111] NOMBRE: La 8 Leon
+      ID CANAL: La8CYL.TV4
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8CYL.TV4
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8CYL.TV4/stream
+------------------------------------------------------------------------
+[112] NOMBRE: La 8 Palencia
+      ID CANAL: La8CYL.TV5
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8CYL.TV5
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8CYL.TV5/stream
+------------------------------------------------------------------------
+[113] NOMBRE: La 8 Salamanca
+      ID CANAL: La8CYL.TV6
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8CYL.TV6
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8CYL.TV6/stream
+------------------------------------------------------------------------
+[114] NOMBRE: La 8 Segovia
+      ID CANAL: La8CYL.TV7
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8CYL.TV7
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8CYL.TV7/stream
+------------------------------------------------------------------------
+[115] NOMBRE: La 8 Soria
+      ID CANAL: La8CYL.TV8
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8CYL.TV8
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8CYL.TV8/stream
+------------------------------------------------------------------------
+[116] NOMBRE: La 8 Valladolid
+      ID CANAL: La8CYL.TV9
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8CYL.TV9
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8CYL.TV9/stream
+------------------------------------------------------------------------
+[117] NOMBRE: La 8 Zamora
+      ID CANAL: La8CYL.TV10
+      GRUPO   : Castilla y León
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8CYL.TV10
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8CYL.TV10/stream
+------------------------------------------------------------------------
+[118] NOMBRE: À Punt
+      ID CANAL: APUNT.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/APUNT.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/APUNT.TV/stream
+------------------------------------------------------------------------
+[119] NOMBRE: 7 TeleValencia
+      ID CANAL: 7Televalencia.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7Televalencia.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7Televalencia.TV/stream
+------------------------------------------------------------------------
+[120] NOMBRE: La 8 Mediterráneo
+      ID CANAL: La8M.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La8M.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La8M.TV/stream
+------------------------------------------------------------------------
+[121] NOMBRE: Bon Dia TV
+      ID CANAL: BonDia.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/BonDia.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/BonDia.TV/stream
+------------------------------------------------------------------------
+[122] NOMBRE: Telesafor
+      ID CANAL: Telesafor.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Telesafor.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Telesafor.TV/stream
+------------------------------------------------------------------------
+[123] NOMBRE: 12 TV Alicante
+      ID CANAL: 12Alicante.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/12Alicante.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/12Alicante.TV/stream
+------------------------------------------------------------------------
+[124] NOMBRE: Alacantí TV
+      ID CANAL: Alacanti.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Alacanti.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Alacanti.TV/stream
+------------------------------------------------------------------------
+[125] NOMBRE: TV Alcoi
+      ID CANAL: Alcoi.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Alcoi.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Alcoi.TV/stream
+------------------------------------------------------------------------
+[126] NOMBRE: TeleElx
+      ID CANAL: TeleElx.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TeleElx.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TeleElx.TV/stream
+------------------------------------------------------------------------
+[127] NOMBRE: Elche7TV
+      ID CANAL: Elche7.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Elche7.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Elche7.TV/stream
+------------------------------------------------------------------------
+[128] NOMBRE: Punt 3
+      ID CANAL: Punt3.TV
+      GRUPO   : C. Valenciana
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Punt3.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Punt3.TV/stream
+------------------------------------------------------------------------
+[129] NOMBRE: TV3
+      ID CANAL: TV3.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TV3.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TV3.TV/stream
+------------------------------------------------------------------------
+[130] NOMBRE: 3CatInfo
+      ID CANAL: 324.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/324.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/324.TV/stream
+------------------------------------------------------------------------
+[131] NOMBRE: 33
+      ID CANAL: C33.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/C33.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/C33.TV/stream
+------------------------------------------------------------------------
+[132] NOMBRE: 3CAT Vinagre(ta)
+      ID CANAL: Vinagreta.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Vinagreta.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Vinagreta.TV/stream
+------------------------------------------------------------------------
+[133] NOMBRE: 3CAT Joc de Cartes
+      ID CANAL: Jocdecartes.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Jocdecartes.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Jocdecartes.TV/stream
+------------------------------------------------------------------------
+[134] NOMBRE: 3CAT Doraemon
+      ID CANAL: Doraemon.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Doraemon.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Doraemon.TV/stream
+------------------------------------------------------------------------
+[135] NOMBRE: 3CAT Plats Bruts
+      ID CANAL: PlatsBruts.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/PlatsBruts.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/PlatsBruts.TV/stream
+------------------------------------------------------------------------
+[136] NOMBRE: 3CAT Verdi Classics
+      ID CANAL: VerdiClassics.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/VerdiClassics.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/VerdiClassics.TV/stream
+------------------------------------------------------------------------
+[137] NOMBRE: 3CAT Anime
+      ID CANAL: Anime.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Anime.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Anime.TV/stream
+------------------------------------------------------------------------
+[138] NOMBRE: 3CAT Cámeres del temps
+      ID CANAL: CameresdeTemps.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/CameresdeTemps.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/CameresdeTemps.TV/stream
+------------------------------------------------------------------------
+[139] NOMBRE: La 1 Catalunya
+      ID CANAL: La1_CAT.TV
+      GRUPO   : Cataluña
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La1_CAT.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La1_CAT.TV/stream
+------------------------------------------------------------------------
+[140] NOMBRE: La 2 Cat
+      ID CANAL: La2_CAT.TV
+      GRUPO   : Cataluña
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/La2_CAT.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/La2_CAT.TV/stream
+------------------------------------------------------------------------
+[141] NOMBRE: 24h Catalunya
+      ID CANAL: 24H_CAT
+      GRUPO   : Cataluña
+      STREAM  : stream1
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/24H_CAT
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/24H_CAT/stream
+------------------------------------------------------------------------
+[142] NOMBRE: Betevé
+      ID CANAL: Beteve.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Beteve.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Beteve.TV/stream
+------------------------------------------------------------------------
+[143] NOMBRE: Penedès TV
+      ID CANAL: Penedes.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Penedes.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Penedes.TV/stream
+------------------------------------------------------------------------
+[144] NOMBRE: ETV
+      ID CANAL: ETV.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ETV.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ETV.TV/stream
+------------------------------------------------------------------------
+[145] NOMBRE: Empordà TV
+      ID CANAL: Emporda.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Emporda.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Emporda.TV/stream
+------------------------------------------------------------------------
+[146] NOMBRE: TV L'Hospitalet
+      ID CANAL: Hospitalet.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Hospitalet.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Hospitalet.TV/stream
+------------------------------------------------------------------------
+[147] NOMBRE: Canal 10 Empordà
+      ID CANAL: Canal10Emporda.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Canal10Emporda.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Canal10Emporda.TV/stream
+------------------------------------------------------------------------
+[148] NOMBRE: TV Girona
+      ID CANAL: TVGirona.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVGirona.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVGirona.TV/stream
+------------------------------------------------------------------------
+[149] NOMBRE: Lleida TV
+      ID CANAL: Lleida.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Lleida.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Lleida.TV/stream
+------------------------------------------------------------------------
+[150] NOMBRE: Taronja Anoia
+      ID CANAL: TaronjaAnoia.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TaronjaAnoia.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TaronjaAnoia.TV/stream
+------------------------------------------------------------------------
+[151] NOMBRE: Canal Reus TV
+      ID CANAL: CanalReus.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/CanalReus.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/CanalReus.TV/stream
+------------------------------------------------------------------------
+[152] NOMBRE: TAC12
+      ID CANAL: TAC12.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TAC12.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TAC12.TV/stream
+------------------------------------------------------------------------
+[153] NOMBRE: Canal Terrassa
+      ID CANAL: CanalTerrassa.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/CanalTerrassa.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/CanalTerrassa.TV/stream
+------------------------------------------------------------------------
+[154] NOMBRE: VOTV
+      ID CANAL: VOTV.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/VOTV.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/VOTV.TV/stream
+------------------------------------------------------------------------
+[155] NOMBRE: TV Costa Brava
+      ID CANAL: TVCostaBrava.TV
+      GRUPO   : Cataluña
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVCostaBrava.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVCostaBrava.TV/stream
+------------------------------------------------------------------------
+[156] NOMBRE: TV Sabadell Vallès
+      ID CANAL: TVSabadell.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVSabadell.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVSabadell.TV/stream
+------------------------------------------------------------------------
+[157] NOMBRE: Televisió de Badalona
+      ID CANAL: Badalona.TV
+      GRUPO   : Cataluña
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Badalona.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Badalona.TV/stream
+------------------------------------------------------------------------
+[158] NOMBRE: RTVCE
+      ID CANAL: RTVCE
+      GRUPO   : Ceuta
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/RTVCE
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/RTVCE/stream
+------------------------------------------------------------------------
+[159] NOMBRE: Telemadrid
+      ID CANAL: Telemadrid.TV
+      GRUPO   : Madrid
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Telemadrid.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Telemadrid.TV/stream
+------------------------------------------------------------------------
+[160] NOMBRE: Telemadrid INT
+      ID CANAL: TelemadridINT.TV
+      GRUPO   : Madrid
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TelemadridINT.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TelemadridINT.TV/stream
+------------------------------------------------------------------------
+[161] NOMBRE: LaOtra
+      ID CANAL: LaOtra.TV
+      GRUPO   : Madrid
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/LaOtra.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/LaOtra.TV/stream
+------------------------------------------------------------------------
+[162] NOMBRE: Es tu tele
+      ID CANAL: Estutele.TV
+      GRUPO   : Madrid
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Estutele.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Estutele.TV/stream
+------------------------------------------------------------------------
+[163] NOMBRE: Déjate de Historias
+      ID CANAL: Dejate.TV
+      GRUPO   : Madrid
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Dejate.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Dejate.TV/stream
+------------------------------------------------------------------------
+[164] NOMBRE: C33 Madrid
+      ID CANAL: C33Madrid.TV
+      GRUPO   : Madrid
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/C33Madrid.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/C33Madrid.TV/stream
+------------------------------------------------------------------------
+[165] NOMBRE: Distrito TV
+      ID CANAL: Distrito.TV
+      GRUPO   : Madrid
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Distrito.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Distrito.TV/stream
+------------------------------------------------------------------------
+[166] NOMBRE: Canal Extremadura
+      ID CANAL: Extremadura.TV
+      GRUPO   : Extremadura
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Extremadura.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Extremadura.TV/stream
+------------------------------------------------------------------------
+[167] NOMBRE: Extremadura Infantil
+      ID CANAL: ExtremaduraInfantil.TV
+      GRUPO   : Extremadura
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ExtremaduraInfantil.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ExtremaduraInfantil.TV/stream
+------------------------------------------------------------------------
+[168] NOMBRE: Extremadura Semos asina
+      ID CANAL: ExtremaduraSemosasina.TV
+      GRUPO   : Extremadura
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ExtremaduraSemosasina.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ExtremaduraSemosasina.TV/stream
+------------------------------------------------------------------------
+[169] NOMBRE: Extremadura Toros
+      ID CANAL: ExtremaduraToros.TV
+      GRUPO   : Extremadura
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ExtremaduraToros.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ExtremaduraToros.TV/stream
+------------------------------------------------------------------------
+[170] NOMBRE: TVG
+      ID CANAL: TVGAL.TV
+      GRUPO   : Galicia
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVGAL.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVGAL.TV/stream
+------------------------------------------------------------------------
+[171] NOMBRE: TVG 2
+      ID CANAL: TVG2.TV
+      GRUPO   : Galicia
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVG2.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVG2.TV/stream
+------------------------------------------------------------------------
+[172] NOMBRE: Melilla TV
+      ID CANAL: MelillaTV.TV
+      GRUPO   : Melilla
+      STREAM  : stream12
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/MelillaTV.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/MelillaTV.TV/stream
+------------------------------------------------------------------------
+[173] NOMBRE: ETB 1
+      ID CANAL: ETB1.TV
+      GRUPO   : País Vasco
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ETB1.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ETB1.TV/stream
+------------------------------------------------------------------------
+[174] NOMBRE: ETB 2
+      ID CANAL: ETB2.TV
+      GRUPO   : País Vasco
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ETB2.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ETB2.TV/stream
+------------------------------------------------------------------------
+[175] NOMBRE: ETB1 ON
+      ID CANAL: etb-1on.TV
+      GRUPO   : País Vasco;Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/etb-1on.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/etb-1on.TV/stream
+------------------------------------------------------------------------
+[176] NOMBRE: ETB2 ON
+      ID CANAL: etb-2on.TV
+      GRUPO   : País Vasco;Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/etb-2on.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/etb-2on.TV/stream
+------------------------------------------------------------------------
+[177] NOMBRE: ETB Herri txiki
+      ID CANAL: Herritxiki.TV
+      GRUPO   : País Vasco
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Herritxiki.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Herritxiki.TV/stream
+------------------------------------------------------------------------
+[178] NOMBRE: ETB Vaya Semanita
+      ID CANAL: VayaSemanita.TV
+      GRUPO   : País Vasco
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/VayaSemanita.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/VayaSemanita.TV/stream
+------------------------------------------------------------------------
+[179] NOMBRE: ETB Vascos por el mundo
+      ID CANAL: ETBVascos.TV
+      GRUPO   : País Vasco
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ETBVascos.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ETBVascos.TV/stream
+------------------------------------------------------------------------
+[180] NOMBRE: ETB Conquistador
+      ID CANAL: Conquistador.TV
+      GRUPO   : País Vasco
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Conquistador.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Conquistador.TV/stream
+------------------------------------------------------------------------
+[181] NOMBRE: ETB El Tiempo
+      ID CANAL: ETBElTiempo.TV
+      GRUPO   : País Vasco
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ETBElTiempo.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ETBElTiempo.TV/stream
+------------------------------------------------------------------------
+[182] NOMBRE: TPA7
+      ID CANAL: TPA.TV
+      GRUPO   : P. de Asturias
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TPA.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TPA.TV/stream
+------------------------------------------------------------------------
+[183] NOMBRE: Navarra TV
+      ID CANAL: Navarra TV.TV
+      GRUPO   : Navarra
+      STREAM  : stream12
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Navarra TV.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Navarra TV.TV/stream
+------------------------------------------------------------------------
+[184] NOMBRE: IB3
+      ID CANAL: IB3.TV
+      GRUPO   : Baleares
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/IB3.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/IB3.TV/stream
+------------------------------------------------------------------------
+[185] NOMBRE: Fibwi TV
+      ID CANAL: Fibwi.TV
+      GRUPO   : Baleares
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Fibwi.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Fibwi.TV/stream
+------------------------------------------------------------------------
+[186] NOMBRE: 7 R. de Murcia
+      ID CANAL: 7RM.TV
+      GRUPO   : Murcia
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7RM.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7RM.TV/stream
+------------------------------------------------------------------------
+[187] NOMBRE: Arabí TV Yecla
+      ID CANAL: arabitvyecla.TV
+      GRUPO   : Murcia
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/arabitvyecla.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/arabitvyecla.TV/stream
+------------------------------------------------------------------------
+[188] NOMBRE: Popular TV Murcia
+      ID CANAL: PopularMurcia.TV
+      GRUPO   : Murcia
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/PopularMurcia.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/PopularMurcia.TV/stream
+------------------------------------------------------------------------
+[189] NOMBRE: Canal 1 Mar Menor
+      ID CANAL: MarMenor.TV
+      GRUPO   : Murcia
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/MarMenor.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/MarMenor.TV/stream
+------------------------------------------------------------------------
+[190] NOMBRE: 101TV Sevilla
+      ID CANAL: 101TVSevilla.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/101TVSevilla.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/101TVSevilla.TV/stream
+------------------------------------------------------------------------
+[191] NOMBRE: 101TV Málaga
+      ID CANAL: 101Malaga.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/101Malaga.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/101Malaga.TV/stream
+------------------------------------------------------------------------
+[192] NOMBRE: 101TV Granada
+      ID CANAL: 101Granada.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/101Granada.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/101Granada.TV/stream
+------------------------------------------------------------------------
+[193] NOMBRE: 101TV Antequera
+      ID CANAL: 101Antequera.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/101Antequera.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/101Antequera.TV/stream
+------------------------------------------------------------------------
+[194] NOMBRE: 101TV Cádiz
+      ID CANAL: 101Cadiz.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/101Cadiz.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/101Cadiz.TV/stream
+------------------------------------------------------------------------
+[195] NOMBRE: 101TV Alahurín
+      ID CANAL: Alahurin.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Alahurin.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Alahurin.TV/stream
+------------------------------------------------------------------------
+[196] NOMBRE: PTV Sevilla
+      ID CANAL: PTVSevilla.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/PTVSevilla.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/PTVSevilla.TV/stream
+------------------------------------------------------------------------
+[197] NOMBRE: PTV Granada
+      ID CANAL: PTVGranada.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/PTVGranada.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/PTVGranada.TV/stream
+------------------------------------------------------------------------
+[198] NOMBRE: PTV Córdoba
+      ID CANAL: PTVCordoba.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/PTVCordoba.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/PTVCordoba.TV/stream
+------------------------------------------------------------------------
+[199] NOMBRE: PTV Málaga
+      ID CANAL: PTVMalaga.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/PTVMalaga.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/PTVMalaga.TV/stream
+------------------------------------------------------------------------
+[200] NOMBRE: PTV Linares
+      ID CANAL: PTVLinares.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/PTVLinares.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/PTVLinares.TV/stream
+------------------------------------------------------------------------
+[201] NOMBRE: Interalmería TV
+      ID CANAL: InterAlmeria.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/InterAlmeria.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/InterAlmeria.TV/stream
+------------------------------------------------------------------------
+[202] NOMBRE: Condavisión
+      ID CANAL: Condavision.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Condavision.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Condavision.TV/stream
+------------------------------------------------------------------------
+[203] NOMBRE: Onda Cádiz
+      ID CANAL: ondacadiz.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/ondacadiz.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/ondacadiz.TV/stream
+------------------------------------------------------------------------
+[204] NOMBRE: Tele Onuba
+      ID CANAL: Teleonuba.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Teleonuba.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Teleonuba.TV/stream
+------------------------------------------------------------------------
+[205] NOMBRE: Canal Costa
+      ID CANAL: canalcosta.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/canalcosta.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/canalcosta.TV/stream
+------------------------------------------------------------------------
+[206] NOMBRE: Huelva Television
+      ID CANAL: HuelvaTelevision.TV
+      GRUPO   : Andalucía
+      STREAM  : geturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/HuelvaTelevision.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/HuelvaTelevision.TV/stream
+------------------------------------------------------------------------
+[207] NOMBRE: 9 la Loma TV
+      ID CANAL: 9LaLoma.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/9LaLoma.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/9LaLoma.TV/stream
+------------------------------------------------------------------------
+[208] NOMBRE: Diez TV Úbeda
+      ID CANAL: DiezTV.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/DiezTV.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/DiezTV.TV/stream
+------------------------------------------------------------------------
+[209] NOMBRE: Fuengirola TV
+      ID CANAL: Fuengirola.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Fuengirola.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Fuengirola.TV/stream
+------------------------------------------------------------------------
+[210] NOMBRE: Costa Noroeste TV
+      ID CANAL: CostaNoroeste.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/CostaNoroeste.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/CostaNoroeste.TV/stream
+------------------------------------------------------------------------
+[211] NOMBRE: 7TV Andalucía
+      ID CANAL: 7Andalucia.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7Andalucia.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7Andalucia.TV/stream
+------------------------------------------------------------------------
+[212] NOMBRE: 7TV Sevilla
+      ID CANAL: 7Sevilla.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7Sevilla.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7Sevilla.TV/stream
+------------------------------------------------------------------------
+[213] NOMBRE: 7TV Almería
+      ID CANAL: 7Almeria.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7Almeria.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7Almeria.TV/stream
+------------------------------------------------------------------------
+[214] NOMBRE: 7TV Cádiz
+      ID CANAL: 7Cadiz.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7Cadiz.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7Cadiz.TV/stream
+------------------------------------------------------------------------
+[215] NOMBRE: 7TV Cordoba
+      ID CANAL: 7Cordoba.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7Cordoba.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7Cordoba.TV/stream
+------------------------------------------------------------------------
+[216] NOMBRE: 7TV Granada
+      ID CANAL: 7Granada.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7Granada.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7Granada.TV/stream
+------------------------------------------------------------------------
+[217] NOMBRE: 7TV Jaén
+      ID CANAL: 7Jaen.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7Jaen.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7Jaen.TV/stream
+------------------------------------------------------------------------
+[218] NOMBRE: 7TV Málaga
+      ID CANAL: 7Malaga.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7Malaga.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7Malaga.TV/stream
+------------------------------------------------------------------------
+[219] NOMBRE: 7TV Aljarafe
+      ID CANAL: 7Aljarafe.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/7Aljarafe.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/7Aljarafe.TV/stream
+------------------------------------------------------------------------
+[220] NOMBRE: Estepona TV
+      ID CANAL: Estepona.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Estepona.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Estepona.TV/stream
+------------------------------------------------------------------------
+[221] NOMBRE: Almería 24h TV
+      ID CANAL: Almeria24h.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Almeria24h.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Almeria24h.TV/stream
+------------------------------------------------------------------------
+[222] NOMBRE: Cadena Elite TV
+      ID CANAL: CadenaElite.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/CadenaElite.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/CadenaElite.TV/stream
+------------------------------------------------------------------------
+[223] NOMBRE: TG7
+      ID CANAL: TG7.TV
+      GRUPO   : Andalucía
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TG7.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TG7.TV/stream
+------------------------------------------------------------------------
+[224] NOMBRE: ATV Andorra
+      ID CANAL: Andorra.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Andorra.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Andorra.TV/stream
+------------------------------------------------------------------------
+[225] NOMBRE: TVE Europa
+      ID CANAL: TVEEuropa.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVEEuropa.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVEEuropa.TV/stream
+------------------------------------------------------------------------
+[226] NOMBRE: STAR RTVE
+      ID CANAL: STARHD.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/STARHD.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/STARHD.TV/stream
+------------------------------------------------------------------------
+[227] NOMBRE: TV3 CAT internacional
+      ID CANAL: TV3CAT.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TV3CAT.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TV3CAT.TV/stream
+------------------------------------------------------------------------
+[228] NOMBRE: TVG Europa
+      ID CANAL: TVGEuropa.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVGEuropa.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVGEuropa.TV/stream
+------------------------------------------------------------------------
+[229] NOMBRE: TV Perú
+      ID CANAL: TVPeru.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVPeru.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVPeru.TV/stream
+------------------------------------------------------------------------
+[230] NOMBRE: TV Perú Noticias
+      ID CANAL: TVPeruNoticias.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVPeruNoticias.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVPeruNoticias.TV/stream
+------------------------------------------------------------------------
+[231] NOMBRE: Canal IPE
+      ID CANAL: canalipe.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/canalipe.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/canalipe.TV/stream
+------------------------------------------------------------------------
+[232] NOMBRE: Latina TV Perú
+      ID CANAL: LatinaTVPeru.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/LatinaTVPeru.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/LatinaTVPeru.TV/stream
+------------------------------------------------------------------------
+[233] NOMBRE: Canal 6
+      ID CANAL: Canal6.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Canal6.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Canal6.TV/stream
+------------------------------------------------------------------------
+[234] NOMBRE: Señal Colombia
+      ID CANAL: SeñalColombia.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/SeñalColombia.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/SeñalColombia.TV/stream
+------------------------------------------------------------------------
+[235] NOMBRE: Net TV
+      ID CANAL: Net.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Net.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Net.TV/stream
+------------------------------------------------------------------------
+[236] NOMBRE: Bolivisión
+      ID CANAL: Bolivision.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Bolivision.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Bolivision.TV/stream
+------------------------------------------------------------------------
+[237] NOMBRE: Bolivia TV
+      ID CANAL: Bolivia.TV
+      GRUPO   : Internacional
+      STREAM  : stream12
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Bolivia.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Bolivia.TV/stream
+------------------------------------------------------------------------
+[238] NOMBRE: Telefe Rosario
+      ID CANAL: TelefeRosario.TV
+      GRUPO   : Internacional
+      STREAM  : posturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TelefeRosario.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TelefeRosario.TV/stream
+------------------------------------------------------------------------
+[239] NOMBRE: TVP Argentina
+      ID CANAL: TVPArgentina.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVPArgentina.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVPArgentina.TV/stream
+------------------------------------------------------------------------
+[240] NOMBRE: América TV Argentina
+      ID CANAL: AméricaTVArgentina.TV
+      GRUPO   : Internacional
+      STREAM  : posturl
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/AméricaTVArgentina.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/AméricaTVArgentina.TV/stream
+------------------------------------------------------------------------
+[241] NOMBRE: N+ UNIVISION
+      ID CANAL: NUNIVISION.TV
+      GRUPO   : Internacional;Informativos
+      STREAM  : youtube
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/NUNIVISION.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/NUNIVISION.TV/stream
+------------------------------------------------------------------------
+[242] NOMBRE: SOL Música
+      ID CANAL: SolMusica.TV
+      GRUPO   : Musica
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/SolMusica.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/SolMusica.TV/stream
+------------------------------------------------------------------------
+[243] NOMBRE: Tito TV
+      ID CANAL: TITO.TV
+      GRUPO   : Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TITO.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TITO.TV/stream
+------------------------------------------------------------------------
+[244] NOMBRE: Euro Indie Music Chart TV
+      ID CANAL: euroindiemusic.TV
+      GRUPO   : Musica
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/euroindiemusic.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/euroindiemusic.TV/stream
+------------------------------------------------------------------------
+[245] NOMBRE: TVOMIX
+      ID CANAL: TVOMIX.TV
+      GRUPO   : Musica
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVOMIX.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVOMIX.TV/stream
+------------------------------------------------------------------------
+[246] NOMBRE: CUMBIAMIX
+      ID CANAL: CUMBIAMIX.TV
+      GRUPO   : Musica
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/CUMBIAMIX.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/CUMBIAMIX.TV/stream
+------------------------------------------------------------------------
+[247] NOMBRE: Kpop Mix
+      ID CANAL: KpopMix.TV
+      GRUPO   : Musica
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/KpopMix.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/KpopMix.TV/stream
+------------------------------------------------------------------------
+[248] NOMBRE: Urban Mix
+      ID CANAL: UrbanMix.TV
+      GRUPO   : Musica
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/UrbanMix.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/UrbanMix.TV/stream
+------------------------------------------------------------------------
+[249] NOMBRE: Verbena TV
+      ID CANAL: Verbena.TV
+      GRUPO   : Musica
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Verbena.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Verbena.TV/stream
+------------------------------------------------------------------------
+[250] NOMBRE: Activa TV
+      ID CANAL: Activa.TV
+      GRUPO   : Musica
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Activa.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Activa.TV/stream
+------------------------------------------------------------------------
+[251] NOMBRE: Spektra TV
+      ID CANAL: Spektra.TV
+      GRUPO   : Musica
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Spektra.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Spektra.TV/stream
+------------------------------------------------------------------------
+[252] NOMBRE: Planeta X TV
+      ID CANAL: PlanetaX.TV
+      GRUPO   : Musica
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/PlanetaX.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/PlanetaX.TV/stream
+------------------------------------------------------------------------
+[253] NOMBRE: Alternativa TV
+      ID CANAL: Alternativa.TV
+      GRUPO   : Religiosos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Alternativa.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Alternativa.TV/stream
+------------------------------------------------------------------------
+[254] NOMBRE: María+Visión España
+      ID CANAL: MariaVision.TV
+      GRUPO   : Religiosos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/MariaVision.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/MariaVision.TV/stream
+------------------------------------------------------------------------
+[255] NOMBRE: TvOasis
+      ID CANAL: TvOasis.TV
+      GRUPO   : Religiosos;Venezuela
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TvOasis.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TvOasis.TV/stream
+------------------------------------------------------------------------
+[256] NOMBRE: Tvo Jesús
+      ID CANAL: TVOJESUS.TV
+      GRUPO   : Religiosos
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/TVOJESUS.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/TVOJESUS.TV/stream
+------------------------------------------------------------------------
+[257] NOMBRE: Kairos TV
+      ID CANAL: Kairos.TV
+      GRUPO   : Religiosos;Internacional
+      STREAM  : 
+      PETICIÓN INFORMACIÓN: curl -s http://localhost:8080/canales/Kairos.TV
+      PETICIÓN STREAM LIVE : curl -s http://localhost:8080/canales/Kairos.TV/stream
+------------------------------------------------------------------------

@@ -1,0 +1,24 @@
+# Dependencias Node y Python
+node_modules/
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Aplicación móvil (no se despliega en backend)
+app_iptv/
+Yacine_Decompiled/
+
+# Archivos de entorno y temporales
+.idea/
+.vscode/
+.claude/
+*.md
+propt
+get_logs.sh
+deploy.sh
+restart.sh
+run
+
+# Mac/OS
+.DS_Store

@@ -1,0 +1,2613 @@
+================================================================================
+                     VENOLIE TV - CANALES Y CATEGORÍAS                          
+================================================================================
+Fecha de Generación : 2026-08-20 01:26:49
+Servidor API Base   : http://0.0.0.0:9090
+Total de Países     : 15
+Total de Canales    : 358
+================================================================================
+
+--------------------------------------------------------------------------------
+RESUMEN DE CATEGORÍAS DISPONIBLES:
+--------------------------------------------------------------------------------
+  - General             : 116 canales
+  - News                : 90 canales
+  - Movies              : 26 canales
+  - Religious           : 20 canales
+  - Series              : 17 canales
+  - Kids                : 16 canales
+  - Music               : 13 canales
+  - Regional            : 13 canales
+  - Sports              : 12 canales
+  - Documentary         : 10 canales
+  - Local               : 6 canales
+  - Comedy              : 4 canales
+  - Entertainment       : 4 canales
+  - Divertissement      : 3 canales
+  - Education           : 3 canales
+  - Drama               : 2 canales
+  - Cooking             : 1 canales
+  - Technology          : 1 canales
+  - Shopping            : 1 canales
+
+
+================================================================================
+PAÍS: SAUDI ARABIA (38 canales)
+================================================================================
+[01] MBC Masr
+     ID           : bcmasr
+     País         : Saudi Arabia
+     Categoría    : Entertainment
+     Página Web   : https://venolie.com/navo/view/p/bcmasr.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcmasr/stream
+--------------------------------------------------------------------------------
+[02] MBC Masr 2
+     ID           : bcmasr2
+     País         : Saudi Arabia
+     Categoría    : Entertainment
+     Página Web   : https://venolie.com/navo/view/p/bcmasr2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcmasr2/stream
+--------------------------------------------------------------------------------
+[03] Mbc
+     ID           : bc
+     País         : Saudi Arabia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/bc.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bc/stream
+--------------------------------------------------------------------------------
+[04] Mbc 2
+     ID           : bc2
+     País         : Saudi Arabia
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bc2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bc2/stream
+--------------------------------------------------------------------------------
+[05] mbc 3
+     ID           : bc3
+     País         : Saudi Arabia
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/bc3.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bc3/stream
+--------------------------------------------------------------------------------
+[06] Mbc 4
+     ID           : bc4
+     País         : Saudi Arabia
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bc4.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bc4/stream
+--------------------------------------------------------------------------------
+[07] Mbc 5
+     ID           : bc5
+     País         : Saudi Arabia
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bc5.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bc5/stream
+--------------------------------------------------------------------------------
+[08] Mbc Iraq
+     ID           : bciraq
+     País         : Saudi Arabia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/bciraq.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bciraq/stream
+--------------------------------------------------------------------------------
+[09] MBC Persia
+     ID           : bcpersia
+     País         : Saudi Arabia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/bcpersia.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcpersia/stream
+--------------------------------------------------------------------------------
+[10] Mbc Action
+     ID           : bcaction
+     País         : Saudi Arabia
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bcaction.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcaction/stream
+--------------------------------------------------------------------------------
+[11] MBC Max
+     ID           : bcmax
+     País         : Saudi Arabia
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bcmax.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcmax/stream
+--------------------------------------------------------------------------------
+[12] MBC Bollywood
+     ID           : bcbollywood
+     País         : Saudi Arabia
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bcbollywood.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcbollywood/stream
+--------------------------------------------------------------------------------
+[13] MBC Drama
+     ID           : bcdrama
+     País         : Saudi Arabia
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/bcdrama.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcdrama/stream
+--------------------------------------------------------------------------------
+[14] MBC Masr Drama
+     ID           : mbmasrdrama
+     País         : Saudi Arabia
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/mbmasrdrama.php
+     Stream API   : http://0.0.0.0:9090/api/channels/mbmasrdrama/stream
+--------------------------------------------------------------------------------
+[15] MBC Drama+
+     ID           : bcdramapls
+     País         : Saudi Arabia
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/bcdramapls.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcdramapls/stream
+--------------------------------------------------------------------------------
+[16] MBC Variety
+     ID           : bcvariety
+     País         : Saudi Arabia
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/bcvariety.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcvariety/stream
+--------------------------------------------------------------------------------
+[17] Wanasah
+     ID           : wanasah
+     País         : Saudi Arabia
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/wanasah.php
+     Stream API   : http://0.0.0.0:9090/api/channels/wanasah/stream
+--------------------------------------------------------------------------------
+[18] KSA 1
+     ID           : ksa1
+     País         : Saudi Arabia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/ksa1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ksa1/stream
+--------------------------------------------------------------------------------
+[19] Saudi Alaan
+     ID           : saudialaan
+     País         : Saudi Arabia
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/saudialaan.php
+     Stream API   : http://0.0.0.0:9090/api/channels/saudialaan/stream
+--------------------------------------------------------------------------------
+[20] الثقافية
+     ID           : thqafiya
+     País         : Saudi Arabia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/thqafiya.php
+     Stream API   : http://0.0.0.0:9090/api/channels/thqafiya/stream
+--------------------------------------------------------------------------------
+[21] الإخبارية
+     ID           : al-ikhbaria
+     País         : Saudi Arabia
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/al-ikhbaria.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al-ikhbaria/stream
+--------------------------------------------------------------------------------
+[22] ثمانية
+     ID           : thmanyah1
+     País         : Saudi Arabia
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/thmanyah1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/thmanyah1/stream
+--------------------------------------------------------------------------------
+[23] زي الوان
+     ID           : zee_alwan
+     País         : Saudi Arabia
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/zee_alwan.php
+     Stream API   : http://0.0.0.0:9090/api/channels/zee_alwan/stream
+--------------------------------------------------------------------------------
+[24] ذكريات
+     ID           : thikrayuat
+     País         : Saudi Arabia
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/thikrayuat.php
+     Stream API   : http://0.0.0.0:9090/api/channels/thikrayuat/stream
+--------------------------------------------------------------------------------
+[25] Sbc
+     ID           : sbc
+     País         : Saudi Arabia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/sbc.php
+     Stream API   : http://0.0.0.0:9090/api/channels/sbc/stream
+--------------------------------------------------------------------------------
+[26] Quran tv
+     ID           : qurantv
+     País         : Saudi Arabia
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/qurantv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/qurantv/stream
+--------------------------------------------------------------------------------
+[27] Sunna TV
+     ID           : sunnatv
+     País         : Saudi Arabia
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/sunnatv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/sunnatv/stream
+--------------------------------------------------------------------------------
+[28] مكة
+     ID           : makkah
+     País         : Saudi Arabia
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/makkah.php
+     Stream API   : http://0.0.0.0:9090/api/channels/makkah/stream
+--------------------------------------------------------------------------------
+[29] المجد
+     ID           : al-majd
+     País         : Saudi Arabia
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/al-majd.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al-majd/stream
+--------------------------------------------------------------------------------
+[30] إقرأ
+     ID           : iqraa
+     País         : Saudi Arabia
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/iqraa.php
+     Stream API   : http://0.0.0.0:9090/api/channels/iqraa/stream
+--------------------------------------------------------------------------------
+[31] Iqraa Europe
+     ID           : iqraa_eu
+     País         : Saudi Arabia
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/iqraa_eu.php
+     Stream API   : http://0.0.0.0:9090/api/channels/iqraa_eu/stream
+--------------------------------------------------------------------------------
+[32] Iqraa International
+     ID           : iqraa_int
+     País         : Saudi Arabia
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/iqraa_int.php
+     Stream API   : http://0.0.0.0:9090/api/channels/iqraa_int/stream
+--------------------------------------------------------------------------------
+[33] أطفال المواهب
+     ID           : atfal_alMawahib
+     País         : Saudi Arabia
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/atfal_alMawahib.php
+     Stream API   : http://0.0.0.0:9090/api/channels/atfal_alMawahib/stream
+--------------------------------------------------------------------------------
+[34] الخليج
+     ID           : al-khalij
+     País         : Saudi Arabia
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/al-khalij.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al-khalij/stream
+--------------------------------------------------------------------------------
+[35] زاد
+     ID           : zad
+     País         : Saudi Arabia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/zad.php
+     Stream API   : http://0.0.0.0:9090/api/channels/zad/stream
+--------------------------------------------------------------------------------
+[36] ايات
+     ID           : ayat
+     País         : Saudi Arabia
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/ayat.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ayat/stream
+--------------------------------------------------------------------------------
+[37] هدى الفضائية
+     ID           : huda
+     País         : Saudi Arabia
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/huda.php
+     Stream API   : http://0.0.0.0:9090/api/channels/huda/stream
+--------------------------------------------------------------------------------
+[38] الخليجية
+     ID           : khaleejia
+     País         : Saudi Arabia
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/khaleejia.php
+     Stream API   : http://0.0.0.0:9090/api/channels/khaleejia/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: MOROCCO (16 canales)
+================================================================================
+[01] Al Oula
+     ID           : al-oulatv
+     País         : Morocco
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/al-oulatv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al-oulatv/stream
+--------------------------------------------------------------------------------
+[02] 2M
+     ID           : 2m
+     País         : Morocco
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/2m.php
+     Stream API   : http://0.0.0.0:9090/api/channels/2m/stream
+--------------------------------------------------------------------------------
+[03] Laayoune TV
+     ID           : laayoune
+     País         : Morocco
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/laayoune.php
+     Stream API   : http://0.0.0.0:9090/api/channels/laayoune/stream
+--------------------------------------------------------------------------------
+[04] Arriadia
+     ID           : arriadia
+     País         : Morocco
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/arriadia.php
+     Stream API   : http://0.0.0.0:9090/api/channels/arriadia/stream
+--------------------------------------------------------------------------------
+[05] Athaqafia
+     ID           : athaqafia
+     País         : Morocco
+     Categoría    : Education
+     Página Web   : https://venolie.com/navo/view/p/athaqafia.php
+     Stream API   : http://0.0.0.0:9090/api/channels/athaqafia/stream
+--------------------------------------------------------------------------------
+[06] Al Maghribia
+     ID           : almaghribia
+     País         : Morocco
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/almaghribia.php
+     Stream API   : http://0.0.0.0:9090/api/channels/almaghribia/stream
+--------------------------------------------------------------------------------
+[07] Assadissa
+     ID           : assadissa
+     País         : Morocco
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/assadissa.php
+     Stream API   : http://0.0.0.0:9090/api/channels/assadissa/stream
+--------------------------------------------------------------------------------
+[08] Assabia
+     ID           : assabia
+     País         : Morocco
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/assabia.php
+     Stream API   : http://0.0.0.0:9090/api/channels/assabia/stream
+--------------------------------------------------------------------------------
+[09] Tamazight
+     ID           : tamazight
+     País         : Morocco
+     Categoría    : Education
+     Página Web   : https://venolie.com/navo/view/p/tamazight.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tamazight/stream
+--------------------------------------------------------------------------------
+[10] Medi 1 Maghreb
+     ID           : midi-1-maghreb
+     País         : Morocco
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/midi-1-maghreb.php
+     Stream API   : http://0.0.0.0:9090/api/channels/midi-1-maghreb/stream
+--------------------------------------------------------------------------------
+[11] Medi 1  Arabic
+     ID           : midi-1-arabic
+     País         : Morocco
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/midi-1-arabic.php
+     Stream API   : http://0.0.0.0:9090/api/channels/midi-1-arabic/stream
+--------------------------------------------------------------------------------
+[12] Medi 1  Afrique
+     ID           : medi-1-afriqhe
+     País         : Morocco
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/medi-1-afriqhe.php
+     Stream API   : http://0.0.0.0:9090/api/channels/medi-1-afriqhe/stream
+--------------------------------------------------------------------------------
+[13] Chada TV
+     ID           : chadatv
+     País         : Morocco
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/chadatv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/chadatv/stream
+--------------------------------------------------------------------------------
+[14] Télé Maroc
+     ID           : tele-maroc
+     País         : Morocco
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/tele-maroc.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tele-maroc/stream
+--------------------------------------------------------------------------------
+[15] M24
+     ID           : m24
+     País         : Morocco
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/m24.php
+     Stream API   : http://0.0.0.0:9090/api/channels/m24/stream
+--------------------------------------------------------------------------------
+[16] 2M
+     ID           : 2mmonde
+     País         : Morocco
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/2mmonde.php
+     Stream API   : http://0.0.0.0:9090/api/channels/2mmonde/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: QATAR (18 canales)
+================================================================================
+[01] Qatar TV
+     ID           : qatar1
+     País         : Qatar
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/qatar1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/qatar1/stream
+--------------------------------------------------------------------------------
+[02] Qatar 2 TV
+     ID           : qatar2
+     País         : Qatar
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/qatar2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/qatar2/stream
+--------------------------------------------------------------------------------
+[03] Al Jazeera Arabic
+     ID           : aljazeera_arabic
+     País         : Qatar
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/aljazeera_arabic.php
+     Stream API   : http://0.0.0.0:9090/api/channels/aljazeera_arabic/stream
+--------------------------------------------------------------------------------
+[04] Al Jazeera Mubashir
+     ID           : aljazeera_mubashir
+     País         : Qatar
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/aljazeera_mubashir.php
+     Stream API   : http://0.0.0.0:9090/api/channels/aljazeera_mubashir/stream
+--------------------------------------------------------------------------------
+[05] Al Jazeera Documentary
+     ID           : aljazeera_documentary
+     País         : Qatar
+     Categoría    : Documentary
+     Página Web   : https://venolie.com/navo/view/p/aljazeera_documentary.php
+     Stream API   : http://0.0.0.0:9090/api/channels/aljazeera_documentary/stream
+--------------------------------------------------------------------------------
+[06] Al Jazeera English
+     ID           : aljazeera_english
+     País         : Qatar
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/aljazeera_english.php
+     Stream API   : http://0.0.0.0:9090/api/channels/aljazeera_english/stream
+--------------------------------------------------------------------------------
+[07] Al Jazeera America
+     ID           : aljazeera_america
+     País         : Qatar
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/aljazeera_america.php
+     Stream API   : http://0.0.0.0:9090/api/channels/aljazeera_america/stream
+--------------------------------------------------------------------------------
+[08] Al Jazeera Balkans
+     ID           : aljazeera_balkans
+     País         : Qatar
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/aljazeera_balkans.php
+     Stream API   : http://0.0.0.0:9090/api/channels/aljazeera_balkans/stream
+--------------------------------------------------------------------------------
+[09] Al Rayyan
+     ID           : alrayyantv
+     País         : Qatar
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/alrayyantv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alrayyantv/stream
+--------------------------------------------------------------------------------
+[10] Al Rayyan Al Qadeem
+     ID           : alrayyan_alqadeem
+     País         : Qatar
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/alrayyan_alqadeem.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alrayyan_alqadeem/stream
+--------------------------------------------------------------------------------
+[11] Al Rasoul
+     ID           : alrasoultv
+     País         : Qatar
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/alrasoultv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alrasoultv/stream
+--------------------------------------------------------------------------------
+[12] Kass One
+     ID           : kass1
+     País         : Qatar
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/kass1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/kass1/stream
+--------------------------------------------------------------------------------
+[13] Al Kass 2
+     ID           : kass2
+     País         : Qatar
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/kass2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/kass2/stream
+--------------------------------------------------------------------------------
+[14] Al Kass 3
+     ID           : kass3
+     País         : Qatar
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/kass3.php
+     Stream API   : http://0.0.0.0:9090/api/channels/kass3/stream
+--------------------------------------------------------------------------------
+[15] Al Kass 4
+     ID           : kass4
+     País         : Qatar
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/kass4.php
+     Stream API   : http://0.0.0.0:9090/api/channels/kass4/stream
+--------------------------------------------------------------------------------
+[16] Al Kass 5
+     ID           : kass5
+     País         : Qatar
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/kass5.php
+     Stream API   : http://0.0.0.0:9090/api/channels/kass5/stream
+--------------------------------------------------------------------------------
+[17] Baraem
+     ID           : baraem
+     País         : Qatar
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/baraem.php
+     Stream API   : http://0.0.0.0:9090/api/channels/baraem/stream
+--------------------------------------------------------------------------------
+[18] Jeem
+     ID           : jeem
+     País         : Qatar
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/jeem.php
+     Stream API   : http://0.0.0.0:9090/api/channels/jeem/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: PALESTINE (27 canales)
+================================================================================
+[01] قناة الأقصى
+     ID           : aqsa
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/aqsa.php
+     Stream API   : http://0.0.0.0:9090/api/channels/aqsa/stream
+--------------------------------------------------------------------------------
+[02] فلسطين اليوم
+     ID           : palestine_today
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/palestine_today.php
+     Stream API   : http://0.0.0.0:9090/api/channels/palestine_today/stream
+--------------------------------------------------------------------------------
+[03] قناة فلسطين
+     ID           : palestinetv
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/palestinetv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/palestinetv/stream
+--------------------------------------------------------------------------------
+[04] فلسطين مباشر
+     ID           : plaestine_mubashir
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/plaestine_mubashir.php
+     Stream API   : http://0.0.0.0:9090/api/channels/plaestine_mubashir/stream
+--------------------------------------------------------------------------------
+[05] Hekaya TV
+     ID           : hekayatv
+     País         : Palestine
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/hekayatv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/hekayatv/stream
+--------------------------------------------------------------------------------
+[06] النجاح
+     ID           : anajjah
+     País         : Palestine
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/anajjah.php
+     Stream API   : http://0.0.0.0:9090/api/channels/anajjah/stream
+--------------------------------------------------------------------------------
+[07] المدينة
+     ID           : almadina
+     País         : Palestine
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/almadina.php
+     Stream API   : http://0.0.0.0:9090/api/channels/almadina/stream
+--------------------------------------------------------------------------------
+[08] فلسطيني
+     ID           : falastini
+     País         : Palestine
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/falastini.php
+     Stream API   : http://0.0.0.0:9090/api/channels/falastini/stream
+--------------------------------------------------------------------------------
+[09] قناة مساواة
+     ID           : musawachannel
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/musawachannel.php
+     Stream API   : http://0.0.0.0:9090/api/channels/musawachannel/stream
+--------------------------------------------------------------------------------
+[10] Rajeen tv
+     ID           : rajeen
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/rajeen.php
+     Stream API   : http://0.0.0.0:9090/api/channels/rajeen/stream
+--------------------------------------------------------------------------------
+[11] كل الناس
+     ID           : kolalnastv
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/kolalnastv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/kolalnastv/stream
+--------------------------------------------------------------------------------
+[12] Makan tv
+     ID           : makan
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/makan.php
+     Stream API   : http://0.0.0.0:9090/api/channels/makan/stream
+--------------------------------------------------------------------------------
+[13] i24NEWS Français
+     ID           : i24news_fr
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/i24news_fr.php
+     Stream API   : http://0.0.0.0:9090/api/channels/i24news_fr/stream
+--------------------------------------------------------------------------------
+[14] i24NEWS English
+     ID           : i24news_en
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/i24news_en.php
+     Stream API   : http://0.0.0.0:9090/api/channels/i24news_en/stream
+--------------------------------------------------------------------------------
+[15] I24 News Arabic
+     ID           : i24news_ar
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/i24news_ar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/i24news_ar/stream
+--------------------------------------------------------------------------------
+[16] معا
+     ID           : maanews
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/maanews.php
+     Stream API   : http://0.0.0.0:9090/api/channels/maanews/stream
+--------------------------------------------------------------------------------
+[17] اجيال
+     ID           : ajyal
+     País         : Palestine
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/ajyal.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ajyal/stream
+--------------------------------------------------------------------------------
+[18] السلام
+     ID           : salamtv
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/salamtv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/salamtv/stream
+--------------------------------------------------------------------------------
+[19] الفجر 1
+     ID           : alfajr1
+     País         : Palestine
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/alfajr1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alfajr1/stream
+--------------------------------------------------------------------------------
+[20] الفجر 2
+     ID           : aljajrtv2
+     País         : Palestine
+     Categoría    : Divertissement
+     Página Web   : https://venolie.com/navo/view/p/aljajrtv2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/aljajrtv2/stream
+--------------------------------------------------------------------------------
+[21] وطن
+     ID           : wattan
+     País         : Palestine
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/wattan.php
+     Stream API   : http://0.0.0.0:9090/api/channels/wattan/stream
+--------------------------------------------------------------------------------
+[22] نابلس
+     ID           : nabluslive
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/nabluslive.php
+     Stream API   : http://0.0.0.0:9090/api/channels/nabluslive/stream
+--------------------------------------------------------------------------------
+[23] وتر
+     ID           : watar
+     País         : Palestine
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/watar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/watar/stream
+--------------------------------------------------------------------------------
+[24] Raya 1
+     ID           : rayatv
+     País         : Palestine
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/rayatv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/rayatv/stream
+--------------------------------------------------------------------------------
+[25] Baha tv
+     ID           : baha
+     País         : Palestine
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/baha.php
+     Stream API   : http://0.0.0.0:9090/api/channels/baha/stream
+--------------------------------------------------------------------------------
+[26] On Sports 1
+     ID           : onsport1
+     País         : Palestine
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/onsport1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/onsport1/stream
+--------------------------------------------------------------------------------
+[27] الكوفية
+     ID           : alkofiya
+     País         : Palestine
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alkofiya.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alkofiya/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: EGYPT (40 canales)
+================================================================================
+[01] الأولى المصرية
+     ID           : egypt_one
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/egypt_one.php
+     Stream API   : http://0.0.0.0:9090/api/channels/egypt_one/stream
+--------------------------------------------------------------------------------
+[02] الفضائية المصرية
+     ID           : egypt_tow
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/egypt_tow.php
+     Stream API   : http://0.0.0.0:9090/api/channels/egypt_tow/stream
+--------------------------------------------------------------------------------
+[03] قاف التفاعلية
+     ID           : Qaf
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/Qaf.php
+     Stream API   : http://0.0.0.0:9090/api/channels/Qaf/stream
+--------------------------------------------------------------------------------
+[04] MBC Masr
+     ID           : bcmasr
+     País         : Egypt
+     Categoría    : Entertainment
+     Página Web   : https://venolie.com/navo/view/p/bcmasr.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcmasr/stream
+--------------------------------------------------------------------------------
+[05] MBC Masr 2
+     ID           : bcmasr2
+     País         : Egypt
+     Categoría    : Entertainment
+     Página Web   : https://venolie.com/navo/view/p/bcmasr2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcmasr2/stream
+--------------------------------------------------------------------------------
+[06] Mbc
+     ID           : bc
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/bc.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bc/stream
+--------------------------------------------------------------------------------
+[07] Mbc 2
+     ID           : bc2
+     País         : Egypt
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bc2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bc2/stream
+--------------------------------------------------------------------------------
+[08] mbc 3
+     ID           : bc3
+     País         : Egypt
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/bc3.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bc3/stream
+--------------------------------------------------------------------------------
+[09] Mbc 4
+     ID           : bc4
+     País         : Egypt
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bc4.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bc4/stream
+--------------------------------------------------------------------------------
+[10] Mbc 5
+     ID           : bc5
+     País         : Egypt
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bc5.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bc5/stream
+--------------------------------------------------------------------------------
+[11] Mbc Iraq
+     ID           : bciraq
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/bciraq.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bciraq/stream
+--------------------------------------------------------------------------------
+[12] MBC Persia
+     ID           : bcpersia
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/bcpersia.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcpersia/stream
+--------------------------------------------------------------------------------
+[13] Mbc Action
+     ID           : bcaction
+     País         : Egypt
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bcaction.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcaction/stream
+--------------------------------------------------------------------------------
+[14] MBC Max
+     ID           : bcmax
+     País         : Egypt
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bcmax.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcmax/stream
+--------------------------------------------------------------------------------
+[15] MBC Bollywood
+     ID           : bcbollywood
+     País         : Egypt
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/bcbollywood.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcbollywood/stream
+--------------------------------------------------------------------------------
+[16] MBC Drama
+     ID           : bcdrama
+     País         : Egypt
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/bcdrama.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcdrama/stream
+--------------------------------------------------------------------------------
+[17] MBC Masr Drama
+     ID           : mbmasrdrama
+     País         : Egypt
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/mbmasrdrama.php
+     Stream API   : http://0.0.0.0:9090/api/channels/mbmasrdrama/stream
+--------------------------------------------------------------------------------
+[18] MBC Drama+
+     ID           : bcdramapls
+     País         : Egypt
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/bcdramapls.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcdramapls/stream
+--------------------------------------------------------------------------------
+[19] MBC Variety
+     ID           : bcvariety
+     País         : Egypt
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/bcvariety.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bcvariety/stream
+--------------------------------------------------------------------------------
+[20] Wanasah
+     ID           : wanasah
+     País         : Egypt
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/wanasah.php
+     Stream API   : http://0.0.0.0:9090/api/channels/wanasah/stream
+--------------------------------------------------------------------------------
+[21] القاهرة والناس
+     ID           : alkaherawalnas1
+     País         : Egypt
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alkaherawalnas1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alkaherawalnas1/stream
+--------------------------------------------------------------------------------
+[22] القاهرة والناس 2
+     ID           : alkaherawalnas2
+     País         : Egypt
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alkaherawalnas2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alkaherawalnas2/stream
+--------------------------------------------------------------------------------
+[23] القاهرة الاخبارية
+     ID           : alqaheranews
+     País         : Egypt
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alqaheranews.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alqaheranews/stream
+--------------------------------------------------------------------------------
+[24] التغيير
+     ID           : altaghier
+     País         : Egypt
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/altaghier.php
+     Stream API   : http://0.0.0.0:9090/api/channels/altaghier/stream
+--------------------------------------------------------------------------------
+[25] الشرق
+     ID           : elsharq
+     País         : Egypt
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/elsharq.php
+     Stream API   : http://0.0.0.0:9090/api/channels/elsharq/stream
+--------------------------------------------------------------------------------
+[26] الغد
+     ID           : alghad
+     País         : Egypt
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alghad.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alghad/stream
+--------------------------------------------------------------------------------
+[27] الفتح
+     ID           : alfath
+     País         : Egypt
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/alfath.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alfath/stream
+--------------------------------------------------------------------------------
+[28] النهار
+     ID           : alnahareg
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/alnahareg.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alnahareg/stream
+--------------------------------------------------------------------------------
+[29] ميكس هوليود
+     ID           : mix_bollywood
+     País         : Egypt
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/mix_bollywood.php
+     Stream API   : http://0.0.0.0:9090/api/channels/mix_bollywood/stream
+--------------------------------------------------------------------------------
+[30] ميكس بالعربي
+     ID           : mix_araby
+     País         : Egypt
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/mix_araby.php
+     Stream API   : http://0.0.0.0:9090/api/channels/mix_araby/stream
+--------------------------------------------------------------------------------
+[31] ميكس وان
+     ID           : mix_one
+     País         : Egypt
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/mix_one.php
+     Stream API   : http://0.0.0.0:9090/api/channels/mix_one/stream
+--------------------------------------------------------------------------------
+[32] مكملين
+     ID           : mekameleen
+     País         : Egypt
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/mekameleen.php
+     Stream API   : http://0.0.0.0:9090/api/channels/mekameleen/stream
+--------------------------------------------------------------------------------
+[33] Ten
+     ID           : ten
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/ten.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ten/stream
+--------------------------------------------------------------------------------
+[34] النيل
+     ID           : nile
+     País         : Egypt
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/nile.php
+     Stream API   : http://0.0.0.0:9090/api/channels/nile/stream
+--------------------------------------------------------------------------------
+[35] وطن
+     ID           : watan
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/watan.php
+     Stream API   : http://0.0.0.0:9090/api/channels/watan/stream
+--------------------------------------------------------------------------------
+[36] 90.90 FM
+     ID           : fm_9090
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/fm_9090.php
+     Stream API   : http://0.0.0.0:9090/api/channels/fm_9090/stream
+--------------------------------------------------------------------------------
+[37] ماسبيرو زمان
+     ID           : maspero
+     País         : Egypt
+     Categoría    : Comedy
+     Página Web   : https://venolie.com/navo/view/p/maspero.php
+     Stream API   : http://0.0.0.0:9090/api/channels/maspero/stream
+--------------------------------------------------------------------------------
+[38] مصر قران كريم
+     ID           : misr_quran
+     País         : Egypt
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/misr_quran.php
+     Stream API   : http://0.0.0.0:9090/api/channels/misr_quran/stream
+--------------------------------------------------------------------------------
+[39] ابن عثيمين
+     ID           : binothaimeen
+     País         : Egypt
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/binothaimeen.php
+     Stream API   : http://0.0.0.0:9090/api/channels/binothaimeen/stream
+--------------------------------------------------------------------------------
+[40] ON E
+     ID           : on_e
+     País         : Egypt
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/on_e.php
+     Stream API   : http://0.0.0.0:9090/api/channels/on_e/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: KUWAIT (11 canales)
+================================================================================
+[01] الكويت 1
+     ID           : kuwait1
+     País         : Kuwait
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/kuwait1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/kuwait1/stream
+--------------------------------------------------------------------------------
+[02] الكويت الثانية
+     ID           : ktv2
+     País         : Kuwait
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/ktv2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ktv2/stream
+--------------------------------------------------------------------------------
+[03] كويت الرياضية
+     ID           : kuwaits
+     País         : Kuwait
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/kuwaits.php
+     Stream API   : http://0.0.0.0:9090/api/channels/kuwaits/stream
+--------------------------------------------------------------------------------
+[04] كويت الرياضية 2
+     ID           : kuwaits2
+     País         : Kuwait
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/kuwaits2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/kuwaits2/stream
+--------------------------------------------------------------------------------
+[05] اثراء
+     ID           : ithraa
+     País         : Kuwait
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/ithraa.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ithraa/stream
+--------------------------------------------------------------------------------
+[06] العربي
+     ID           : alarabi
+     País         : Kuwait
+     Categoría    : Documentary
+     Página Web   : https://venolie.com/navo/view/p/alarabi.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alarabi/stream
+--------------------------------------------------------------------------------
+[07] كويت الاخبار
+     ID           : ktv_news
+     País         : Kuwait
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/ktv_news.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ktv_news/stream
+--------------------------------------------------------------------------------
+[08] القرين
+     ID           : alqurain
+     País         : Kuwait
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/alqurain.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alqurain/stream
+--------------------------------------------------------------------------------
+[09] الراي
+     ID           : alrai
+     País         : Kuwait
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/alrai.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alrai/stream
+--------------------------------------------------------------------------------
+[10] مارينا 90.4
+     ID           : marinafm
+     País         : Kuwait
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/marinafm.php
+     Stream API   : http://0.0.0.0:9090/api/channels/marinafm/stream
+--------------------------------------------------------------------------------
+[11] فنون
+     ID           : funoon
+     País         : Kuwait
+     Categoría    : Comedy
+     Página Web   : https://venolie.com/navo/view/p/funoon.php
+     Stream API   : http://0.0.0.0:9090/api/channels/funoon/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: ALGERIA (20 canales)
+================================================================================
+[01] الاولى الجزائرية
+     ID           : canal-algeria
+     País         : Algeria
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/canal-algeria.php
+     Stream API   : http://0.0.0.0:9090/api/channels/canal-algeria/stream
+--------------------------------------------------------------------------------
+[02] الثانية الجزائرية
+     ID           : canal-alegrie2
+     País         : Algeria
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/canal-alegrie2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/canal-alegrie2/stream
+--------------------------------------------------------------------------------
+[03] الثالثة
+     ID           : canal-algerie3
+     País         : Algeria
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/canal-algerie3.php
+     Stream API   : http://0.0.0.0:9090/api/channels/canal-algerie3/stream
+--------------------------------------------------------------------------------
+[04] تامزيغت 4
+     ID           : tamazight4
+     País         : Algeria
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/tamazight4.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tamazight4/stream
+--------------------------------------------------------------------------------
+[05] القران الكريم
+     ID           : canal-algerie5
+     País         : Algeria
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/canal-algerie5.php
+     Stream API   : http://0.0.0.0:9090/api/channels/canal-algerie5/stream
+--------------------------------------------------------------------------------
+[06] السادسة
+     ID           : canal-algerie6
+     País         : Algeria
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/canal-algerie6.php
+     Stream API   : http://0.0.0.0:9090/api/channels/canal-algerie6/stream
+--------------------------------------------------------------------------------
+[07] المعرفة
+     ID           : canal-alegrie7
+     País         : Algeria
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/canal-alegrie7.php
+     Stream API   : http://0.0.0.0:9090/api/channels/canal-alegrie7/stream
+--------------------------------------------------------------------------------
+[08] الذاكرة
+     ID           : canal-algerie8
+     País         : Algeria
+     Categoría    : Documentary
+     Página Web   : https://venolie.com/navo/view/p/canal-algerie8.php
+     Stream API   : http://0.0.0.0:9090/api/channels/canal-algerie8/stream
+--------------------------------------------------------------------------------
+[09] الجزائرية وان
+     ID           : eldjazairia_one
+     País         : Algeria
+     Categoría    : Drama
+     Página Web   : https://venolie.com/navo/view/p/eldjazairia_one.php
+     Stream API   : http://0.0.0.0:9090/api/channels/eldjazairia_one/stream
+--------------------------------------------------------------------------------
+[10] سميرة
+     ID           : samiratv
+     País         : Algeria
+     Categoría    : Cooking
+     Página Web   : https://venolie.com/navo/view/p/samiratv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/samiratv/stream
+--------------------------------------------------------------------------------
+[11] ÈRE TV
+     ID           : ere
+     País         : Algeria
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/ere.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ere/stream
+--------------------------------------------------------------------------------
+[12] الفجر
+     ID           : alfadjrtv
+     País         : Algeria
+     Categoría    : Drama
+     Página Web   : https://venolie.com/navo/view/p/alfadjrtv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alfadjrtv/stream
+--------------------------------------------------------------------------------
+[13] رصد
+     ID           : rasd
+     País         : Algeria
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/rasd.php
+     Stream API   : http://0.0.0.0:9090/api/channels/rasd/stream
+--------------------------------------------------------------------------------
+[14] الحوار
+     ID           : alhiwar
+     País         : Algeria
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alhiwar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alhiwar/stream
+--------------------------------------------------------------------------------
+[15] الهداف
+     ID           : alhaddaf
+     País         : Algeria
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/alhaddaf.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alhaddaf/stream
+--------------------------------------------------------------------------------
+[16] المغاربية
+     ID           : almagharibia
+     País         : Algeria
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/almagharibia.php
+     Stream API   : http://0.0.0.0:9090/api/channels/almagharibia/stream
+--------------------------------------------------------------------------------
+[17] البلاد
+     ID           : Albilad
+     País         : Algeria
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/Albilad.php
+     Stream API   : http://0.0.0.0:9090/api/channels/Albilad/stream
+--------------------------------------------------------------------------------
+[18] الجزائر الدولية
+     ID           : al24news
+     País         : Algeria
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/al24news.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al24news/stream
+--------------------------------------------------------------------------------
+[19] عمو يزيد
+     ID           : amouyazid
+     País         : Algeria
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/amouyazid.php
+     Stream API   : http://0.0.0.0:9090/api/channels/amouyazid/stream
+--------------------------------------------------------------------------------
+[20] الأطفال الجزائرية
+     ID           : 4kids
+     País         : Algeria
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/4kids.php
+     Stream API   : http://0.0.0.0:9090/api/channels/4kids/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: TUNISIA (7 canales)
+================================================================================
+[01] الوطنية
+     ID           : alwatania1
+     País         : Tunisia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/alwatania1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alwatania1/stream
+--------------------------------------------------------------------------------
+[02] الوطنية 2
+     ID           : alwatania2
+     País         : Tunisia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/alwatania2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alwatania2/stream
+--------------------------------------------------------------------------------
+[03] حنبعل
+     ID           : hanibal
+     País         : Tunisia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/hanibal.php
+     Stream API   : http://0.0.0.0:9090/api/channels/hanibal/stream
+--------------------------------------------------------------------------------
+[04] نسمة
+     ID           : nessma
+     País         : Tunisia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/nessma.php
+     Stream API   : http://0.0.0.0:9090/api/channels/nessma/stream
+--------------------------------------------------------------------------------
+[05] الحوار التونسي
+     ID           : elhiwarettounsi
+     País         : Tunisia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/elhiwarettounsi.php
+     Stream API   : http://0.0.0.0:9090/api/channels/elhiwarettounsi/stream
+--------------------------------------------------------------------------------
+[06] كارتاج  +
+     ID           : carthage
+     País         : Tunisia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/carthage.php
+     Stream API   : http://0.0.0.0:9090/api/channels/carthage/stream
+--------------------------------------------------------------------------------
+[07] التلفزة
+     ID           : telvza
+     País         : Tunisia
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/telvza.php.php
+     Stream API   : http://0.0.0.0:9090/api/channels/telvza/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: SYRIA (9 canales)
+================================================================================
+[01] اليوم
+     ID           : alyawmnews
+     País         : Syria
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alyawmnews.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alyawmnews/stream
+--------------------------------------------------------------------------------
+[02] القناة 9
+     ID           : alqanat9
+     País         : Syria
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alqanat9.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alqanat9/stream
+--------------------------------------------------------------------------------
+[03] تلفزيون سوريا
+     ID           : syriatv
+     País         : Syria
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/syriatv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/syriatv/stream
+--------------------------------------------------------------------------------
+[04] حلب اليوم
+     ID           : halabtoday
+     País         : Syria
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/halabtoday.php
+     Stream API   : http://0.0.0.0:9090/api/channels/halabtoday/stream
+--------------------------------------------------------------------------------
+[05] سوريا 2
+     ID           : syria2
+     País         : Syria
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/syria2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/syria2/stream
+--------------------------------------------------------------------------------
+[06] لنا الفضائية
+     ID           : lanatv
+     País         : Syria
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/lanatv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/lanatv/stream
+--------------------------------------------------------------------------------
+[07] شام إف إم
+     ID           : shamfm
+     País         : Syria
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/shamfm.php
+     Stream API   : http://0.0.0.0:9090/api/channels/shamfm/stream
+--------------------------------------------------------------------------------
+[08] السورية
+     ID           : al_souriya_tv
+     País         : Syria
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/al_souriya_tv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al_souriya_tv/stream
+--------------------------------------------------------------------------------
+[09] Syria One
+     ID           : syriaone
+     País         : Syria
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/syriaone.php
+     Stream API   : http://0.0.0.0:9090/api/channels/syriaone/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: LEBANON (16 canales)
+================================================================================
+[01] إم تي في
+     ID           : mtv
+     País         : Lebanon
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/mtv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/mtv/stream
+--------------------------------------------------------------------------------
+[02] MTV One
+     ID           : mtvone
+     País         : Lebanon
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/mtvone.php
+     Stream API   : http://0.0.0.0:9090/api/channels/mtvone/stream
+--------------------------------------------------------------------------------
+[03] الجديد
+     ID           : aljadeed
+     País         : Lebanon
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/aljadeed.php
+     Stream API   : http://0.0.0.0:9090/api/channels/aljadeed/stream
+--------------------------------------------------------------------------------
+[04] الميادين
+     ID           : almayadeen
+     País         : Lebanon
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/almayadeen.php
+     Stream API   : http://0.0.0.0:9090/api/channels/almayadeen/stream
+--------------------------------------------------------------------------------
+[05] المنار
+     ID           : almanar
+     País         : Lebanon
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/almanar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/almanar/stream
+--------------------------------------------------------------------------------
+[06] المشهد
+     ID           : almashhad
+     País         : Lebanon
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/almashhad.php
+     Stream API   : http://0.0.0.0:9090/api/channels/almashhad/stream
+--------------------------------------------------------------------------------
+[07] الوفاق نيوز
+     ID           : alwefaq
+     País         : Lebanon
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alwefaq.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alwefaq/stream
+--------------------------------------------------------------------------------
+[08] المستقبل
+     ID           : future
+     País         : Lebanon
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/future.php
+     Stream API   : http://0.0.0.0:9090/api/channels/future/stream
+--------------------------------------------------------------------------------
+[09] OTV
+     ID           : otv
+     País         : Lebanon
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/otv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/otv/stream
+--------------------------------------------------------------------------------
+[10] تلفزيون لبنان
+     ID           : telelebanon
+     País         : Lebanon
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/telelebanon.php
+     Stream API   : http://0.0.0.0:9090/api/channels/telelebanon/stream
+--------------------------------------------------------------------------------
+[11] NBN
+     ID           : nbn
+     País         : Lebanon
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/nbn.php
+     Stream API   : http://0.0.0.0:9090/api/channels/nbn/stream
+--------------------------------------------------------------------------------
+[12] يونيوز
+     ID           : unews
+     País         : Lebanon
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/unews.php
+     Stream API   : http://0.0.0.0:9090/api/channels/unews/stream
+--------------------------------------------------------------------------------
+[13] VDL 24
+     ID           : vdl24
+     País         : Lebanon
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/vdl24.php
+     Stream API   : http://0.0.0.0:9090/api/channels/vdl24/stream
+--------------------------------------------------------------------------------
+[14] نبأ
+     ID           : nabaa
+     País         : Lebanon
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/nabaa.php
+     Stream API   : http://0.0.0.0:9090/api/channels/nabaa/stream
+--------------------------------------------------------------------------------
+[15] المشهد
+     ID           : al-ashhad
+     País         : Lebanon
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/al-ashhad.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al-ashhad/stream
+--------------------------------------------------------------------------------
+[16] LBC
+     ID           : lbc
+     País         : Lebanon
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/lbc.php
+     Stream API   : http://0.0.0.0:9090/api/channels/lbc/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: LIBYA (5 canales)
+================================================================================
+[01] الوطنية
+     ID           : lnc
+     País         : Libya
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/lnc.php
+     Stream API   : http://0.0.0.0:9090/api/channels/lnc/stream
+--------------------------------------------------------------------------------
+[02] التناصح
+     ID           : tanasuh
+     País         : Libya
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/tanasuh.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tanasuh/stream
+--------------------------------------------------------------------------------
+[03] المسار
+     ID           : almasar
+     País         : Libya
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/almasar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/almasar/stream
+--------------------------------------------------------------------------------
+[04] ليبيا وان
+     ID           : libyaone
+     País         : Libya
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/libyaone.php
+     Stream API   : http://0.0.0.0:9090/api/channels/libyaone/stream
+--------------------------------------------------------------------------------
+[05] ليبيا الأحرار
+     ID           : libya_alahrar
+     País         : Libya
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/libya_alahrar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/libya_alahrar/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: UAEUAE (52 canales)
+================================================================================
+[01] Zee Aflam
+     ID           : zee-af
+     País         : UAEUAE
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/zee-af.php
+     Stream API   : http://0.0.0.0:9090/api/channels/zee-af/stream
+--------------------------------------------------------------------------------
+[02] زي الوان
+     ID           : zee_alwan
+     País         : UAEUAE
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/zee_alwan.php
+     Stream API   : http://0.0.0.0:9090/api/channels/zee_alwan/stream
+--------------------------------------------------------------------------------
+[03] روسيا اليوم
+     ID           : rt_arabic
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/rt_arabic.php
+     Stream API   : http://0.0.0.0:9090/api/channels/rt_arabic/stream
+--------------------------------------------------------------------------------
+[04] سكاي نيوز
+     ID           : skynews_ar
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/skynews_ar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/skynews_ar/stream
+--------------------------------------------------------------------------------
+[05] بي بي سي نيوز
+     ID           : bbcarabic
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/bbcarabic.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bbcarabic/stream
+--------------------------------------------------------------------------------
+[06] أورو نيوز
+     ID           : euronews_ar
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/euronews_ar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/euronews_ar/stream
+--------------------------------------------------------------------------------
+[07] العربية
+     ID           : alarabia
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alarabia.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alarabia/stream
+--------------------------------------------------------------------------------
+[08] العربية بزنس
+     ID           : alarabiabiz
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alarabiabiz.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alarabiabiz/stream
+--------------------------------------------------------------------------------
+[09] العربية برامج
+     ID           : alarabiaprog
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alarabiaprog.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alarabiaprog/stream
+--------------------------------------------------------------------------------
+[10] Al Arabiya
+     ID           : alarabia_en
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alarabia_en.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alarabia_en/stream
+--------------------------------------------------------------------------------
+[11] الحدث
+     ID           : alarabia_alhadath
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alarabia_alhadath.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alarabia_alhadath/stream
+--------------------------------------------------------------------------------
+[12] DW
+     ID           : dw_ar
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/dw_ar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/dw_ar/stream
+--------------------------------------------------------------------------------
+[13] CNBC
+     ID           : cnbc_ar
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/cnbc_ar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/cnbc_ar/stream
+--------------------------------------------------------------------------------
+[14] فرانس 24
+     ID           : france24_ar
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/france24_ar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/france24_ar/stream
+--------------------------------------------------------------------------------
+[15] Dubai One
+     ID           : dubai_one
+     País         : UAEUAE
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/dubai_one.php
+     Stream API   : http://0.0.0.0:9090/api/channels/dubai_one/stream
+--------------------------------------------------------------------------------
+[16] دبي
+     ID           : dubiatv
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/dubiatv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/dubiatv/stream
+--------------------------------------------------------------------------------
+[17] نور دبي
+     ID           : noordubai
+     País         : UAEUAE
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/noordubai.php
+     Stream API   : http://0.0.0.0:9090/api/channels/noordubai/stream
+--------------------------------------------------------------------------------
+[18] سما دبي
+     ID           : sama_dubai
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/sama_dubai.php
+     Stream API   : http://0.0.0.0:9090/api/channels/sama_dubai/stream
+--------------------------------------------------------------------------------
+[19] دبي زمان
+     ID           : dubaizaman
+     País         : UAEUAE
+     Categoría    : Comedy
+     Página Web   : https://venolie.com/navo/view/p/dubaizaman.php
+     Stream API   : http://0.0.0.0:9090/api/channels/dubaizaman/stream
+--------------------------------------------------------------------------------
+[20] أبوظبي
+     ID           : abudhabi1
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/abudhabi1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/abudhabi1/stream
+--------------------------------------------------------------------------------
+[21] الإمارات
+     ID           : alimarat
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/alimarat.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alimarat/stream
+--------------------------------------------------------------------------------
+[22] الظفرة
+     ID           : aldafrah
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/aldafrah.php
+     Stream API   : http://0.0.0.0:9090/api/channels/aldafrah/stream
+--------------------------------------------------------------------------------
+[23] الكوثر
+     ID           : alkawthar
+     País         : UAEUAE
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/alkawthar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alkawthar/stream
+--------------------------------------------------------------------------------
+[24] الثقلين
+     ID           : Thaqalayn
+     País         : UAEUAE
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/Thaqalayn.php
+     Stream API   : http://0.0.0.0:9090/api/channels/Thaqalayn/stream
+--------------------------------------------------------------------------------
+[25] Sharjah Radio
+     ID           : radiosharjah
+     País         : UAEUAE
+     Categoría    : Local
+     Página Web   : https://venolie.com/navo/view/p/radiosharjah.php
+     Stream API   : http://0.0.0.0:9090/api/channels/radiosharjah/stream
+--------------------------------------------------------------------------------
+[26] الشارقة
+     ID           : sharhajtv
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/sharhajtv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/sharhajtv/stream
+--------------------------------------------------------------------------------
+[27] قناة الشارقة 2
+     ID           : sharhajtv2
+     País         : UAEUAE
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/sharhajtv2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/sharhajtv2/stream
+--------------------------------------------------------------------------------
+[28] الشرقية كربلاء
+     ID           : sharhajahkarblaa
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/sharhajahkarblaa.php
+     Stream API   : http://0.0.0.0:9090/api/channels/sharhajahkarblaa/stream
+--------------------------------------------------------------------------------
+[29] الوسطى
+     ID           : alwusta
+     País         : UAEUAE
+     Categoría    : Local
+     Página Web   : https://venolie.com/navo/view/p/alwusta.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alwusta/stream
+--------------------------------------------------------------------------------
+[30] القرآن الكريم
+     ID           : sharjah_quran_radio
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/sharjah_quran_radio.php
+     Stream API   : http://0.0.0.0:9090/api/channels/sharjah_quran_radio/stream
+--------------------------------------------------------------------------------
+[31] الفجيرة
+     ID           : fujtv
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/fujtv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/fujtv/stream
+--------------------------------------------------------------------------------
+[32] الاتحاد
+     ID           : ittihad
+     País         : UAEUAE
+     Categoría    : Local
+     Página Web   : https://venolie.com/navo/view/p/ittihad.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ittihad/stream
+--------------------------------------------------------------------------------
+[33] البحرين
+     ID           : bahrain
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/bahrain.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bahrain/stream
+--------------------------------------------------------------------------------
+[34] Bahrain Int
+     ID           : bahrain_int
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/bahrain_int.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bahrain_int/stream
+--------------------------------------------------------------------------------
+[35] بحرين قرآن
+     ID           : bahrain_quran
+     País         : UAEUAE
+     Categoría    : Religious
+     Página Web   : https://venolie.com/navo/view/p/bahrain_quran.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bahrain_quran/stream
+--------------------------------------------------------------------------------
+[36] البحرين الرياضية 1
+     ID           : bahrain_s1
+     País         : UAEUAE
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/bahrain_s1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bahrain_s1/stream
+--------------------------------------------------------------------------------
+[37] البحرين الرياضية 2
+     ID           : bahrain_s2
+     País         : UAEUAE
+     Categoría    : Sports
+     Página Web   : https://venolie.com/navo/view/p/bahrain_s2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bahrain_s2/stream
+--------------------------------------------------------------------------------
+[38] اللؤلؤة
+     ID           : allouloa
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/allouloa.php
+     Stream API   : http://0.0.0.0:9090/api/channels/allouloa/stream
+--------------------------------------------------------------------------------
+[39] ماجد
+     ID           : majid
+     País         : UAEUAE
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/majid.php
+     Stream API   : http://0.0.0.0:9090/api/channels/majid/stream
+--------------------------------------------------------------------------------
+[40] سبيس تون
+     ID           : spacetoon
+     País         : UAEUAE
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/spacetoon.php
+     Stream API   : http://0.0.0.0:9090/api/channels/spacetoon/stream
+--------------------------------------------------------------------------------
+[41] CN Arabia
+     ID           : cn_ar
+     País         : UAEUAE
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/cn_ar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/cn_ar/stream
+--------------------------------------------------------------------------------
+[42] عجمان
+     ID           : ajman
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/ajman.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ajman/stream
+--------------------------------------------------------------------------------
+[43] CGTN
+     ID           : cgtn_ar
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/cgtn_ar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/cgtn_ar/stream
+--------------------------------------------------------------------------------
+[44] بينونة
+     ID           : baynoonah
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/baynoonah.php
+     Stream API   : http://0.0.0.0:9090/api/channels/baynoonah/stream
+--------------------------------------------------------------------------------
+[45] الشرق
+     ID           : alsharq
+     País         : UAEUAE
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/alsharq.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alsharq/stream
+--------------------------------------------------------------------------------
+[46] الشرق الوثائقية
+     ID           : al-harq_documentary
+     País         : UAEUAE
+     Categoría    : Documentary
+     Página Web   : https://venolie.com/navo/view/p/al-harq_documentary.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al-harq_documentary/stream
+--------------------------------------------------------------------------------
+[47] ناشيونال جيوغرافيك أبوظبي
+     ID           : natgeo
+     País         : UAEUAE
+     Categoría    : Documentary
+     Página Web   : https://venolie.com/navo/view/p/natgeo.php
+     Stream API   : http://0.0.0.0:9090/api/channels/natgeo/stream
+--------------------------------------------------------------------------------
+[48] الشرق discovery
+     ID           : al-harq_disc
+     País         : UAEUAE
+     Categoría    : Documentary
+     Página Web   : https://venolie.com/navo/view/p/al-harq_disc.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al-harq_disc/stream
+--------------------------------------------------------------------------------
+[49] Radio Asharq
+     ID           : al-harq_radio
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/al-harq_radio.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al-harq_radio/stream
+--------------------------------------------------------------------------------
+[50] قاف التفاعلية
+     ID           : Qaf
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/Qaf.php
+     Stream API   : http://0.0.0.0:9090/api/channels/Qaf/stream
+--------------------------------------------------------------------------------
+[51] الشلال
+     ID           : al-shalaltv
+     País         : UAEUAE
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/al-shalaltv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/al-shalaltv/stream
+--------------------------------------------------------------------------------
+[52] الخليجية
+     ID           : khaleejia
+     País         : UAEUAE
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/khaleejia.php
+     Stream API   : http://0.0.0.0:9090/api/channels/khaleejia/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: FRANCE (46 canales)
+================================================================================
+[01] Tf1
+     ID           : f1
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/f1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/f1/stream
+--------------------------------------------------------------------------------
+[02] TF1 Séries
+     ID           : tfs
+     País         : France
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/tfs.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tfs/stream
+--------------------------------------------------------------------------------
+[03] France 2
+     ID           : f2
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/f2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/f2/stream
+--------------------------------------------------------------------------------
+[04] France 3
+     ID           : fr3
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/fr3.php
+     Stream API   : http://0.0.0.0:9090/api/channels/fr3/stream
+--------------------------------------------------------------------------------
+[05] France 4
+     ID           : fr4
+     País         : France
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/fr4.php
+     Stream API   : http://0.0.0.0:9090/api/channels/fr4/stream
+--------------------------------------------------------------------------------
+[06] France 5
+     ID           : fr5
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/fr5.php
+     Stream API   : http://0.0.0.0:9090/api/channels/fr5/stream
+--------------------------------------------------------------------------------
+[07] CStar
+     ID           : cstar
+     País         : France
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/cstar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/cstar/stream
+--------------------------------------------------------------------------------
+[08] CNews
+     ID           : cnews
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/cnews.php
+     Stream API   : http://0.0.0.0:9090/api/channels/cnews/stream
+--------------------------------------------------------------------------------
+[09] LCP
+     ID           : lcp
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/lcp.php
+     Stream API   : http://0.0.0.0:9090/api/channels/lcp/stream
+--------------------------------------------------------------------------------
+[10] ARTE
+     ID           : arte
+     País         : France
+     Categoría    : Documentary
+     Página Web   : https://venolie.com/navo/view/p/arte.php
+     Stream API   : http://0.0.0.0:9090/api/channels/arte/stream
+--------------------------------------------------------------------------------
+[11] Le Figaro
+     ID           : figaro
+     País         : France
+     Categoría    : Documentary
+     Página Web   : https://venolie.com/navo/view/p/figaro.php
+     Stream API   : http://0.0.0.0:9090/api/channels/figaro/stream
+--------------------------------------------------------------------------------
+[12] TMC
+     ID           : tmc
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/tmc.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tmc/stream
+--------------------------------------------------------------------------------
+[13] Gulli
+     ID           : gulli
+     País         : France
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/gulli.php
+     Stream API   : http://0.0.0.0:9090/api/channels/gulli/stream
+--------------------------------------------------------------------------------
+[14] RMC Story
+     ID           : rstory
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/rstory.php
+     Stream API   : http://0.0.0.0:9090/api/channels/rstory/stream
+--------------------------------------------------------------------------------
+[15] TFX
+     ID           : tfx
+     País         : France
+     Categoría    : Divertissement
+     Página Web   : https://venolie.com/navo/view/p/tfx.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tfx/stream
+--------------------------------------------------------------------------------
+[16] M6
+     ID           : m6
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/m6.php
+     Stream API   : http://0.0.0.0:9090/api/channels/m6/stream
+--------------------------------------------------------------------------------
+[17] 6ter
+     ID           : 6ter
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/6ter.php
+     Stream API   : http://0.0.0.0:9090/api/channels/6ter/stream
+--------------------------------------------------------------------------------
+[18] MaTélé
+     ID           : matele
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/matele.php
+     Stream API   : http://0.0.0.0:9090/api/channels/matele/stream
+--------------------------------------------------------------------------------
+[19] Wéo
+     ID           : weo
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/weo.php
+     Stream API   : http://0.0.0.0:9090/api/channels/weo/stream
+--------------------------------------------------------------------------------
+[20] Antenne
+     ID           : antenne
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/antenne.php
+     Stream API   : http://0.0.0.0:9090/api/channels/antenne/stream
+--------------------------------------------------------------------------------
+[21] RTC
+     ID           : rtc
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/rtc.php
+     Stream API   : http://0.0.0.0:9090/api/channels/rtc/stream
+--------------------------------------------------------------------------------
+[22] Télénantes
+     ID           : telenantes
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/telenantes.php
+     Stream API   : http://0.0.0.0:9090/api/channels/telenantes/stream
+--------------------------------------------------------------------------------
+[23] W9
+     ID           : w9
+     País         : France
+     Categoría    : Divertissement
+     Página Web   : https://venolie.com/navo/view/p/w9.php
+     Stream API   : http://0.0.0.0:9090/api/channels/w9/stream
+--------------------------------------------------------------------------------
+[24] Canal Savoir
+     ID           : savoir
+     País         : France
+     Categoría    : Education
+     Página Web   : https://venolie.com/navo/view/p/savoir.php
+     Stream API   : http://0.0.0.0:9090/api/channels/savoir/stream
+--------------------------------------------------------------------------------
+[25] ÈRE TV
+     ID           : ere
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/ere.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ere/stream
+--------------------------------------------------------------------------------
+[26] Tébéo
+     ID           : tebeo
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/tebeo.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tebeo/stream
+--------------------------------------------------------------------------------
+[27] TébéSud
+     ID           : tebeosud
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/tebeosud.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tebeosud/stream
+--------------------------------------------------------------------------------
+[28] Carac 1
+     ID           : carac1
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/carac1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/carac1/stream
+--------------------------------------------------------------------------------
+[29] Carac 2
+     ID           : carac2
+     País         : France
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/carac2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/carac2/stream
+--------------------------------------------------------------------------------
+[30] Carac 3
+     ID           : carac3
+     País         : France
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/carac3.php
+     Stream API   : http://0.0.0.0:9090/api/channels/carac3/stream
+--------------------------------------------------------------------------------
+[31] 20 Minutes
+     ID           : 20minutes
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/20minutes.php
+     Stream API   : http://0.0.0.0:9090/api/channels/20minutes/stream
+--------------------------------------------------------------------------------
+[32] 100% Docs
+     ID           : docs
+     País         : France
+     Categoría    : Documentary
+     Página Web   : https://venolie.com/navo/view/p/docs.php
+     Stream API   : http://0.0.0.0:9090/api/channels/docs/stream
+--------------------------------------------------------------------------------
+[33] B SMART
+     ID           : bsmart
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/bsmart.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bsmart/stream
+--------------------------------------------------------------------------------
+[34] France 24
+     ID           : france24_fr
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/france24_fr.php
+     Stream API   : http://0.0.0.0:9090/api/channels/france24_fr/stream
+--------------------------------------------------------------------------------
+[35] BFM
+     ID           : bfm
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/bfm.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bfm/stream
+--------------------------------------------------------------------------------
+[36] BFM 2
+     ID           : bfm2
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/bfm2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bfm2/stream
+--------------------------------------------------------------------------------
+[37] BFM Business
+     ID           : bfm_bus
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/bfm_bus.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bfm_bus/stream
+--------------------------------------------------------------------------------
+[38] BFM LYON
+     ID           : bfm_lyon
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/bfm_lyon.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bfm_lyon/stream
+--------------------------------------------------------------------------------
+[39] BFM Grand Lille
+     ID           : bahrain_gl
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/bahrain_gl.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bahrain_gl/stream
+--------------------------------------------------------------------------------
+[40] BFM Grand Littoral
+     ID           : bfm_lit
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/bfm_lit.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bfm_lit/stream
+--------------------------------------------------------------------------------
+[41] Tech&Co
+     ID           : bfm_tech
+     País         : France
+     Categoría    : Technology
+     Página Web   : https://venolie.com/navo/view/p/bfm_tech.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bfm_tech/stream
+--------------------------------------------------------------------------------
+[42] BFM DICI
+     ID           : bfm_prov
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/bfm_prov.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bfm_prov/stream
+--------------------------------------------------------------------------------
+[43] BFM Reportages
+     ID           : bfm_repo
+     País         : France
+     Categoría    : Documentary
+     Página Web   : https://venolie.com/navo/view/p/bfm_repo.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bfm_repo/stream
+--------------------------------------------------------------------------------
+[44] LCI
+     ID           : lci
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/lci.php
+     Stream API   : http://0.0.0.0:9090/api/channels/lci/stream
+--------------------------------------------------------------------------------
+[45] RT FRANCE
+     ID           : rt_fr
+     País         : France
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/rt_fr.php
+     Stream API   : http://0.0.0.0:9090/api/channels/rt_fr/stream
+--------------------------------------------------------------------------------
+[46] Télé du Tchad
+     ID           : tchad
+     País         : France
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/tchad.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tchad/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: GERMANY (23 canales)
+================================================================================
+[01] DWTV
+     ID           : deutsch-welle
+     País         : Germany
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/deutsch-welle.php
+     Stream API   : http://0.0.0.0:9090/api/channels/deutsch-welle/stream
+--------------------------------------------------------------------------------
+[02] DW Español
+     ID           : dw-espanol
+     País         : Germany
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/dw-espanol.php
+     Stream API   : http://0.0.0.0:9090/api/channels/dw-espanol/stream
+--------------------------------------------------------------------------------
+[03] DW TV
+     ID           : dw-en
+     País         : Germany
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/dw-en.php
+     Stream API   : http://0.0.0.0:9090/api/channels/dw-en/stream
+--------------------------------------------------------------------------------
+[04] DW ARABIC
+     ID           : dw-arabic
+     País         : Germany
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/dw-arabic.php
+     Stream API   : http://0.0.0.0:9090/api/channels/dw-arabic/stream
+--------------------------------------------------------------------------------
+[05] BR Fernsehen
+     ID           : br-fernsehen
+     País         : Germany
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/br-fernsehen.php
+     Stream API   : http://0.0.0.0:9090/api/channels/br-fernsehen/stream
+--------------------------------------------------------------------------------
+[06] hr fernsehen
+     ID           : hr-fernsehen
+     País         : Germany
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/hr-fernsehen.php
+     Stream API   : http://0.0.0.0:9090/api/channels/hr-fernsehen/stream
+--------------------------------------------------------------------------------
+[07] NDR Fernsehen
+     ID           : ndr-fernsehen
+     País         : Germany
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/ndr-fernsehen.php
+     Stream API   : http://0.0.0.0:9090/api/channels/ndr-fernsehen/stream
+--------------------------------------------------------------------------------
+[08] ALEX Berlin
+     ID           : alex
+     País         : Germany
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/alex.php
+     Stream API   : http://0.0.0.0:9090/api/channels/alex/stream
+--------------------------------------------------------------------------------
+[09] ATV Augsburg
+     ID           : atv-augsburg
+     País         : Germany
+     Categoría    : Local
+     Página Web   : https://venolie.com/navo/view/p/atv-augsburg.php
+     Stream API   : http://0.0.0.0:9090/api/channels/atv-augsburg/stream
+--------------------------------------------------------------------------------
+[10] Allgäu TV
+     ID           : allgau
+     País         : Germany
+     Categoría    : Local
+     Página Web   : https://venolie.com/navo/view/p/allgau.php
+     Stream API   : http://0.0.0.0:9090/api/channels/allgau/stream
+--------------------------------------------------------------------------------
+[11] Baden TV
+     ID           : baden
+     País         : Germany
+     Categoría    : Local
+     Página Web   : https://venolie.com/navo/view/p/baden.php
+     Stream API   : http://0.0.0.0:9090/api/channels/baden/stream
+--------------------------------------------------------------------------------
+[12] BLK Regional
+     ID           : blkregional
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/blkregional.php
+     Stream API   : http://0.0.0.0:9090/api/channels/blkregional/stream
+--------------------------------------------------------------------------------
+[13] Franken Fernsehen
+     ID           : frankenfernsehen
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/frankenfernsehen.php
+     Stream API   : http://0.0.0.0:9090/api/channels/frankenfernsehen/stream
+--------------------------------------------------------------------------------
+[14] FRF1
+     ID           : frf1
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/frf1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/frf1/stream
+--------------------------------------------------------------------------------
+[15] l-tv
+     ID           : l-tv
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/l-tv.php
+     Stream API   : http://0.0.0.0:9090/api/channels/l-tv/stream
+--------------------------------------------------------------------------------
+[16] MDF.1
+     ID           : mdf1
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/mdf1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/mdf1/stream
+--------------------------------------------------------------------------------
+[17] München
+     ID           : Munchen
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/Munchen.php
+     Stream API   : http://0.0.0.0:9090/api/channels/Munchen/stream
+--------------------------------------------------------------------------------
+[18] NOA4
+     ID           : noa4
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/noa4.php
+     Stream API   : http://0.0.0.0:9090/api/channels/noa4/stream
+--------------------------------------------------------------------------------
+[19] Oberpfalz
+     ID           : oberpfalz
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/oberpfalz.php
+     Stream API   : http://0.0.0.0:9090/api/channels/oberpfalz/stream
+--------------------------------------------------------------------------------
+[20] Offener Kanal Dessau
+     ID           : offener
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/offener.php
+     Stream API   : http://0.0.0.0:9090/api/channels/offener/stream
+--------------------------------------------------------------------------------
+[21] Offener Kanal Magdeburg
+     ID           : magdeburg
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/magdeburg.php
+     Stream API   : http://0.0.0.0:9090/api/channels/magdeburg/stream
+--------------------------------------------------------------------------------
+[22] Regio TV
+     ID           : regio
+     País         : Germany
+     Categoría    : Regional
+     Página Web   : https://venolie.com/navo/view/p/regio.php
+     Stream API   : http://0.0.0.0:9090/api/channels/regio/stream
+--------------------------------------------------------------------------------
+[23] MediaShop
+     ID           : mediashop
+     País         : Germany
+     Categoría    : Shopping
+     Página Web   : https://venolie.com/navo/view/p/mediashop.php
+     Stream API   : http://0.0.0.0:9090/api/channels/mediashop/stream
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PAÍS: PERSIAN & IRANIAN (30 canales)
+================================================================================
+[01] BBC Persian
+     ID           : bbc_farsi
+     País         : Persian & Iranian
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/bbc_farsi.php
+     Stream API   : http://0.0.0.0:9090/api/channels/bbc_farsi/stream
+--------------------------------------------------------------------------------
+[02] VOA Persian
+     ID           : voa_persian
+     País         : Persian & Iranian
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/voa_persian.php
+     Stream API   : http://0.0.0.0:9090/api/channels/voa_persian/stream
+--------------------------------------------------------------------------------
+[03] Iran Int-
+     ID           : iran_int
+     País         : Persian & Iranian
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/iran_int.php
+     Stream API   : http://0.0.0.0:9090/api/channels/iran_int/stream
+--------------------------------------------------------------------------------
+[04] Irinn
+     ID           : irinn
+     País         : Persian & Iranian
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/irinn.php
+     Stream API   : http://0.0.0.0:9090/api/channels/irinn/stream
+--------------------------------------------------------------------------------
+[05] IRIB 1
+     ID           : irib1
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/irib1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/irib1/stream
+--------------------------------------------------------------------------------
+[06] IRIB 2
+     ID           : irib2
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/irib2.php
+     Stream API   : http://0.0.0.0:9090/api/channels/irib2/stream
+--------------------------------------------------------------------------------
+[07] IRIB 3
+     ID           : irib3
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/irib3.php
+     Stream API   : http://0.0.0.0:9090/api/channels/irib3/stream
+--------------------------------------------------------------------------------
+[08] IRIB 4
+     ID           : irib4
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/irib4.php
+     Stream API   : http://0.0.0.0:9090/api/channels/irib4/stream
+--------------------------------------------------------------------------------
+[09] IRIB 5
+     ID           : irib5
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/irib5.php
+     Stream API   : http://0.0.0.0:9090/api/channels/irib5/stream
+--------------------------------------------------------------------------------
+[10] Pars TV
+     ID           : pars
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/pars.php
+     Stream API   : http://0.0.0.0:9090/api/channels/pars/stream
+--------------------------------------------------------------------------------
+[11] PMC
+     ID           : pmc
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/pmc.php
+     Stream API   : http://0.0.0.0:9090/api/channels/pmc/stream
+--------------------------------------------------------------------------------
+[12] Tapesh
+     ID           : tapesh
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/tapesh.php
+     Stream API   : http://0.0.0.0:9090/api/channels/tapesh/stream
+--------------------------------------------------------------------------------
+[13] Omid e
+     ID           : omid-e
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/omid-e.php
+     Stream API   : http://0.0.0.0:9090/api/channels/omid-e/stream
+--------------------------------------------------------------------------------
+[14] Didar
+     ID           : dirar
+     País         : Persian & Iranian
+     Categoría    : News
+     Página Web   : https://venolie.com/navo/view/p/dirar.php
+     Stream API   : http://0.0.0.0:9090/api/channels/dirar/stream
+--------------------------------------------------------------------------------
+[15] GEM
+     ID           : gem
+     País         : Persian & Iranian
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/gem.php
+     Stream API   : http://0.0.0.0:9090/api/channels/gem/stream
+--------------------------------------------------------------------------------
+[16] GEM Classic
+     ID           : gem_classic
+     País         : Persian & Iranian
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/gem_classic.php
+     Stream API   : http://0.0.0.0:9090/api/channels/gem_classic/stream
+--------------------------------------------------------------------------------
+[17] GEM Drama
+     ID           : gem_drama
+     País         : Persian & Iranian
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/gem_drama.php
+     Stream API   : http://0.0.0.0:9090/api/channels/gem_drama/stream
+--------------------------------------------------------------------------------
+[18] GEM Junior
+     ID           : gem_genior
+     País         : Persian & Iranian
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/gem_genior.php
+     Stream API   : http://0.0.0.0:9090/api/channels/gem_genior/stream
+--------------------------------------------------------------------------------
+[19] GEM Bollywood
+     ID           : gem_bolly
+     País         : Persian & Iranian
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/gem_bolly.php
+     Stream API   : http://0.0.0.0:9090/api/channels/gem_bolly/stream
+--------------------------------------------------------------------------------
+[20] Gem Film
+     ID           : gem_flm
+     País         : Persian & Iranian
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/gem_flm.php
+     Stream API   : http://0.0.0.0:9090/api/channels/gem_flm/stream
+--------------------------------------------------------------------------------
+[21] Persiana 1
+     ID           : persiana1
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/persiana1.php
+     Stream API   : http://0.0.0.0:9090/api/channels/persiana1/stream
+--------------------------------------------------------------------------------
+[22] Persiana Music
+     ID           : persiana_music
+     País         : Persian & Iranian
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/persiana_music.php
+     Stream API   : http://0.0.0.0:9090/api/channels/persiana_music/stream
+--------------------------------------------------------------------------------
+[23] Persiana Sonnati
+     ID           : gem_sonnati
+     País         : Persian & Iranian
+     Categoría    : Music
+     Página Web   : https://venolie.com/navo/view/p/gem_sonnati.php
+     Stream API   : http://0.0.0.0:9090/api/channels/gem_sonnati/stream
+--------------------------------------------------------------------------------
+[24] Persiana Plus
+     ID           : gem_plus
+     País         : Persian & Iranian
+     Categoría    : Series
+     Página Web   : https://venolie.com/navo/view/p/gem_plus.php
+     Stream API   : http://0.0.0.0:9090/api/channels/gem_plus/stream
+--------------------------------------------------------------------------------
+[25] Persiana Comedy
+     ID           : gem_comedy
+     País         : Persian & Iranian
+     Categoría    : Comedy
+     Página Web   : https://venolie.com/navo/view/p/gem_comedy.php
+     Stream API   : http://0.0.0.0:9090/api/channels/gem_comedy/stream
+--------------------------------------------------------------------------------
+[26] Persiana Family
+     ID           : persiana_family
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/persiana_family.php
+     Stream API   : http://0.0.0.0:9090/api/channels/persiana_family/stream
+--------------------------------------------------------------------------------
+[27] Persiana Irania
+     ID           : persiana_iranian
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/persiana_iranian.php
+     Stream API   : http://0.0.0.0:9090/api/channels/persiana_iranian/stream
+--------------------------------------------------------------------------------
+[28] Persiana Junior
+     ID           : persiana_junior
+     País         : Persian & Iranian
+     Categoría    : Kids
+     Página Web   : https://venolie.com/navo/view/p/persiana_junior.php
+     Stream API   : http://0.0.0.0:9090/api/channels/persiana_junior/stream
+--------------------------------------------------------------------------------
+[29] Persiana Cinema
+     ID           : persiana_cinema
+     País         : Persian & Iranian
+     Categoría    : Movies
+     Página Web   : https://venolie.com/navo/view/p/persiana_cinema.php
+     Stream API   : http://0.0.0.0:9090/api/channels/persiana_cinema/stream
+--------------------------------------------------------------------------------
+[30] Iran Independent
+     ID           : iran_ind
+     País         : Persian & Iranian
+     Categoría    : General
+     Página Web   : https://venolie.com/navo/view/p/iran_ind.php
+     Stream API   : http://0.0.0.0:9090/api/channels/iran_ind/stream
+--------------------------------------------------------------------------------
+

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KovalskyTV · Streaming Premium</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        brand: { 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' },
+                        dark: { 800: '#111827', 900: '#0f172a', 950: '#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- HLS.js for video streaming -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+    
+    <!-- Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <style>
+        /* Utilities */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #475569; }
+
+        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .channel-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .channel-card:hover { transform: translateX(4px); }
+        .channel-card.active { border-color: #0ea5e9; background: rgba(14, 165, 233, 0.1); }
+    </style>
+</head>
+<body class="bg-dark-950 text-slate-200 h-screen w-screen overflow-hidden flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- ── NAVBAR SUPERIOR ── -->
+    <nav class="h-16 w-full glass-panel flex flex-col justify-center px-4 md:px-6 z-20 shrink-0">
+        <div class="flex items-center justify-between">
+            
+            <!-- Logo KovalskyTV -->
+            <div class="flex items-center gap-3 shrink-0 mr-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-[0_0_15px_rgba(14,165,233,0.5)] border border-white/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" viewBox="0 0 256 256">
+                        <path d="M216,64H147.31l34.35-34.34a8,8,0,0,0-11.32-11.32L128,60.69,85.66,18.34A8,8,0,0,0,74.34,29.66L108.69,64H40A16,16,0,0,0,24,80V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64Zm0,136H40V80H216V200Zm-24-60a8,8,0,0,1-8,8H72a8,8,0,0,1,0-16H184A8,8,0,0,1,192,140Z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-black tracking-tight text-white hidden sm:block drop-shadow-md">Kovalsky<span class="text-brand-400">TV</span></h1>
+            </div>
+
+            <!-- Connection Status -->
+            <div class="flex items-center gap-3 shrink-0 ml-4">
+                <div id="connection-status" class="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-full text-xs font-medium border border-slate-700 shadow-inner">
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                    </span>
+                    Conectando...
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── LAYOUT PRINCIPAL (Sidebar + Reproductor) ── -->
+    <main class="flex-1 flex flex-col md:flex-row w-full overflow-hidden relative">
+        
+        <!-- ZONA DE REPRODUCTOR (Mobile: Arriba / PC: Derecha) -->
+        <section id="player-section" class="w-full md:flex-1 h-[35vh] md:h-full bg-black flex flex-col relative z-10 shrink-0 order-1 md:order-2 group">
+            
+            <!-- Cabecera de Stream -->
+            <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-start z-10 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-none opacity-100 transition-opacity duration-300 group-hover:opacity-100 md:opacity-0">
+                <div class="flex items-center gap-3">
+                    <div class="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded tracking-wider flex items-center gap-1.5 shadow-[0_0_10px_rgba(220,38,38,0.8)] border border-red-500/50">
+                        <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div> LIVE
+                    </div>
+                    <h2 id="now-playing-title" class="text-white font-bold text-lg md:text-xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Selecciona un canal</h2>
+                </div>
+                <div class="flex items-center gap-2 pointer-events-auto">
+                    <button id="btn-refresh" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg backdrop-blur-sm transition-colors border border-slate-700 hover:text-brand-400 shadow-lg flex items-center gap-2 text-sm font-semibold">
+                        <i id="btn-refresh-icon" class="ph-bold ph-arrows-clockwise text-lg"></i>
+                        <span id="btn-refresh-text">Refrescar API</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenedor del Vídeo -->
+            <div id="video-container" class="flex-1 w-full h-full relative cursor-pointer overflow-hidden bg-dark-950">
+                <video id="video-player" class="w-full h-full object-contain bg-black" controls playsinline></video>
+                <iframe id="iframe-player" class="w-full h-full hidden border-0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                
+                <!-- Placeholder -->
+                <div id="player-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-dark-900 to-dark-950 z-0">
+                    <div class="w-24 h-24 rounded-3xl bg-slate-800/50 flex items-center justify-center mb-6 shadow-2xl border border-slate-700/30 backdrop-blur-sm">
+                        <i class="ph-fill ph-monitor-play text-5xl text-slate-500"></i>
+                    </div>
+                    <p class="text-slate-400 font-medium text-lg tracking-wide">Listo para transmitir</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SIDEBAR (Mobile: Abajo / PC: Izquierda) -->
+        <aside class="w-full md:w-80 lg:w-[380px] h-[65vh] md:h-full bg-dark-900 border-r border-slate-800/50 flex flex-col shrink-0 order-2 md:order-1 relative z-20 shadow-[4px_0_24px_rgba(0,0,0,0.3)]">
+            <!-- Búsqueda y Estadísticas -->
+            <div class="p-4 border-b border-slate-800/50 bg-dark-900/95 sticky top-0 z-10 backdrop-blur-xl">
+                <div class="relative group">
+                    <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-400 transition-colors"></i>
+                    <input type="text" id="search-input" placeholder="Buscar canal, liga, país..." class="w-full bg-slate-950 border border-slate-800 text-white text-sm rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all shadow-inner">
+                </div>
+            </div>
+
+            <!-- VISTA CATEGORIAS -->
+            <div id="view-categories" class="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-2" style="-webkit-overflow-scrolling: touch;">
+                <h3 class="text-xs text-slate-400 font-bold uppercase tracking-wider px-2 mb-1">Categorías Disponibles</h3>
+                <div id="category-filters" class="flex flex-col gap-2"></div>
+            </div>
+
+            <!-- VISTA CANALES -->
+            <div id="view-channels" class="hidden flex-1 min-h-0 flex flex-col overflow-hidden">
+                <div class="p-3 border-b border-slate-800/50 bg-slate-900/40 flex flex-col gap-3 shrink-0">
+                    <div class="flex justify-between items-center">
+                        <button id="btn-back-categories" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors border border-slate-700">
+                            <i class="ph-bold ph-arrow-left"></i> Categorías
+                        </button>
+                        <span class="bg-brand-500/10 text-brand-400 px-2.5 py-1 rounded-md border border-brand-500/20 text-xs font-bold"><span id="channels-count">0</span> canales</span>
+                    </div>
+                    
+                    <div id="subcategory-container" class="hidden flex-col gap-2">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1">Filtro País / Región</span>
+                        <div id="subcategory-filters" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+                </div>
+
+                <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3" style="-webkit-overflow-scrolling: touch;">
+                    <div id="channels-list" class="flex flex-col gap-2">
+                        <!-- Skeletons (Mientras carga) -->
+                        <div class="animate-pulse flex gap-3 p-3 rounded-xl bg-slate-800/20 border border-slate-800/50">
+                            <div class="w-14 h-14 bg-slate-700/30 rounded-xl"></div>
+                            <div class="flex-1 space-y-2 py-2"><div class="h-4 bg-slate-700/30 rounded w-3/4"></div><div class="h-3 bg-slate-700/30 rounded w-1/2"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- ── LÓGICA DE LA APLICACIÓN (Arquitectura Modular) ── -->
+    <script>
+        class KovalskyTVApp {
+            constructor() {
+                // Estado Global (Single Source of Truth)
+                this.state = {
+                    channels: [],
+                    categories: [],
+                    subCategories: [],
+                    activeFilter: null, // Default to null to show Categories View
+                    activeSubFilter: 'all_sub',
+                    searchQuery: '',
+                    activeChannelId: null,
+                };
+                
+                // Controladores Externos
+                this.socket = null;
+                this.hls = null;
+
+                // Referencias DOM Cacheables
+                this.dom = {
+                    list: document.getElementById('channels-list'),
+                    count: document.getElementById('channels-count'),
+                    search: document.getElementById('search-input'),
+                    categoryContainer: document.getElementById('category-filters'),
+                    subCategoryContainer: document.getElementById('subcategory-container'),
+                    subCategoryFilters: document.getElementById('subcategory-filters'),
+                    viewCategories: document.getElementById('view-categories'),
+                    viewChannels: document.getElementById('view-channels'),
+                    btnBack: document.getElementById('btn-back-categories'),
+                    videoContainer: document.getElementById('video-container'),
+                    video: document.getElementById('video-player'),
+                    iframe: document.getElementById('iframe-player'),
+                    placeholder: document.getElementById('player-placeholder'),
+                    title: document.getElementById('now-playing-title'),
+                    statusBadge: document.getElementById('connection-status'),
+                    btnRefresh: document.getElementById('btn-refresh'),
+                    btnRefreshText: document.getElementById('btn-refresh-text'),
+                    btnRefreshIcon: document.getElementById('btn-refresh-icon')
+                };
+
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.connectSocket();
+                
+                // Fallback para desarrollo si no hay backend
+                setTimeout(() => { if (this.state.channels.length === 0) this.loadMockData(); }, 3000);
+            }
+
+            // ─── EVENT LISTENER REGISTRY ─────────────────────────────
+            bindEvents() {
+                // Buscador
+                this.dom.search.addEventListener('input', (e) => {
+                    this.state.searchQuery = e.target.value.toLowerCase();
+                    if (this.state.activeFilter === null && this.state.searchQuery.length > 0) {
+                        this.state.activeFilter = 'all'; // Forzar vista de canales al buscar
+                    } else if (this.state.activeFilter === 'all' && this.state.searchQuery.length === 0) {
+                        this.state.activeFilter = null; // Volver a categorías si borra búsqueda
+                    }
+                    this.renderCategories();
+                    this.renderChannels();
+                });
+
+                // Botón Volver a Categorías
+                this.dom.btnBack.addEventListener('click', () => {
+                    this.state.activeFilter = null;
+                    this.state.searchQuery = '';
+                    this.dom.search.value = '';
+                    this.renderCategories();
+                    this.renderChannels();
+                });
+
+                // Refresco de Streams (Contextual)
+                this.dom.btnRefresh.addEventListener('click', async () => {
+                    this.dom.btnRefreshIcon.classList.add('animate-spin');
+                    this.dom.btnRefreshText.innerText = 'Cargando...';
+                    
+                    let endpoint = null;
+                    if (this.state.activeFilter === 'spain' || this.state.activeFilter === 'españa') endpoint = '/api/refresh-spain';
+                    else if (this.state.activeFilter === 'deportes' || this.state.activeFilter === 'ibero') endpoint = '/api/refresh-ibero';
+                    else if (this.state.activeFilter === 'arabic_channels') endpoint = '/api/refresh-arabic';
+                    else if (this.state.activeFilter === 'bein') endpoint = '/api/refresh-bein';
+                    else {
+                        if (this.socket && this.socket.connected) {
+                            this.socket.emit('solicitar_streams');
+                            this.updateStatus('Refrescando...', 'blue', 'ph-arrows-clockwise animate-spin');
+                        }
+                        this.dom.btnRefreshIcon.classList.remove('animate-spin');
+                        this.updateContextualRefresh();
+                        return;
+                    }
+                    
+                    try {
+                        const res = await fetch(endpoint);
+                        const data = await res.json();
+                        // Mostrar feedback del resultado
+                        const count = data.actualizados || data.canales_actualizados || 0;
+                        const ok = data.success !== false;
+                        this.showToast(
+                            ok
+                                ? `✅ ${count} canales actualizados`
+                                : `❌ Error: ${data.error || data.message || 'fallo desconocido'}`,
+                            ok ? 'green' : 'red'
+                        );
+                        if (ok && this.socket && this.socket.connected) this.socket.emit('solicitar_streams');
+                    } catch (e) {
+                        this.showToast('❌ Error de conexión con el servidor', 'red');
+                        console.error('Error fetching API:', e);
+                    } finally {
+                        this.dom.btnRefreshIcon.classList.remove('animate-spin');
+                        this.updateContextualRefresh();
+                    }
+                });
+
+                // UX: Doble Clic para Pantalla Completa
+                const handleDoubleClick = (e) => {
+                    // Evitar que el evento se propague si viene de controles nativos
+                    e.preventDefault();
+                    this.toggleFullScreen();
+                };
+                
+                // Asociamos tanto al contenedor como al propio video
+                this.dom.videoContainer.addEventListener('dblclick', handleDoubleClick);
+                this.dom.video.addEventListener('dblclick', handleDoubleClick);
+            }
+
+            // ─── PANTALLA COMPLETA ──────────────────────────────────
+            toggleFullScreen() {
+                const el = this.dom.videoContainer;
+                const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+
+                if (!isFullscreen) {
+                    if (el.requestFullscreen) {
+                        el.requestFullscreen().catch(err => console.warn(`Error FS: ${err.message}`));
+                    } else if (el.webkitRequestFullscreen) { /* Safari */
+                        el.webkitRequestFullscreen();
+                    } else if (el.msRequestFullscreen) { /* IE11 */
+                        el.msRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) { /* Safari */
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) { /* IE11 */
+                        document.msExitFullscreen();
+                    }
+                }
+            }
+
+            // ─── WEB SOCKETS ─────────────────────────────────────────
+            connectSocket() {
+                try {
+                    this.socket = io();
+                    this.socket.on('connect', () => {
+                        this.updateStatus('Conectado', 'green', 'ph-check-circle');
+                        this.socket.emit('solicitar_streams');
+                    });
+                    
+                    this.socket.on('disconnect', () => {
+                        this.updateStatus('Desconectado', 'red', 'ph-warning-circle');
+                    });
+                    
+                    this.socket.on('actualizar_streams', (data) => {
+                        this.state.channels = data;
+                        this.extractDynamicCategories();
+                        this.renderCategories();
+                        this.renderChannels();
+                    });
+                } catch(e) {
+                    console.warn('Socket.io no disponible. Fallback inminente.');
+                }
+            }
+
+            updateStatus(text, color, iconClass) {
+                const colors = { red: 'bg-red-500 text-red-500', green: 'bg-emerald-500 text-emerald-500', blue: 'bg-brand-500 text-brand-500' };
+                const bgColors = { red: 'bg-red-400', green: 'bg-emerald-400', blue: 'bg-brand-400' };
+                
+                this.dom.statusBadge.innerHTML = `
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${bgColors[color]} opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 ${colors[color].split(' ')[0]}"></span>
+                    </span>
+                    ${text}
+                `;
+            }
+
+            // ─── LOGIC: CATEGORÍAS ESTRICTAS ──────────────────────────
+            updateContextualRefresh() {
+                let text = 'Refrescar API';
+                if (this.state.activeFilter === 'spain') text = 'Refrescar España';
+                else if (this.state.activeFilter === 'deportes') text = 'Refrescar Deportes';
+                else if (this.state.activeFilter === 'arabic_channels') text = 'Refrescar Arabic Channels';
+                else if (this.state.activeFilter === 'bein') text = 'Refrescar BeIN Sports';
+                this.dom.btnRefreshText.innerText = text;
+            }
+
+            extractDynamicCategories() {
+                const subCategoriesMap = new Map();
+                
+                this.state.channels.forEach(c => {
+                    const catName = c.categoria || 'Otros';
+                    
+                    if (catName.startsWith('Árabe - ')) {
+                        const subName = catName.replace('Árabe - ', '');
+                        const subId = `arabic_sub_${subName.toLowerCase().replace(/\s+/g, '_')}`;
+                        
+                        let icon = 'ph-map-pin';
+                        if (subName === 'Francia' || subName === 'Alemania') icon = 'ph-globe-hemisphere-east';
+                        else icon = 'ph-mosque';
+                        
+                        if (!subCategoriesMap.has(subId)) {
+                            subCategoriesMap.set(subId, { id: subId, label: subName, icon: icon });
+                        }
+                    }
+                });
+
+                // Convertir y ordenar alfabéticamente
+                this.state.subCategories = Array.from(subCategoriesMap.values()).sort((a, b) => a.label.localeCompare(b.label));
+            }
+
+            renderCategories() {
+                // Alternar Vistas
+                if (this.state.activeFilter === null) {
+                    this.dom.viewCategories.classList.remove('hidden');
+                    this.dom.viewChannels.classList.add('hidden');
+                } else {
+                    this.dom.viewCategories.classList.add('hidden');
+                    this.dom.viewChannels.classList.remove('hidden');
+                }
+
+                this.dom.categoryContainer.innerHTML = '';
+                this.dom.subCategoryFilters.innerHTML = '';
+
+                // Botones Principales ESTRICTOS en la Sidebar
+                this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'all', label: 'Todos los canales', icon: 'ph-squares-four' }, false));
+                this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'bein', label: 'BeIN Sports', icon: 'ph-soccer-ball' }, false));
+                this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'spain', label: 'España', icon: 'ph-flag' }, false));
+                this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'deportes', label: 'Deportes', icon: 'ph-globe-hemisphere-west' }, false));
+                this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'arabic_channels', label: 'Arabic Channels', icon: 'ph-planet' }, false));
+                this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'favs', label: 'Favoritos', icon: 'ph-star' }, false));
+                
+                // Botones Secundarios (Subcategorías de Arabic Channels)
+                if (this.state.activeFilter === 'arabic_channels') {
+                    this.dom.subCategoryContainer.classList.remove('hidden');
+                    this.dom.subCategoryContainer.classList.add('flex');
+                    this.dom.subCategoryFilters.appendChild(this.createCategoryBtn({ id: 'all_sub', label: 'Todos', icon: 'ph-squares-four' }, true));
+                    
+                    this.state.subCategories.forEach(sub => {
+                        this.dom.subCategoryFilters.appendChild(this.createCategoryBtn(sub, true));
+                    });
+                } else {
+                    this.dom.subCategoryContainer.classList.add('hidden');
+                    this.dom.subCategoryContainer.classList.remove('flex');
+                }
+                
+                this.updateContextualRefresh();
+            }
+
+            createCategoryBtn(cat, isSub) {
+                const btn = document.createElement('button');
+                const isActive = isSub ? (this.state.activeSubFilter === cat.id) : (this.state.activeFilter === cat.id);
+                
+                // Si es Categoría Principal (Sidebar full width)
+                if (!isSub) {
+                    btn.className = `w-full text-left p-4 rounded-xl flex items-center justify-between group transition-all duration-200 border bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600`;
+                    btn.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-slate-900/80 flex items-center justify-center text-xl text-brand-400 group-hover:scale-110 transition-transform shadow-inner border border-slate-700">
+                                <i class="ph-fill ${cat.icon}"></i>
+                            </div>
+                            <span class="font-bold text-white text-base tracking-wide">${cat.label}</span>
+                        </div>
+                        <i class="ph-bold ph-caret-right text-slate-500 group-hover:text-brand-400 group-hover:translate-x-1 transition-all"></i>
+                    `;
+                } 
+                // Si es Subcategoría (Píldoras)
+                else {
+                    const activeClasses = 'bg-brand-500 text-white border-brand-500 shadow-md shadow-brand-500/20';
+                    const inactiveClasses = 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white';
+                    btn.className = `px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors border ${isActive ? activeClasses : inactiveClasses}`;
+                    btn.innerHTML = `<i class="ph-fill ${cat.icon} text-sm"></i> ${cat.label}`;
+                }
+                
+                btn.addEventListener('click', () => {
+                    if (isSub) {
+                        this.state.activeSubFilter = cat.id;
+                    } else {
+                        this.state.activeFilter = cat.id;
+                        this.state.activeSubFilter = 'all_sub';
+                    }
+                    this.renderCategories();
+                    this.renderChannels();
+                });
+                return btn;
+            }
+
+            // ─── LOGIC: LISTA DE CANALES ─────────────────────────────
+            getFilteredChannels() {
+                return this.state.channels.filter(c => {
+                    if (this.state.searchQuery && !c.nombre.toLowerCase().includes(this.state.searchQuery)) return false;
+                    
+                    if (this.state.activeFilter === 'all') return true;
+                    if (this.state.activeFilter === 'favs') return c.favorito === true;
+                    
+                    const catName = c.categoria || 'Otros';
+                    const name = (c.nombre || '').toLowerCase();
+                    const id = (c.id || '').toLowerCase();
+                    
+                    if (this.state.activeFilter === 'spain') {
+                        return catName === 'España' || id.startsWith('tdt_') || name.includes('la 1') || name.includes('antena 3');
+                    }
+                    if (this.state.activeFilter === 'deportes') {
+                        return catName === 'Deportes' || id.startsWith('ibero_');
+                    }
+                    if (this.state.activeFilter === 'bein') {
+                        return catName === 'BeIN Sports' || name.includes('bein');
+                    }
+                    
+                    if (this.state.activeFilter === 'arabic_channels') {
+                        if (!catName.startsWith('Árabe - ') && !id.startsWith('arabic_')) return false;
+                        if (this.state.activeSubFilter === 'all_sub') return true;
+                        
+                        const subName = catName.replace('Árabe - ', '');
+                        const subId = `arabic_sub_${subName.toLowerCase().replace(/\s+/g, '_')}`;
+                        return subId === this.state.activeSubFilter;
+                    }
+                    
+                    return false;
+                });
+            }
+
+            renderChannels() {
+                const list = this.getFilteredChannels();
+                this.dom.count.innerText = list.length;
+                this.dom.list.innerHTML = '';
+
+                if (list.length === 0) {
+                    this.dom.list.innerHTML = `
+                        <div class="text-center py-16 px-4 text-slate-500 flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                                <i class="ph-fill ph-ghost text-3xl opacity-50"></i>
+                            </div>
+                            <h3 class="text-white font-medium mb-1">Sin Resultados</h3>
+                            <p class="text-sm">No hay canales que coincidan con el filtro.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Fragmento para optimizar renderizado de DOM masivo
+                const fragment = document.createDocumentFragment();
+
+                list.forEach(channel => {
+                    const isActive = this.state.activeChannelId === channel.id;
+                    const isOnline = channel.estado !== 'offline';
+                    
+                    // Inicial de reserva por si falla el logo
+                    const initial = channel.nombre.charAt(0).toUpperCase();
+                    
+                    // OPTIMIZACIÓN: loading="lazy" inyectado en el img tag
+                    const logoHtml = channel.logo 
+                        ? `<img src="${channel.logo}" loading="lazy" alt="${channel.nombre}" class="w-full h-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-110" onerror="this.outerHTML='<div class=\\'w-full h-full flex items-center justify-center font-bold text-2xl text-slate-500 bg-slate-900\\'>${initial}</div>'">`
+                        : `<div class="w-full h-full flex items-center justify-center font-bold text-2xl text-slate-500 bg-slate-900">${initial}</div>`;
+
+                    const el = document.createElement('div');
+                    el.className = `channel-card relative flex items-center gap-3 p-2.5 rounded-2xl cursor-pointer border ${
+                        isActive 
+                        ? 'active border-brand-500 bg-gradient-to-r from-brand-500/10 to-transparent' 
+                        : 'border-transparent bg-slate-800/30 hover:bg-slate-800/80 hover:border-slate-700/50'
+                    } group`;
+                    
+                    el.innerHTML = `
+                        <div class="w-14 h-14 bg-dark-950 rounded-xl border border-slate-700/30 overflow-hidden shrink-0 shadow-md relative">
+                            ${logoHtml}
+                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                <i class="ph-fill ${isActive ? 'ph-pause-circle' : 'ph-play-circle'} text-2xl text-white drop-shadow-md"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0 pr-10">
+                            <h3 class="font-bold text-[15px] truncate ${isActive ? 'text-white' : 'text-slate-200 group-hover:text-brand-300 transition-colors'}">${channel.nombre}</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="flex items-center gap-1 text-[11px] font-medium tracking-wide ${isOnline ? 'text-emerald-400' : 'text-rose-400'}">
+                                    <span class="w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}"></span>
+                                    ${isOnline ? 'Online' : 'Offline'}
+                                </span>
+                                ${channel.tipo === 'hls' ? `<span class="text-[9px] font-bold uppercase tracking-wider bg-slate-700/80 text-slate-300 px-1.5 py-0.5 rounded border border-slate-600">HLS</span>` : ''}
+                            </div>
+                        </div>
+                        ${isActive ? `
+                        <div class="absolute right-4 flex items-center justify-center text-brand-400 text-xs font-bold">
+                            <div class="flex items-end gap-[3px] h-3.5">
+                                <div class="w-1 bg-brand-400 rounded-t-sm animate-[bounce_1s_infinite] h-2"></div>
+                                <div class="w-1 bg-brand-400 rounded-t-sm animate-[bounce_1s_infinite_0.2s] h-3.5"></div>
+                                <div class="w-1 bg-brand-400 rounded-t-sm animate-[bounce_1s_infinite_0.4s] h-1.5"></div>
+                            </div>
+                        </div>
+                        ` : ''}
+                    `;
+
+                    el.addEventListener('click', () => this.playChannel(channel));
+                    fragment.appendChild(el);
+                });
+
+                this.dom.list.appendChild(fragment);
+            }
+
+            // ─── LOGIC: REPRODUCTOR ──────────────────────────────────
+            async playChannel(channel) {
+                this.state.activeChannelId = channel.id;
+                this.renderChannels();
+                
+                this.dom.placeholder.style.display = 'none';
+                this.dom.title.innerText = channel.nombre;
+
+                // --- RESET COMPLETO: destruir HLS y matar iframe activo ---
+                if (this.hls) {
+                    this.hls.destroy();
+                    this.hls = null;
+                }
+                // Silenciar y detener video anterior
+                this.dom.video.pause();
+                this.dom.video.muted = true;
+                this.dom.video.removeAttribute('src');
+                this.dom.video.load();
+                // CLAVE: vaciar iframe para que el canal anterior NO siga sonando de fondo
+                this.dom.iframe.src = 'about:blank';
+                this.dom.iframe.classList.add('hidden');
+                this.dom.video.classList.add('hidden');
+
+                let finalUrl = channel.url;
+
+                // Resolución dinámica para canales no-árabes si aplica
+                if (!channel.id.startsWith('arabic_')) {
+                    try {
+                        const res = await fetch(`/api/play/${encodeURIComponent(channel.id)}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            finalUrl = data.proxyUrl ? data.proxyUrl : (data.streamUrl || finalUrl);
+                        }
+                    } catch(e) { console.warn('Usando URL directa.'); }
+                }
+
+                // Detectar si la URL es un stream .m3u8 / playlist
+                const isDirectM3u8 = finalUrl && (
+                    finalUrl.includes('.m3u8') ||
+                    finalUrl.includes('manifest') ||
+                    finalUrl.includes('.ts') ||
+                    finalUrl.includes('playlist')
+                );
+                const esIframe = channel.tipo === 'iframe' && !isDirectM3u8;
+
+                // Si es HLS y es una URL remota externa, forzar pasaje por /proxy-video
+                // Esto evita que m3u8 Sniffer o extensiones de navegador abran ventanas externas y soluciona CORS
+                if (!esIframe && finalUrl && (finalUrl.startsWith('http://') || finalUrl.startsWith('https://')) && !finalUrl.includes('/proxy-video')) {
+                    finalUrl = `/proxy-video?url=${encodeURIComponent(finalUrl)}`;
+                }
+
+                // Renderizado
+                if (esIframe) {
+                    // Canal de iframe (Dailymotion, Youtube, etc.)
+                    this.dom.video.classList.add('hidden');
+                    this.dom.iframe.classList.remove('hidden');
+                    this.dom.iframe.src = finalUrl;
+                } else {
+                    // Canal HLS nativo — Hls.js o fallback HTML5
+                    this.dom.iframe.src = 'about:blank'; // doble seguro para matar audio/video previo
+                    this.dom.video.muted = false;
+                    this.dom.video.classList.remove('hidden');
+
+
+                    if (Hls.isSupported()) {
+                        this.hls = new Hls({
+                            maxBufferLength: 30,
+                            maxMaxBufferLength: 60,
+                            enableWorker: true,
+                            liveSyncDurationCount: 3
+                        });
+                        this.hls.loadSource(finalUrl);
+                        this.hls.attachMedia(this.dom.video);
+                        this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                            this.dom.video.play().catch(e => console.error('Autoplay bloqueado:', e));
+                        });
+                        this.hls.on(Hls.Events.ERROR, (event, data) => {
+                            if (data.fatal) {
+                                switch (data.type) {
+                                    case Hls.ErrorTypes.NETWORK_ERROR:
+                                        this.hls.startLoad();
+                                        break;
+                                    case Hls.ErrorTypes.MEDIA_ERROR:
+                                        this.hls.recoverMediaError();
+                                        break;
+                                    default:
+                                        this.hls.destroy();
+                                        this.hls = null;
+                                        break;
+                                }
+                            }
+                        });
+                    } else if (this.dom.video.canPlayType('application/vnd.apple.mpegurl')) {
+                        // Fallback Safari/iOS
+                        this.dom.video.src = finalUrl;
+                        this.dom.video.play().catch(() => {});
+                    }
+                }
+            }
+
+            // ─── TOAST NOTIFICACIÓN ─────────────────────────────────
+            showToast(msg, type = 'green') {
+                const colors = {
+                    green: 'bg-emerald-600 border-emerald-500 text-white',
+                    red: 'bg-red-700 border-red-600 text-white',
+                    blue: 'bg-brand-600 border-brand-500 text-white'
+                };
+                const toast = document.createElement('div');
+                toast.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl border shadow-2xl text-sm font-semibold flex items-center gap-2 transition-all duration-300 ${colors[type] || colors.green}`;
+                toast.style.transform = 'translateY(20px)';
+                toast.style.opacity = '0';
+                toast.innerText = msg;
+                document.body.appendChild(toast);
+                requestAnimationFrame(() => {
+                    toast.style.transform = 'translateY(0)';
+                    toast.style.opacity = '1';
+                });
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(10px)';
+                    setTimeout(() => toast.remove(), 400);
+                }, 4000);
+            }
+
+            // ─── DESARROLLO ──────────────────────────────────────────
+            loadMockData() {
+                console.log("Cargando Mock Data para desarrollo offline");
+                this.state.channels = [
+                    { id: 'bein_1', nombre: 'BeIN Sports 1', tipo: 'hls', estado: 'online', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', logo: 'https://assets.bein.com/mena/sites/4/2015/06/beIN_SPORTS1_DIGITAL_Mono.png' },
+                    { id: 'bein_2', nombre: 'BeIN Sports 2', tipo: 'hls', estado: 'online', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', logo: 'https://assets.bein.com/mena/sites/4/2021/02/beIN_SPORTS2_DIGITAL_Mono.png' },
+                    { id: 'tdt_1', nombre: 'La 1 HD', tipo: 'hls', estado: 'online', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/La_1_TVE_2008.svg/1200px-La_1_TVE_2008.svg.png' },
+                    { id: 'tdt_2', nombre: 'Antena 3', tipo: 'hls', estado: 'online', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Antena_3_2017.svg/1200px-Antena_3_2017.svg.png' },
+                    { id: 'ibero_1', nombre: 'DSports', tipo: 'hls', estado: 'online', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/DSports_logo.svg/1200px-DSports_logo.svg.png' }
+                ];
+                this.updateStatus('Desarrollo Offline', 'blue', 'ph-code');
+                this.extractDynamicCategories();
+                this.renderCategories();
+                this.renderChannels();
+            }
+        }
+
+        // Iniciar la Plataforma
+        const app = new KovalskyTVApp();
+    </script>
+</body>
+</html>

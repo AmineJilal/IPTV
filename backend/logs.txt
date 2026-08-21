@@ -1,0 +1,7 @@
+
+🟢 Servidor IPTV corriendo en http://localhost:3000
+📡 Acceso en red local: http://192.168.0.43:3000
+
+[Auto-Updater Arabic] Iniciando sincronización en bloque de canales Árabes...
+[Auto-Updater Arabic] Resolviendo streams de 358 canales en lotes de 5...
+[Auto-Updater Arabic] ¡Sincronización Completa! 352 canales resueltos y guardados.

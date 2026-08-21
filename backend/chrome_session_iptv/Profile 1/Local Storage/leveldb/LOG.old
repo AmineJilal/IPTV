@@ -1,0 +1,5 @@
+2026/08/12-03:14:13.380 c3c2 Creating DB /home/amin/Escritorio/IPTV LOCAL/chrome_session_iptv/Profile 1/Local Storage/leveldb since it was missing.
+2026/08/12-03:14:13.386 c3c2 Reusing MANIFEST /home/amin/Escritorio/IPTV LOCAL/chrome_session_iptv/Profile 1/Local Storage/leveldb/MANIFEST-000001
+2026/08/12-03:15:21.104 c3c1 Level-0 table #5: started
+2026/08/12-03:15:21.109 c3c1 Level-0 table #5: 51935 bytes OK
+2026/08/12-03:15:21.111 c3c1 Delete type=0 #3
