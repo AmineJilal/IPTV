@@ -106,7 +106,6 @@
             <!-- Contenedor del Vídeo -->
             <div id="video-container" class="flex-1 w-full h-full relative cursor-pointer overflow-hidden bg-dark-950">
                 <video id="video-player" class="w-full h-full object-contain bg-black" controls playsinline></video>
-                <iframe id="iframe-player" class="w-full h-full hidden border-0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
                 
                 <!-- Placeholder -->
                 <div id="player-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-dark-900 to-dark-950 z-0">
@@ -196,7 +195,6 @@
                     btnBack: document.getElementById('btn-back-categories'),
                     videoContainer: document.getElementById('video-container'),
                     video: document.getElementById('video-player'),
-                    iframe: document.getElementById('iframe-player'),
                     placeholder: document.getElementById('player-placeholder'),
                     title: document.getElementById('now-playing-title'),
                     statusBadge: document.getElementById('connection-status'),
@@ -588,9 +586,13 @@
                 this.dom.video.muted = true;
                 this.dom.video.removeAttribute('src');
                 this.dom.video.load();
-                // CLAVE: vaciar iframe para que el canal anterior NO siga sonando de fondo
-                this.dom.iframe.src = 'about:blank';
-                this.dom.iframe.classList.add('hidden');
+                
+                // CLAVE: vaciar iframe y eliminarlo completamente del DOM para evitar fugas de memoria
+                if (this.dom.iframe) {
+                    this.dom.iframe.remove();
+                    this.dom.iframe = null;
+                }
+                
                 this.dom.video.classList.add('hidden');
 
                 let finalUrl = channel.url;
@@ -623,11 +625,16 @@
                 if (esIframe) {
                     // Canal de iframe (Dailymotion, Youtube, etc.)
                     this.dom.video.classList.add('hidden');
-                    this.dom.iframe.classList.remove('hidden');
+                    
+                    this.dom.iframe = document.createElement('iframe');
+                    this.dom.iframe.className = 'absolute top-0 left-0 w-full h-full rounded-2xl bg-black border border-white/10 z-10';
+                    this.dom.iframe.setAttribute('allowfullscreen', 'true');
+                    this.dom.iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
                     this.dom.iframe.src = finalUrl;
+                    
+                    this.dom.video.parentNode.appendChild(this.dom.iframe);
                 } else {
                     // Canal HLS nativo — Hls.js o fallback HTML5
-                    this.dom.iframe.src = 'about:blank'; // doble seguro para matar audio/video previo
                     this.dom.video.muted = false;
                     this.dom.video.classList.remove('hidden');
 
