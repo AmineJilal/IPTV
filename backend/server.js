@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express    = require('express');
 const http       = require('http');
 const { Server } = require('socket.io');
@@ -210,29 +211,38 @@ const db = createClient({
 });
 
 async function initDb() {
-    await db.execute(`
-        CREATE TABLE IF NOT EXISTS channel_cache (
-            id TEXT PRIMARY KEY,
-            nombre TEXT,
-            categoria TEXT,
-            logo TEXT,
-            stream_url TEXT,
-            tipo TEXT,
-            headers TEXT,
-            estado TEXT,
-            favorito INTEGER DEFAULT 0,
-            updated_at INTEGER
-        )
-    `);
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS channel_cache (
+                id TEXT PRIMARY KEY,
+                nombre TEXT,
+                categoria TEXT,
+                logo TEXT,
+                stream_url TEXT,
+                tipo TEXT,
+                headers TEXT,
+                estado TEXT,
+                favorito INTEGER DEFAULT 0,
+                updated_at INTEGER
+            )
+        `);
+    } catch (e) {
+        console.error("🔥 Error crítico inicializando Turso DB. Revisa tus credenciales (TURSO_DATABASE_URL y TURSO_AUTH_TOKEN).", e.message);
+    }
 }
 initDb();
 
 async function obtenerStreamsDb() {
-    const res = await db.execute("SELECT * FROM channel_cache");
-    return res.rows.map(r => ({
-        ...r,
-        favorito: r.favorito === 1
-    }));
+    try {
+        const res = await db.execute("SELECT * FROM channel_cache");
+        return res.rows.map(r => ({
+            ...r,
+            favorito: r.favorito === 1
+        }));
+    } catch (e) {
+        console.error("Error al obtener streams de Turso:", e.message);
+        return [];
+    }
 }
 
 function emitStreamsUpdate(streams) {

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",
+    "dotenv": "^17.4.2",
     "express": "^4.22.2",
     "http-proxy-middleware": "^4.2.0",
     "puppeteer": "^22.15.0",
