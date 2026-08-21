@@ -455,12 +455,12 @@ app.get('/api/play/:channelId', async (req, res) => {
         let stream = result.rows[0];
 
         if (!stream) return res.status(404).json({ error: 'Canal no encontrado en BD.' });
-        if (stream.tipo === 'iframe') return res.status(400).json({ error: 'Canal iframe, no HLS.' });
 
         const ahora = Date.now();
         const ttl = 3600000;
         let finalStreamUrl = stream.stream_url;
         let headersList = stream.headers;
+        let finalTipo = stream.tipo || 'hls';
 
         if (!finalStreamUrl || ahora - (stream.updated_at || 0) > ttl) {
             console.log(`[Cache-Aside] Resolviendo on-demand para: ${stream.nombre} (${id})`);
@@ -497,6 +497,10 @@ app.get('/api/play/:channelId', async (req, res) => {
                     if (r.ok) {
                         const d = await r.json();
                         nuevaUrl = d.stream_url;
+                        if (!nuevaUrl && d.embed_url) {
+                            nuevaUrl = d.embed_url;
+                            finalTipo = 'iframe';
+                        }
                         if (d.headers) nuevosHeaders = JSON.stringify(d.headers);
                     }
                 }
@@ -505,8 +509,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                     finalStreamUrl = nuevaUrl;
                     headersList = nuevosHeaders || '';
                     await db.execute(
-                        "UPDATE channel_cache SET stream_url = ?, headers = ?, updated_at = ? WHERE id = ?",
-                        [finalStreamUrl, headersList, ahora, id]
+                        "UPDATE channel_cache SET stream_url = ?, headers = ?, updated_at = ?, tipo = ? WHERE id = ?",
+                        [finalStreamUrl, headersList, ahora, finalTipo, id]
                     );
                 }
             } catch (fetchErr) {
@@ -536,12 +540,19 @@ app.get('/api/play/:channelId', async (req, res) => {
             }
         }
 
-        const proxyUrl = 'http://' + (req.headers.host || '127.0.0.1:' + (process.env.PORT || 3000)) + '/proxy-video?url=' + encodeURIComponent(finalStreamUrl);
+        let finalStreamUrlWithHeaders = finalStreamUrl;
+        if (ref) finalStreamUrlWithHeaders += `|Referer=${ref}`;
+        if (ori) finalStreamUrlWithHeaders += `|Origin=${ori}`;
+        if (ua && ua !== 'Mozilla/5.0') finalStreamUrlWithHeaders += `|User-Agent=${ua}`;
+
+        const isDirect = finalTipo === 'iframe';
+        const proxyUrl = isDirect ? null : ('http://' + (req.headers.host || '127.0.0.1:' + (process.env.PORT || 3000)) + '/proxy-video?url=' + encodeURIComponent(finalStreamUrlWithHeaders));
 
         return res.json({
             success: true,
             streamUrl: finalStreamUrl,
             proxyUrl: proxyUrl,
+            tipo: finalTipo,
             referer: ref,
             origin: ori,
             userAgent: ua,

@@ -595,16 +595,14 @@
 
                 let finalUrl = channel.url;
 
-                // Resolución dinámica para canales no-árabes si aplica
-                if (!channel.id.startsWith('arabic_')) {
-                    try {
-                        const res = await fetch(`/api/play/${encodeURIComponent(channel.id)}`);
-                        if (res.ok) {
-                            const data = await res.json();
-                            finalUrl = data.proxyUrl ? data.proxyUrl : (data.streamUrl || finalUrl);
-                        }
-                    } catch(e) { console.warn('Usando URL directa.'); }
-                }
+                try {
+                    const res = await fetch(`/api/play/${encodeURIComponent(channel.id)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        finalUrl = data.proxyUrl ? data.proxyUrl : (data.streamUrl || finalUrl);
+                        if (data.tipo) channel.tipo = data.tipo;
+                    }
+                } catch(e) { console.warn('Usando URL directa o caché.'); }
 
                 // Detectar si la URL es un stream .m3u8 / playlist
                 const isDirectM3u8 = finalUrl && (
