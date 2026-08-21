@@ -348,7 +348,13 @@ app.get('/proxy-video', (req, res) => {
         return res.status(400).send('Parámetro ?url= requerido.');
     }
 
-    const { cleanUrl, referer, origin: originFromUrl, userAgent } = parseStreamUrl(rawTargetUrl);
+    // Adaptación para Cloud (Koyeb/Render): Forzar IPs locales/antiguas al localhost del contenedor
+    let adaptedTarget = rawTargetUrl;
+    if (adaptedTarget.includes('192.168.') || adaptedTarget.includes('localhost')) {
+        adaptedTarget = adaptedTarget.replace(/https?:\/\/(192\.168\.\d+\.\d+|localhost)/, 'http://127.0.0.1');
+    }
+
+    const { cleanUrl, referer, origin: originFromUrl, userAgent } = parseStreamUrl(adaptedTarget);
     if (!cleanUrl || !cleanUrl.startsWith('http')) {
         return res.status(400).send('URL inválida.');
     }
@@ -648,10 +654,15 @@ app.get('/api/play-repair/:channelId', async (req, res) => {
         ].filter(Boolean).join('|');
         const proxyUrl = buildProxyUrlFromRequest(req, metadataUrl);
 
+        let finalStreamUrl = cleanUrl;
+        if (cleanUrl.includes('127.0.0.1') || cleanUrl.includes('localhost') || cleanUrl.includes('192.168.')) {
+            finalStreamUrl = proxyUrl;
+        }
+
         console.log(`[Auto-Reparación] ✅ PC retornó URL. Devolviendo JSON a Flutter.`);
         return res.json({
             success: true,
-            streamUrl: cleanUrl,
+            streamUrl: finalStreamUrl,
             proxyUrl,
             referer: referer || null,
             origin: origin || null,
@@ -1433,10 +1444,17 @@ app.get('/api/play/:channelId', async (req, res) => {
             try { origin = new URL(referer).origin; } catch { origin = null; }
         }
 
+        const finalProxyUrl = buildProxyUrlFromRequest(req, stream.url);
+        let finalStreamUrl = cleanUrl;
+        
+        if (cleanUrl.includes('127.0.0.1') || cleanUrl.includes('localhost') || cleanUrl.includes('192.168.')) {
+            finalStreamUrl = finalProxyUrl;
+        }
+
         return res.json({
             success: true,
-            streamUrl: cleanUrl,
-            proxyUrl: buildProxyUrlFromRequest(req, stream.url),
+            streamUrl: finalStreamUrl,
+            proxyUrl: finalProxyUrl,
             referer: referer || null,
             origin: origin || null,
             userAgent: userAgent || UA,
