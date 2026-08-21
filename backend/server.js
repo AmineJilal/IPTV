@@ -425,11 +425,11 @@ app.get('/proxy-video', (req, res) => {
                     const trimmed = line.trim();
                     if (trimmed && !trimmed.startsWith('#')) {
                         const absoluteUrl = trimmed.startsWith('http') ? trimmed : new URL(trimmed, cleanUrl).href;
-                        return `http://${req.headers.host}/proxy-video?url=${encodeURIComponent(withMetadata(absoluteUrl))}`;
+                        return buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
                     } else if (trimmed.startsWith('#EXT-X-STREAM-INF:') || trimmed.startsWith('#EXT-X-MEDIA:')) {
                         return line.replace(/URI="([^"]+)"/g, (match, p1) => {
                             const absoluteUri = p1.startsWith('http') ? p1 : new URL(p1, cleanUrl).href;
-                            return `URI="http://${req.headers.host}/proxy-video?url=${encodeURIComponent(withMetadata(absoluteUri))}"`;
+                            return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
                         });
                     }
                     return line;
