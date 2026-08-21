@@ -329,13 +329,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnRefreshBein) {
         btnRefreshBein.addEventListener('click', async () => {
             btnRefreshBein.disabled = true;
-            btnRefreshBein.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Actualizando...';
-            showToast('Actualizando enlaces seguros...', 'info');
+            btnRefreshBein.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Sincronizando...';
+            showToast('Sincronizando metadatos (Cache-Aside)...', 'info');
             try {
-                const res = await fetch('/api/refresh-bein');
+                const res = await fetch('/api/sync-lists');
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message, 'success');
+                    showToast(`Sincronizados ${data.count} canales`, 'success');
                 } else {
                     showToast(data.error || 'Error actualizando', 'error');
                 }
@@ -350,13 +350,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnRefreshSpain) {
         btnRefreshSpain.addEventListener('click', async () => {
             btnRefreshSpain.disabled = true;
-            btnRefreshSpain.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Cargando...';
-            showToast('Sincronizando canales de España...', 'info');
+            btnRefreshSpain.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Sincronizando...';
+            showToast('Sincronizando metadatos (Cache-Aside)...', 'info');
             try {
-                const res = await fetch('/api/refresh-spain');
+                const res = await fetch('/api/sync-lists');
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message, 'success');
+                    showToast(`Sincronizados ${data.count} canales`, 'success');
                 } else {
                     showToast(data.error || 'Error cargando canales', 'error');
                 }
@@ -371,13 +371,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnRefreshIbero) {
         btnRefreshIbero.addEventListener('click', async () => {
             btnRefreshIbero.disabled = true;
-            btnRefreshIbero.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Cargando...';
-            showToast('Sincronizando canales deportivos iberoamericanos...', 'info');
+            btnRefreshIbero.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Sincronizando...';
+            showToast('Sincronizando metadatos (Cache-Aside)...', 'info');
             try {
-                const res = await fetch('/api/refresh-ibero');
+                const res = await fetch('/api/sync-lists');
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message, 'success');
+                    showToast(`Sincronizados ${data.count} canales`, 'success');
                 } else {
                     showToast(data.error || 'Error cargando canales', 'error');
                 }
