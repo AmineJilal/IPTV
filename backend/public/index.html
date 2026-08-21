@@ -244,12 +244,8 @@
                     this.dom.btnRefreshIcon.classList.add('animate-spin');
                     this.dom.btnRefreshText.innerText = 'Cargando...';
                     
-                    let endpoint = null;
-                    if (this.state.activeFilter === 'spain' || this.state.activeFilter === 'españa') endpoint = '/api/refresh-spain';
-                    else if (this.state.activeFilter === 'deportes' || this.state.activeFilter === 'ibero') endpoint = '/api/refresh-ibero';
-                    else if (this.state.activeFilter === 'arabic_channels') endpoint = '/api/refresh-arabic';
-                    else if (this.state.activeFilter === 'bein') endpoint = '/api/refresh-bein';
-                    else {
+                    let endpoint = '/api/sync-lists';
+                    if (this.state.activeFilter === null || this.state.activeFilter === 'all' || this.state.activeFilter === 'favs') {
                         if (this.socket && this.socket.connected) {
                             this.socket.emit('solicitar_streams');
                             this.updateStatus('Refrescando...', 'blue', 'ph-arrows-clockwise animate-spin');
@@ -263,7 +259,7 @@
                         const res = await fetch(endpoint);
                         const data = await res.json();
                         // Mostrar feedback del resultado
-                        const count = data.actualizados || data.canales_actualizados || 0;
+                        const count = data.count || data.actualizados || data.canales_actualizados || 0;
                         const ok = data.success !== false;
                         this.showToast(
                             ok
