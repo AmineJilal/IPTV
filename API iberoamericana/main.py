@@ -30,7 +30,7 @@ app.add_middleware(
 app.include_router(proxy_router)
 app.include_router(m3u_router)
 
-@app.get("/", summary="Root Endpoint")
+@app.api_route("/", methods=["GET", "HEAD"], summary="Root Endpoint")
 async def home_dashboard():
     return {
         "status": "online",

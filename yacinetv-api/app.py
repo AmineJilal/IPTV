@@ -25,6 +25,6 @@ app.include_router(routes.router)
 
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def index():
     return {"message": "Hello World"}

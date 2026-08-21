@@ -62,7 +62,7 @@ async def fetch_tdt_data():
         detail={"error": "Gateway Timeout", "message": "No se pudo obtener la lista de TDT Spain."}
     )
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def read_root():
     return "Hola Mundo"
 

@@ -35,9 +35,9 @@ CANALES_TXT_PATH = os.path.join(os.path.dirname(__file__), "canales.txt")
 
 @app.on_event("startup")
 def startup_event():
-    print("🚀 Iniciando servidor Venolie API en 0.0.0.0:9090...")
+    print("🚀 Iniciando servidor Venolie API en 0.0.0.0:9080...")
     if not os.path.exists(CANALES_TXT_PATH):
-        generate_txt(port=9090, filename=CANALES_TXT_PATH)
+        generate_txt(port=9080, filename=CANALES_TXT_PATH)
 
 @app.get("/api/health", tags=["System"])
 def health_check():
@@ -45,7 +45,7 @@ def health_check():
         "status": "online",
         "service": "Venolie IPTV API",
         "host": "0.0.0.0",
-        "port": 9090,
+        "port": 9080,
         "uptime_seconds": round(time.time() - START_TIME, 2),
         "version": "1.1.0"
     }
@@ -57,7 +57,7 @@ def get_canales_txt(refresh: bool = False):
     Devuelve el archivo comprimido/estructurado canales.txt con todos los países, categorías y URLs de streaming.
     """
     if refresh or not os.path.exists(CANALES_TXT_PATH):
-        generate_txt(port=9090, filename=CANALES_TXT_PATH)
+        generate_txt(port=9080, filename=CANALES_TXT_PATH)
     
     with open(CANALES_TXT_PATH, "r", encoding="utf-8") as f:
         content = f.read()
@@ -285,7 +285,7 @@ def generate_m3u_playlist(
     channels = get_all_channels(limit=1000, category=category, country=country)
     
     # Extract host header from request to support 0.0.0.0 and external IP
-    host_header = request.headers.get("host", "0.0.0.0:9090")
+    host_header = request.headers.get("host", "0.0.0.0:9080")
     scheme = request.url.scheme or "http"
     base_url = f"{scheme}://{host_header}"
 
@@ -305,17 +305,17 @@ def generate_m3u_playlist(
 
     return "\n".join(lines)
 
-@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse, include_in_schema=False)
 def index_page():
     """
-    Dashboard Web y Reproductor HLS.js Integrado para Venolie API (Puerto 9090 / 0.0.0.0)
+    Dashboard Web y Reproductor HLS.js Integrado para Venolie API (Puerto 9080 / 0.0.0.0)
     """
     return """<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venolie TV - Live HLS IPTV API & Player (0.0.0.0:9090)</title>
+    <title>Venolie TV - Live HLS IPTV API & Player (0.0.0.0:9080)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -668,7 +668,7 @@ def index_page():
     <header>
         <a href="/" class="logo">
             <span>📺</span> Venolie IPTV API
-            <span class="logo-badge">0.0.0.0:9090</span>
+            <span class="logo-badge">0.0.0.0:9080</span>
         </a>
         <div class="nav-links">
             <a href="/canales.txt" target="_blank" class="btn btn-outline">📄 canales.txt</a>
@@ -755,7 +755,7 @@ def index_page():
     </div>
 
     <footer>
-        Venolie TV Open Source IPTV Resolution API • Escuchando en 0.0.0.0:9090
+        Venolie TV Open Source IPTV Resolution API • Escuchando en 0.0.0.0:9080
     </footer>
 
     <script>
@@ -934,4 +934,4 @@ def index_page():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=9090, reload=False)
+    uvicorn.run("main:app", host="0.0.0.0", port=9080, reload=False)
