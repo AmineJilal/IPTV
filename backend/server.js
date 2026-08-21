@@ -706,6 +706,10 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
 
 // Eliminado proxy interno HLS para liberar Termux (Zero-Latency)
 
+io.on('connection', async (socket) => {
+    const clientIp = socket.handshake.address;
+    console.log(`[+] Cliente conectado: ${socket.id} (IP: ${clientIp})`);
+
     socket.on('solicitar_streams', async () => {
         socket.emit('actualizar_streams', await obtenerStreamsDb());
     });
@@ -713,7 +717,6 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
     socket.emit('actualizar_streams', await obtenerStreamsDb());
 
     // ── Añadir stream .m3u8 manualmente ─────
-    
     socket.on('nuevo_stream', async ({ nombre, url }) => {
         if (!nombre || !url) return;
         try {
@@ -727,7 +730,6 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
     });
 
     // ── Borrar Todos los Canales ───────────────────────────────────────
-    
     socket.on('borrar_todos', async () => {
         try {
             await db.execute("DELETE FROM channel_cache");
@@ -736,7 +738,6 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
     });
 
     // ── Marcar / Desmarcar Favorito ──────────────────────────────────
-    
     socket.on('toggle_favorito', async (id) => {
         try {
             const str = await db.execute("SELECT favorito FROM channel_cache WHERE id = ?", [id]);
@@ -753,3 +754,37 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
     });
 });
 
+// ─────────────────────────────────────────────
+// Arranque
+// ── Inicialización de Directorios y Servidor ──
+
+async function initDirectories() {
+    const directorios = [path.join(__dirname, 'public')];
+    for (const dir of directorios) {
+        try { await fs.mkdir(dir, { recursive: true }); } catch (e) {}
+    }
+}
+
+async function startServer() {
+    await initDirectories();
+    const PORT = process.env.PORT || 3000;
+    
+    server.on('error', (e) => {
+        if (e.code === 'EADDRINUSE') {
+            console.error(`⚠️ Puerto ${PORT} ocupado. Reintentando escuchar en 3 segundos...`);
+            setTimeout(() => {
+                server.close();
+                server.listen(PORT, '0.0.0.0');
+            }, 3000);
+        } else {
+            console.error('🔥 Error en el servidor HTTP:', e);
+        }
+    });
+
+    server.listen(PORT, '0.0.0.0', () => {
+        console.log(`\n🟢 Servidor IPTV corriendo en http://localhost:${PORT}`);
+        console.log(`📡 Acceso en red local: http://192.168.0.17:${PORT}\n`);
+    });
+}
+
+startServer();
