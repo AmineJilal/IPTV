@@ -468,26 +468,39 @@ app.get('/api/play/:channelId', async (req, res) => {
             console.log(`[Cache-Aside] Resolviendo on-demand para: ${stream.nombre} (${id})`);
             let nuevaUrl = null;
             let nuevosHeaders = null;
+            
+            // Redundancia de IPs para evitar ECONNREFUSED
+            const bases = ['http://127.0.0.1', 'http://localhost', 'http://192.168.0.17'];
+            let r = null;
 
             try {
                 if (id.startsWith('tdt_')) {
-                    const r = await fetch(`http://127.0.0.1:8080/api/stream/${id.replace('tdt_','')}`, { signal: AbortSignal.timeout(10000) });
-                    if (r.ok) {
+                    const pureId = id.replace('tdt_', '');
+                    for (const base of bases) {
+                        try { r = await fetch(`${base}:8080/api/stream/${pureId}`, { signal: AbortSignal.timeout(10000) }); if (r && r.ok) break; } catch(e){}
+                    }
+                    if (r && r.ok) {
                         const d = await r.json();
                         nuevaUrl = d.stream_url || d.m3u8_url || d.hls_url || d.mpd_url || d.url || null;
                         nuevosHeaders = d.headers || d.headers_required || null;
                         if (nuevosHeaders) nuevosHeaders = JSON.stringify(nuevosHeaders);
                     }
                 } else if (id.startsWith('ibero_')) {
-                    const r = await fetch(`http://127.0.0.1:8090/api/channels/${id}`, { signal: AbortSignal.timeout(10000) });
-                    if (r.ok) {
+                    const pureId = id.replace('ibero_', ''); // BUG CORREGIDO
+                    for (const base of bases) {
+                        try { r = await fetch(`${base}:8090/api/channels/${pureId}`, { signal: AbortSignal.timeout(10000) }); if (r && r.ok) break; } catch(e){}
+                    }
+                    if (r && r.ok) {
                         const d = await r.json();
                         nuevaUrl = d.stream_url;
                         if (d.headers) nuevosHeaders = JSON.stringify(d.headers);
                     }
                 } else if (id.startsWith('bein_')) {
-                    const r = await fetch(`http://127.0.0.1:8000/channel/${id.replace('bein_','')}`, { signal: AbortSignal.timeout(10000) });
-                    if (r.ok) {
+                    const pureId = id.replace('bein_', '');
+                    for (const base of bases) {
+                        try { r = await fetch(`${base}:8000/channel/${pureId}`, { signal: AbortSignal.timeout(10000) }); if (r && r.ok) break; } catch(e){}
+                    }
+                    if (r && r.ok) {
                         const d = await r.json();
                         if (d.data && d.data[0] && d.data[0].url) {
                             nuevaUrl = d.data[0].url;
@@ -495,8 +508,11 @@ app.get('/api/play/:channelId', async (req, res) => {
                         }
                     }
                 } else if (id.startsWith('arabic_')) {
-                    const r = await fetch(`http://127.0.0.1:9080/api/channels/${id.replace('arabic_','')}/stream`, { signal: AbortSignal.timeout(10000) });
-                    if (r.ok) {
+                    const pureId = id.replace('arabic_', '');
+                    for (const base of bases) {
+                        try { r = await fetch(`${base}:9080/api/channels/${pureId}/stream`, { signal: AbortSignal.timeout(10000) }); if (r && r.ok) break; } catch(e){}
+                    }
+                    if (r && r.ok) {
                         const d = await r.json();
                         nuevaUrl = d.stream_url;
                         if (!nuevaUrl && d.embed_url) {
@@ -514,9 +530,10 @@ app.get('/api/play/:channelId', async (req, res) => {
                         "UPDATE channel_cache SET stream_url = ?, headers = ?, updated_at = ?, tipo = ? WHERE id = ?",
                         [finalStreamUrl, headersList, ahora, finalTipo, id]
                     );
+                    console.log(`[Cache-Aside] ✅ Guardado en Turso: ${id}`);
                 }
             } catch (fetchErr) {
-                console.warn(`[Cache-Aside] Falló resolución para ${id}, usando fallback si existe`);
+                console.warn(`[Cache-Aside] ❌ Error de red con APIs:`, fetchErr.message);
             }
         }
 
@@ -736,43 +753,3 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
     });
 });
 
-// ─────────────────────────────────────────────
-// Arranque
-// ── Inicialización de Directorios y Servidor ──
-
-async function initDirectories() {
-    const directorios = [path.join(__dirname, 'public')];
-    for (const dir of directorios) {
-        try { await fs.mkdir(dir, { recursive: true }); } catch (e) {}
-    }
-}
-
-async function startServer() {
-    await initDirectories();
-    const PORT = process.env.PORT || 3000;
-    
-    server.on('error', (e) => {
-        if (e.code === 'EADDRINUSE') {
-            console.error(`⚠️ Puerto ${PORT} ocupado. Reintentando escuchar en 3 segundos...`);
-            setTimeout(() => {
-                server.close();
-                server.listen(PORT, '0.0.0.0');
-            }, 3000);
-        } else {
-            console.error('🔥 Error en el servidor HTTP:', e);
-        }
-    });
-
-    server.listen(PORT, '0.0.0.0', () => {
-        console.log(`\n🟢 Servidor IPTV corriendo en http://localhost:${PORT}`);
-        console.log(`📡 Acceso en red local: http://192.168.0.17:${PORT}\n`);
-    });
-}
-
-startServer();
-
-// ─────────────────────────────────────────────
-// API PLAY — GET /api/play/:channelId
-// Lee la URL guardada en streams.json (pre-resuelta en el refresco).
-// NO hace peticiones externas en tiempo real. Igual que Yacine e Ibero.
-// ─────────────────────────────────────────────

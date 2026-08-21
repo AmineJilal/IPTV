@@ -603,8 +603,15 @@
                         const data = await res.json();
                         finalUrl = data.proxyUrl ? data.proxyUrl : (data.streamUrl || finalUrl);
                         if (data.tipo) channel.tipo = data.tipo;
+                    } else {
+                        const err = await res.json();
+                        this.showToast('❌ ' + (err.error || 'Error al obtener el canal'), 'red');
+                        return; // Abortar reproducción
                     }
-                } catch(e) { console.warn('Usando URL directa o caché.'); }
+                } catch(e) { 
+                    this.showToast('❌ Backend inaccesible.', 'red');
+                    return; 
+                }
 
                 // Detectar si la URL es un stream .m3u8 / playlist
                 const isDirectM3u8 = finalUrl && (
