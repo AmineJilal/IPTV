@@ -209,8 +209,8 @@ def list_channels_resolved(
         with result_lock:
             result.append(entry)
 
-    # Máximo 20 workers paralelos para no saturar venolie.com
-    with ThreadPoolExecutor(max_workers=20) as executor:
+    # Memoria optimizada para Cloud (Koyeb): máximo 2 workers para evitar OOM (Out Of Memory)
+    with ThreadPoolExecutor(max_workers=2) as executor:
         futures = [executor.submit(resolve_one, ch) for ch in all_channels]
         for f in as_completed(futures):
             pass  # Los resultados se añaden dentro de resolve_one via lock

@@ -905,10 +905,7 @@ async function ensureApiFastAPI() {
                 if (res2.ok) return true;
             } catch (e2) {}
             if (attempt === 0) {
-                console.log('[Auto-Launcher] Levantando API TDT España (FastAPI) en puerto 8080...');
-                const { exec } = require('child_process');
-                const apiPath = path.join(__dirname, '../api-españa/run.sh');
-                exec(`bash "${apiPath}"`, { cwd: path.join(__dirname, '../api-españa') });
+                console.log('[Auto-Launcher] Esperando a que la API TDT España (FastAPI) responda...');
             }
             await new Promise(r => setTimeout(r, 800));
         }
