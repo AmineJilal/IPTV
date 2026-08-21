@@ -6,9 +6,6 @@ RUN apt-get update && apt-get install -y curl gnupg && \
     apt-get install -y nodejs && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Instalar PM2 globalmente
-RUN npm install -g pm2
-
 # Configurar el directorio de trabajo
 WORKDIR /app
 
@@ -24,9 +21,12 @@ RUN pip install --no-cache-dir -r "Arabic API/requirements.txt"
 RUN pip install --no-cache-dir -r "yacinetv-api/requirements.txt"
 RUN pip install --no-cache-dir -r "API iberoamericana/requirements.txt"
 
+# Dar permisos al script de inicio
+RUN chmod +x start.sh
+
 # Exponer el puerto del Backend Node.js
 # Koyeb enrutará automáticamente el tráfico al puerto 3000
 EXPOSE 3000
 
-# Iniciar todos los servicios usando PM2
-CMD ["pm2-runtime", "ecosystem.config.js"]
+# Iniciar todos los servicios usando el script ligero
+CMD ["./start.sh"]

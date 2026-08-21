@@ -952,7 +952,7 @@ async function runSpainRefresh() {
         if (!jsonList.canales) throw new Error('Formato de canales no válido');
         
         const oldStreamsStr = JSON.stringify(streams);
-        const batchSize = 5; // Procesar de 5 en 5 para dar suficiente margen de tiempo
+        const batchSize = 2; // Procesar de 2 en 2 para no sobrecargar el CPU de Koyeb
         const canales = jsonList.canales;
         const resolvedResults = new Array(canales.length);
 
@@ -1024,9 +1024,10 @@ async function runSpainRefresh() {
                         resolvedResults[index] = { canalTdt, streamData, finalUrl, tipo: 'hls' };
                     }
                 } catch (err) {
-                    console.error(`Error extrayendo TDT ID ${canalTdt.id}:`, err.message);
+                    console.log(`[Auto-Updater TDT] Falló actualización de ${canalTdt.name}`);
                 }
             }));
+            await new Promise(r => setTimeout(r, 1000)); // Pausa de 1s para no saturar Koyeb
         }
 
         // Construir la lista de canales TDT ordenados exactamente como vienen en la API
@@ -1126,7 +1127,7 @@ async function runIberoRefresh() {
         const nonIberoStreams = streams.filter(s => !s.id || !s.id.startsWith('ibero_'));
         
         const resolvedResults = new Array(canales.length);
-        const chunkSize = 5;
+        const chunkSize = 2; // Reducido para no colapsar el worker de Python
         
         for (let i = 0; i < canales.length; i += chunkSize) {
             const chunk = canales.slice(i, i + chunkSize);
@@ -1166,6 +1167,7 @@ async function runIberoRefresh() {
                     favorito: existingIberoMap.has(`ibero_${c.id}`) ? !!existingIberoMap.get(`ibero_${c.id}`).favorito : false
                 };
             }));
+            await new Promise(r => setTimeout(r, 1000)); // Respiro al CPU
         }
 
         const newIberoStreams = resolvedResults.filter(Boolean);
