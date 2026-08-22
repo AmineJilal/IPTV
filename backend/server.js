@@ -486,7 +486,7 @@ app.get('/api/play/:channelId', async (req, res) => {
             let nuevaUrl = null;
             let nuevosHeaders = null;
             
-            const bases = ['http://127.0.0.1', 'http://localhost', 'http://192.168.0.17'];
+            const bases = ['http://127.0.0.1', 'http://localhost', 'http://192.168.0.43'];
             let r = null;
             let fetchError = null;
 
