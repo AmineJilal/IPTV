@@ -713,7 +713,11 @@ app.get('/api/play/:channelId', async (req, res) => {
         }
 
         if (!finalStreamUrl) {
-            return res.status(422).json({ error: 'La API externa no devolvió enlace.' });
+            return res.status(422).json({ 
+                error: 'La API externa no devolvió enlace.', 
+                channelId: id,
+                fetchError: fetchError ? fetchError.message : 'Unknown'
+            });
         }
 
         let ref = '', ori = '', ua = 'Mozilla/5.0';
