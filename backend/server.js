@@ -848,13 +848,12 @@ app.all('/proxy-video', (req, res) => {
             proxyRes.on('end', () => {
                 if (totalSize > MAX_PLAYLIST_SIZE) return res.end(); // Abortado por seguridad
                 const body = Buffer.concat(chunks).toString('utf-8');
-                const isMediaPlaylist = body.includes('#EXTINF:');
                 
                 const rewritten = body.split('\n').map(line => {
                     const trimmed = line.trim();
                     if (trimmed && !trimmed.startsWith('#')) {
                         const absoluteUrl = trimmed.startsWith('http') ? trimmed : new URL(trimmed, cleanUrl).href;
-                        const isVideo = isMediaPlaylist || absoluteUrl.includes('.ts') || absoluteUrl.includes('.mp4') || absoluteUrl.includes('.m4s') || absoluteUrl.includes('.aac') || absoluteUrl.includes('.vtt') || absoluteUrl.includes('.webvtt') || absoluteUrl.includes('Fragments(');
+                        const isVideo = absoluteUrl.includes('.ts') || absoluteUrl.includes('.mp4') || absoluteUrl.includes('.m4s') || absoluteUrl.includes('.aac') || absoluteUrl.includes('.vtt') || absoluteUrl.includes('.webvtt') || absoluteUrl.includes('Fragments(');
                         return isVideo ? absoluteUrl : buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
                     } else if (trimmed.startsWith('#EXT-X-STREAM-INF:') || trimmed.startsWith('#EXT-X-MEDIA:')) {
                         return line.replace(/URI="([^"]+)"/g, (match, p1) => {
