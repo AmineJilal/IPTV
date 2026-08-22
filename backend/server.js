@@ -100,7 +100,9 @@ async function resolveNativeAtresmedia(slug) {
     const headers = {
         'Origin': 'https://www.atresplayer.com',
         'Referer': 'https://www.atresplayer.com/',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
     };
     const href = encodeURIComponent(`/directos/${slug}/`);
     const r1 = await safeFetch(`https://api.atresplayer.com/client/v1/url?href=${href}&usp=true&device=desktop&NODRM=true`, { headers }, 8000);
