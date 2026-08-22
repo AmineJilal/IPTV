@@ -504,10 +504,15 @@ app.get('/api/play/:channelId', async (req, res) => {
                     
                     if (rtveMap[pureId]) {
                         nuevaUrl = rtveMap[pureId];
+                        nuevosHeaders = JSON.stringify({
+                            "Origin": "https://www.rtve.es",
+                            "Referer": "https://www.rtve.es/",
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                        });
                     } else {
                         for (const base of bases) {
-                            // FIX: TDT Spain (Atresmedia/Mediaset) tarda hasta 90 segundos en resolver tokens. Timeout extendido.
-                            try { r = await safeFetch(`${base}:8080/api/stream/${pureId}`, {}, 120000); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                            // FIX: Timeout restaurado a su valor base, bug de latencia en Atresmedia arreglado.
+                            try { r = await safeFetch(`${base}:8080/api/stream/${pureId}`); if (r && r.ok) break; } catch(e){ fetchError = e; }
                         }
                         if (r && r.ok) {
                             const d = await r.json();

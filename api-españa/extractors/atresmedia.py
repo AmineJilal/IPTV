@@ -29,7 +29,7 @@ class AtresmediaExtractor(BaseExtractor):
         
         # 1. Fetch initial API page URL
         href_encoded = urllib.parse.quote(f"/directos/{slug}/", safe="")
-        api_url = f"https://api.atresplayer.com/client/v1/url?href={href_encoded}?usp=true&device=desktop&NODRM=true"
+        api_url = f"https://api.atresplayer.com/client/v1/url?href={href_encoded}&usp=true&device=desktop&NODRM=true"
         
         async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
             res1 = await client.get(api_url, headers=headers)
