@@ -214,30 +214,20 @@ async def resolve_unified_stream(channel_id: str):
     """
     extractor = StreamFactory.get_extractor(channel_id)
     
-    if not extractor:
-        # Fallback a la resolución original si no hay extractor avanzado
-        return await resolve_stream(channel_id)
-        
-    try:
-        # Obtenemos la url cruda para pasársela al extractor si la necesita
-        data = await fetch_tdt_data()
-        canales = data.get("canales", [])
-        raw_url = ""
-        for c in canales:
-            if c.get("id", "").lower() == channel_id.lower():
-                raw_url = c.get("url", "")
-                break
-                
-        result = await extractor.extract_stream(channel_id, raw_url)
-        return result
-    except Exception as e:
-        import traceback
-        print(f"Error en extracción unificada para {channel_id}: {e}")
-        traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail={"error": "Extraction Failed", "message": str(e), "channel_id": channel_id}
-        )
+    if extractor:
+        try:
+            return await extractor.extract_stream(channel_id, "")
+        except Exception as e:
+            import traceback
+            print(f"Error en extracción unificada para {channel_id}: {e}")
+            traceback.print_exc()
+            raise HTTPException(
+                status_code=500,
+                detail={"error": "Extraction Failed", "message": str(e), "channel_id": channel_id}
+            )
+
+    # Fallback a la resolución original si no hay extractor avanzado
+    return await resolve_stream(channel_id)
 
 @app.get("/playlist.m3u8")
 async def generate_m3u_playlist():

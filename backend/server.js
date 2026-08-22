@@ -471,13 +471,14 @@ app.get('/api/play/:channelId', async (req, res) => {
         }
 
         const ahora = Date.now();
-        const ttl = 3600000; // 1 Hora
+        // TTL de caché: 5 min para TDT/España (por caducidad de tokens), 1 hora para el resto
+        const ttl = id.startsWith('tdt_') ? 300000 : 3600000;
         let finalStreamUrl = stream.stream_url;
         let headersList = stream.headers;
         let finalTipo = stream.tipo || 'hls';
 
-        // FIX: Prevenir corrupción de strings "null" guardadas en la BD
-        if (finalStreamUrl === 'null' || finalStreamUrl === 'undefined') {
+        // FIX: Prevenir corrupción de strings "null" o URLs no válidas en la BD
+        if (!finalStreamUrl || finalStreamUrl === 'null' || finalStreamUrl === 'undefined' || (typeof finalStreamUrl === 'string' && !finalStreamUrl.startsWith('http'))) {
             finalStreamUrl = null;
         }
 
