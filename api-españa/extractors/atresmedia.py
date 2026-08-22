@@ -11,11 +11,17 @@ class AtresmediaExtractor(BaseExtractor):
     # If the slug doesn't match the URL exactly, we can map it here.
     SLUGS = {
         'antena3.tv': 'antena3',
+        'antena3': 'antena3',
         'lasexta.tv': 'lasexta',
+        'lasexta': 'lasexta',
         'neox.tv': 'neox',
+        'neox': 'neox',
         'nova.tv': 'nova',
+        'nova': 'nova',
         'mega.tv': 'mega',
-        'atreseries.tv': 'atreseries'
+        'mega': 'mega',
+        'atreseries.tv': 'atreseries',
+        'atreseries': 'atreseries'
     }
     
     async def extract_stream(self, channel_id: str, raw_url: str) -> Dict[str, Any]:

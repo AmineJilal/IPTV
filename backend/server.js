@@ -492,18 +492,20 @@ app.get('/api/play/:channelId', async (req, res) => {
 
             try {
                 if (id.startsWith('tdt_')) {
-                    const pureId = id.replace('tdt_', '').toLowerCase();
+                    const rawPureId = id.replace('tdt_', '');
+                    const pureIdLower = rawPureId.toLowerCase();
+                    
                     // FIX: Soporte masivo para todas las variantes de IDs de RTVE
                     const rtveMap = {
                         'la1': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8', 'la1.tv': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8', '1': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8',
                         'la2': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8', 'la2.tv': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8', '2': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8',
-                        '24h': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8', '24h.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8',
-                        'tdp': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'teledeporte': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'teledeporte.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8',
+                        '24h': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8', '24h.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8', '24horas.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8',
+                        'tdp': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'teledeporte': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'teledeporte.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'tdp.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8',
                         'clan': 'https://rtvelivestream.rtve.es/rtvesec/clan/clan_main.m3u8', 'clan.tv': 'https://rtvelivestream.rtve.es/rtvesec/clan/clan_main.m3u8'
                     };
                     
-                    if (rtveMap[pureId]) {
-                        nuevaUrl = rtveMap[pureId];
+                    if (rtveMap[pureIdLower]) {
+                        nuevaUrl = rtveMap[pureIdLower];
                         nuevosHeaders = JSON.stringify({
                             "Origin": "https://www.rtve.es",
                             "Referer": "https://www.rtve.es/",
@@ -511,8 +513,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                         });
                     } else {
                         for (const base of bases) {
-                            // FIX: Timeout restaurado a su valor base, bug de latencia en Atresmedia arreglado.
-                            try { r = await safeFetch(`${base}:8080/api/stream/${pureId}`); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                            try { r = await safeFetch(`${base}:8080/api/stream/${rawPureId}`); if (r && r.ok) break; } catch(e){ fetchError = e; }
                         }
                         if (r && r.ok) {
                             const d = await r.json();

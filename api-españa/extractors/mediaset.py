@@ -15,14 +15,14 @@ from extractors.base import BaseExtractor
 
 CHANNEL_CODES = {
     # Telecinco
-    "telecinco.tv": "TLCN",
-    "telecinco": "TLCN",
+    "telecinco.tv": "T5",
+    "telecinco": "T5",
     # Cuatro
     "cuatro.tv": "CT",
     "cuatro": "CT",
     # FDF
-    "fdf.tv": "FDF",
-    "fdf": "FDF",
+    "fdf.tv": "FD",
+    "fdf": "FD",
     # Energy
     "energy.tv": "EN",
     "energy": "EN",
