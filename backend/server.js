@@ -560,6 +560,7 @@ app.get('/api/play/:channelId', async (req, res) => {
         let finalStreamUrl = stream.stream_url;
         let headersList = stream.headers;
         let finalTipo = stream.tipo || 'hls';
+        let fetchError = null;
 
         // FIX: Prevenir corrupción de strings "null" o URLs no válidas en la BD
         if (!finalStreamUrl || finalStreamUrl === 'null' || finalStreamUrl === 'undefined' || (typeof finalStreamUrl === 'string' && !finalStreamUrl.startsWith('http'))) {
@@ -573,7 +574,6 @@ app.get('/api/play/:channelId', async (req, res) => {
             
             const bases = ['http://127.0.0.1', 'http://localhost', 'http://192.168.0.43'];
             let r = null;
-            let fetchError = null;
 
             try {
 
