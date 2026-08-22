@@ -514,7 +514,14 @@ app.get('/api/play/:channelId', async (req, res) => {
                         });
                     } else {
                         for (const base of bases) {
-                            try { r = await safeFetch(`${base}:8080/api/stream/${rawPureId}`); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                            try { 
+                                r = await safeFetch(`${base}:8080/api/stream/${rawPureId}`); 
+                                if (r && r.ok) break; 
+                                else console.error(`⚠️ [España API] Status ${r ? r.status : 'null'} para ${rawPureId} en ${base}:8080`);
+                            } catch(e){ 
+                                fetchError = e; 
+                                console.error(`🔥 [España API Error] ${base}:8080 para ${rawPureId} -> ${e.message}`);
+                            }
                         }
                         if (r && r.ok) {
                             const d = await r.json();
