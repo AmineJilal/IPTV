@@ -1,4 +1,6 @@
 require('dotenv').config();
+const dns = require('dns');
+try { dns.setDefaultResultOrder('ipv4first'); } catch (_) {}
 const express    = require('express');
 const http       = require('http');
 const { Server } = require('socket.io');
@@ -85,6 +87,10 @@ async function safeFetch(url, options = {}, timeoutMs = 12000) {
         return response;
     } catch (e) {
         clearTimeout(timeoutId);
+        if (e.cause) {
+            const causeMsg = e.cause.message || e.cause.code || e.cause;
+            throw new Error(`${e.message} (cause: ${causeMsg})`);
+        }
         throw e;
     }
 }
