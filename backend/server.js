@@ -480,6 +480,20 @@ app.get('/api/play/:channelId', async (req, res) => {
             let r = null;
             let fetchError = null;
 
+            // FIX: Función ultra-segura para reemplazar AbortSignal.timeout (evita crasheos en Node)
+            const safeFetch = async (url) => {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
+                try {
+                    const res = await fetch(url, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    return res;
+                } catch (e) {
+                    clearTimeout(timeoutId);
+                    throw e;
+                }
+            };
+
             try {
                 if (id.startsWith('tdt_')) {
                     const pureId = id.replace('tdt_', '');
@@ -495,7 +509,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                         console.log(`✅ [PLAY] Resuelto RTVE interno bypass: ${nuevaUrl}`);
                     } else {
                         for (const base of bases) {
-                            try { r = await fetch(`${base}:8080/api/stream/${pureId}`, { signal: AbortSignal.timeout(15000) }); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                            try { r = await safeFetch(`${base}:8080/api/stream/${pureId}`); if (r && r.ok) break; } catch(e){ fetchError = e; }
                         }
                         if (r && r.ok) {
                             const d = await r.json();
@@ -507,7 +521,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                 } else if (id.startsWith('ibero_')) {
                     const pureId = id.replace('ibero_', '');
                     for (const base of bases) {
-                        try { r = await fetch(`${base}:8090/api/channels/${pureId}`, { signal: AbortSignal.timeout(15000) }); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                        try { r = await safeFetch(`${base}:8090/api/channels/${pureId}`); if (r && r.ok) break; } catch(e){ fetchError = e; }
                     }
                     if (r && r.ok) {
                         const d = await r.json();
@@ -519,7 +533,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                 } else if (id.startsWith('bein_')) {
                     const pureId = id.replace('bein_', '');
                     for (const base of bases) {
-                        try { r = await fetch(`${base}:8000/channel/${pureId}`, { signal: AbortSignal.timeout(15000) }); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                        try { r = await safeFetch(`${base}:8000/channel/${pureId}`); if (r && r.ok) break; } catch(e){ fetchError = e; }
                     }
                     if (r && r.ok) {
                         const d = await r.json();
@@ -531,7 +545,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                 } else if (id.startsWith('arabic_')) {
                     const pureId = id.replace('arabic_', '');
                     for (const base of bases) {
-                        try { r = await fetch(`${base}:9080/api/channels/${pureId}/stream`, { signal: AbortSignal.timeout(15000) }); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                        try { r = await safeFetch(`${base}:9080/api/channels/${pureId}/stream`); if (r && r.ok) break; } catch(e){ fetchError = e; }
                     }
                     if (r && r.ok) {
                         const d = await r.json();
@@ -551,14 +565,16 @@ app.get('/api/play/:channelId', async (req, res) => {
                         "UPDATE channel_cache SET stream_url = ?, headers = ?, updated_at = ?, tipo = ? WHERE id = ?",
                         [finalStreamUrl, headersList, ahora, finalTipo, id]
                     );
-                    console.log(`✅ [Cache-Aside] Exito. URL resuelta y guardada en BD: ${finalStreamUrl.substring(0, 50)}...`);
+                    console.log(`✅ [Cache-Aside] Exito. URL resuelta y guardada en BD.`);
                 } else {
-                    console.log(`❌ [Cache-Aside] Fallo: La API de Python respondió pero no devolvió una URL de vídeo.`);
-                    if(r) console.log(`   - HTTP Status de la API: ${r.status}`);
+                    console.log(`❌ [Cache-Aside] Fallo: La API de Python no devolvió URL. Status: ${r ? r.status : 'Sin respuesta'}`);
+                    // Forzamos a null para que el frontend salte con el Toast rojo en lugar de quedarse en negro
+                    finalStreamUrl = null; 
                 }
             } catch (fetchErr) {
                 console.log(`❌ [Cache-Aside] Error Catastrófico de red:`, fetchErr.message);
                 if (fetchError) console.log(`   - Último error de Fetch:`, fetchError.message);
+                finalStreamUrl = null;
             }
         } else {
             console.log(`✅ [PLAY] Sirviendo desde Caché Turso (Ahorro de API).`);
