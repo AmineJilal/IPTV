@@ -506,7 +506,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                         nuevaUrl = rtveMap[pureId];
                     } else {
                         for (const base of bases) {
-                            try { r = await safeFetch(`${base}:8080/api/stream/${pureId}`); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                            // FIX: TDT Spain (Atresmedia/Mediaset) tarda hasta 90 segundos en resolver tokens. Timeout extendido.
+                            try { r = await safeFetch(`${base}:8080/api/stream/${pureId}`, {}, 120000); if (r && r.ok) break; } catch(e){ fetchError = e; }
                         }
                         if (r && r.ok) {
                             const d = await r.json();
@@ -518,7 +519,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                 } else if (id.startsWith('ibero_')) {
                     const pureId = id.replace('ibero_', '');
                     for (const base of bases) {
-                        try { r = await safeFetch(`${base}:8090/api/channels/${pureId}`); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                        try { r = await safeFetch(`${base}:8090/api/channels/${pureId}`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
                     }
                     if (r && r.ok) {
                         const d = await r.json();
@@ -530,7 +531,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                 } else if (id.startsWith('bein_')) {
                     const pureId = id.replace('bein_', '');
                     for (const base of bases) {
-                        try { r = await safeFetch(`${base}:8000/channel/${pureId}`); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                        try { r = await safeFetch(`${base}:8000/channel/${pureId}`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
                     }
                     if (r && r.ok) {
                         const d = await r.json();
@@ -542,7 +543,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                 } else if (id.startsWith('arabic_')) {
                     const pureId = id.replace('arabic_', '');
                     for (const base of bases) {
-                        try { r = await safeFetch(`${base}:9080/api/channels/${pureId}/stream`); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                        // FIX: Evitar que la API Árabe devuelva un 307 Redirect (rompe el JSON.parse) usando ?redirect=false
+                        try { r = await safeFetch(`${base}:9080/api/channels/${pureId}/stream?redirect=false`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
                     }
                     if (r && r.ok) {
                         const d = await r.json();
