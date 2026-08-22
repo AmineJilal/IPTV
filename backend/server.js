@@ -752,7 +752,8 @@ app.get('/api/play/:channelId', async (req, res) => {
 
         return res.json({ success: true, streamUrl: finalStreamUrl, proxyUrl: proxyUrl, tipo: finalTipo, referer: ref, origin: ori, userAgent: ua });
     } catch (err) {
-        return res.status(500).json({ error: 'Error interno de BD.' });
+        console.error('🔥 [API PLAY ERROR]', err);
+        return res.status(500).json({ error: 'Error interno de BD.', details: err.message });
     }
 });
 
