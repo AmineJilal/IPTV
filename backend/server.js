@@ -91,93 +91,86 @@ async function safeFetch(url, options = {}, timeoutMs = 12000) {
 
 // ── Resolutores Nativos para TDT España (Atresmedia & Mediaset) ──
 async function resolveNativeAtresmedia(slug) {
-    try {
-        const headers = {
-            'Origin': 'https://www.atresplayer.com',
-            'Referer': 'https://www.atresplayer.com/',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        };
-        const href = encodeURIComponent(`/directos/${slug}/`);
-        const r1 = await safeFetch(`https://api.atresplayer.com/client/v1/url?href=${href}&usp=true&device=desktop&NODRM=true`, { headers }, 8000);
-        if (!r1 || !r1.ok) return null;
-        const d1 = await r1.json();
-        if (!d1.href) return null;
-        const r2 = await safeFetch(d1.href, { headers }, 8000);
-        if (!r2 || !r2.ok) return null;
-        const d2 = await r2.json();
-        if (!d2.urlVideo) return null;
-        const r3 = await safeFetch(d2.urlVideo, { headers }, 8000);
-        if (!r3 || !r3.ok) return null;
-        const d3 = await r3.json();
-        const sources = d3.sourcesLive || d3.sources || [];
-        let m3u8 = null;
-        for (const s of sources) {
-            if (s.src && (s.src.includes('.m3u8') || s.type?.includes('mpegurl') || s.type?.includes('hls'))) {
-                m3u8 = s.src;
-                if (s.src.includes('playlist.m3u8') || s.src.includes('master.m3u8')) break;
-            }
+    const headers = {
+        'Origin': 'https://www.atresplayer.com',
+        'Referer': 'https://www.atresplayer.com/',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    };
+    const href = encodeURIComponent(`/directos/${slug}/`);
+    const r1 = await safeFetch(`https://api.atresplayer.com/client/v1/url?href=${href}&usp=true&device=desktop&NODRM=true`, { headers }, 8000);
+    if (!r1 || !r1.ok) throw new Error(`[Atres Step 1] HTTP ${r1 ? r1.status : 'timeout'}`);
+    const d1 = await r1.json();
+    if (!d1.href) throw new Error(`[Atres Step 1] Missing d1.href in ${JSON.stringify(d1)}`);
+    
+    const r2 = await safeFetch(d1.href, { headers }, 8000);
+    if (!r2 || !r2.ok) throw new Error(`[Atres Step 2] HTTP ${r2 ? r2.status : 'timeout'}`);
+    const d2 = await r2.json();
+    if (!d2.urlVideo) throw new Error(`[Atres Step 2] Missing d2.urlVideo`);
+
+    const r3 = await safeFetch(d2.urlVideo, { headers }, 8000);
+    if (!r3 || !r3.ok) throw new Error(`[Atres Step 3] HTTP ${r3 ? r3.status : 'timeout'}`);
+    const d3 = await r3.json();
+    const sources = d3.sourcesLive || d3.sources || [];
+    let m3u8 = null;
+    for (const s of sources) {
+        if (s.src && (s.src.includes('.m3u8') || s.type?.includes('mpegurl') || s.type?.includes('hls'))) {
+            m3u8 = s.src;
+            if (s.src.includes('playlist.m3u8') || s.src.includes('master.m3u8')) break;
         }
-        if (!m3u8 && sources[0]?.src) m3u8 = sources[0].src;
-        return m3u8 ? { stream_url: m3u8, headers } : null;
-    } catch (e) {
-        console.error(`[Native Atresmedia] Error para ${slug}:`, e.message);
-        return null;
     }
+    if (!m3u8 && sources[0]?.src) m3u8 = sources[0].src;
+    if (!m3u8) throw new Error(`[Atres Step 3] No m3u8 source found`);
+    return { stream_url: m3u8, headers };
 }
 
 async function resolveNativeMediaset(code) {
+    const headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+        'Origin': 'https://www.mediasetinfinity.es',
+        'Referer': 'https://www.mediasetinfinity.es/',
+        'Accept': '*/*',
+        'Content-Type': 'application/json; charset=utf-8'
+    };
+    const r1 = await safeFetch('https://services-ott-prod-fe.mediaset.net/esp/idm/v3.0/anonymous/login', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ appName: 'web//mediasetplay-web/1.2.1-d1b2024', client_id: '12345678-1234-1234-1234-123456789012' })
+    }, 8000);
+    if (!r1 || !r1.ok) throw new Error(`[Media Step 1 Login] HTTP ${r1 ? r1.status : 'timeout'}`);
+    const d1 = await r1.json();
+    const sid = d1.response?.sid;
+    const beToken = d1.response?.beToken;
+    if (!sid || !beToken) throw new Error(`[Media Step 1] Missing sid/beToken`);
+
+    const r2 = await safeFetch(`https://services-ott-prod-fe.mediaset.net/esp/playback/v3.0/check?sid=${sid}`, {
+        method: 'POST',
+        headers: { ...headers, 'Authorization': `Bearer ${beToken}` },
+        body: JSON.stringify({ channelCode: code, streamType: 'LIVE', delivery: 'Streaming', createDevice: true, overrideAppName: 'web//mediasetplay-web/1.2.1-d1b2024' })
+    }, 8000);
+    if (!r2 || !r2.ok) throw new Error(`[Media Step 2 Check] HTTP ${r2 ? r2.status : 'timeout'}`);
+    const d2 = await r2.json();
+    const daiKey = d2.response?.dai?.assetKey;
+    if (!daiKey) throw new Error(`[Media Step 2] Missing dai.assetKey in ${JSON.stringify(d2).substring(0, 150)}`);
+
+    const r3 = await safeFetch(`https://pubads.g.doubleclick.net/ssai/event/${daiKey}/streams`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'User-Agent': headers['User-Agent'] }
+    }, 8000);
+    if (!r3 || !r3.ok) throw new Error(`[Media Step 3 SSAI] HTTP ${r3 ? r3.status : 'timeout'}`);
+    const d3 = await r3.json();
+    const raw = d3.stream_manifest || '';
+    if (!raw) throw new Error(`[Media Step 3] Missing stream_manifest`);
+
+    let masterUrl = raw;
     try {
-        const headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
-            'Origin': 'https://www.mediasetinfinity.es',
-            'Referer': 'https://www.mediasetinfinity.es/',
-            'Accept': '*/*',
-            'Content-Type': 'application/json; charset=utf-8'
-        };
-        const r1 = await safeFetch('https://services-ott-prod-fe.mediaset.net/esp/idm/v3.0/anonymous/login', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ appName: 'web//mediasetplay-web/1.2.1-d1b2024', client_id: '12345678-1234-1234-1234-123456789012' })
-        }, 8000);
-        if (!r1 || !r1.ok) return null;
-        const d1 = await r1.json();
-        const sid = d1.response?.sid;
-        const beToken = d1.response?.beToken;
-        if (!sid || !beToken) return null;
+        const u = new URL(raw);
+        const hdnea = u.searchParams.get('hdnea');
+        const lastSlash = u.pathname.lastIndexOf('/');
+        const basePath = lastSlash !== -1 ? u.pathname.substring(0, lastSlash) : u.pathname;
+        masterUrl = `${u.origin}${basePath}/master.m3u8${hdnea ? '?hdnea=' + hdnea : ''}`;
+    } catch(e) {}
 
-        const r2 = await safeFetch(`https://services-ott-prod-fe.mediaset.net/esp/playback/v3.0/check?sid=${sid}`, {
-            method: 'POST',
-            headers: { ...headers, 'Authorization': `Bearer ${beToken}` },
-            body: JSON.stringify({ channelCode: code, streamType: 'LIVE', delivery: 'Streaming', createDevice: true, overrideAppName: 'web//mediasetplay-web/1.2.1-d1b2024' })
-        }, 8000);
-        if (!r2 || !r2.ok) return null;
-        const d2 = await r2.json();
-        const daiKey = d2.response?.dai?.assetKey;
-        if (!daiKey) return null;
-
-        const r3 = await safeFetch(`https://pubads.g.doubleclick.net/ssai/event/${daiKey}/streams`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'User-Agent': headers['User-Agent'] }
-        }, 8000);
-        if (!r3 || !r3.ok) return null;
-        const d3 = await r3.json();
-        const raw = d3.stream_manifest || '';
-        if (!raw) return null;
-
-        let masterUrl = raw;
-        try {
-            const u = new URL(raw);
-            const hdnea = u.searchParams.get('hdnea');
-            const lastSlash = u.pathname.lastIndexOf('/');
-            const basePath = lastSlash !== -1 ? u.pathname.substring(0, lastSlash) : u.pathname;
-            masterUrl = `${u.origin}${basePath}/master.m3u8${hdnea ? '?hdnea=' + hdnea : ''}`;
-        } catch(e) {}
-
-        return { stream_url: masterUrl, headers: { 'Origin': 'https://www.mediasetinfinity.es', 'Referer': 'https://www.mediasetinfinity.es/', 'User-Agent': headers['User-Agent'] } };
-    } catch (e) {
-        console.error(`[Native Mediaset] Error para ${code}:`, e.message);
-        return null;
-    }
+    return { stream_url: masterUrl, headers: { 'Origin': 'https://www.mediasetinfinity.es', 'Referer': 'https://www.mediasetinfinity.es/', 'User-Agent': headers['User-Agent'] } };
 }
 
 // ── Comprobar si un HLS responde (Corregido Memory Leak en Catch) ──
@@ -624,16 +617,26 @@ app.get('/api/play/:channelId', async (req, res) => {
                             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                         });
                     } else if (atresMap[pureIdLower]) {
-                        const resAtres = await resolveNativeAtresmedia(atresMap[pureIdLower]);
-                        if (resAtres) {
-                            nuevaUrl = resAtres.stream_url;
-                            nuevosHeaders = JSON.stringify(resAtres.headers);
+                        try {
+                            const resAtres = await resolveNativeAtresmedia(atresMap[pureIdLower]);
+                            if (resAtres) {
+                                nuevaUrl = resAtres.stream_url;
+                                nuevosHeaders = JSON.stringify(resAtres.headers);
+                            }
+                        } catch (err) {
+                            fetchError = err;
+                            console.error(`🔥 [Native Atresmedia Error] ${err.message}`);
                         }
                     } else if (mediasetMap[pureIdLower]) {
-                        const resMedia = await resolveNativeMediaset(mediasetMap[pureIdLower]);
-                        if (resMedia) {
-                            nuevaUrl = resMedia.stream_url;
-                            nuevosHeaders = JSON.stringify(resMedia.headers);
+                        try {
+                            const resMedia = await resolveNativeMediaset(mediasetMap[pureIdLower]);
+                            if (resMedia) {
+                                nuevaUrl = resMedia.stream_url;
+                                nuevosHeaders = JSON.stringify(resMedia.headers);
+                            }
+                        } catch (err) {
+                            fetchError = err;
+                            console.error(`🔥 [Native Mediaset Error] ${err.message}`);
                         }
                     }
 
