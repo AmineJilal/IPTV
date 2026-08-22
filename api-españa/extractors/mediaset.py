@@ -75,7 +75,7 @@ class MediasetExtractor(BaseExtractor):
         MediasetExtractor._token_ts = now
         return MediasetExtractor._sid, MediasetExtractor._be_token
 
-    async def extract_stream(self, channel_id: str, raw_url: str = "") -> dict:
+    async def extract_stream(self, channel_id: str, raw_url: str = "", _retries: int = 0) -> dict:
         channel_id_lower = channel_id.lower()
         channel_code = CHANNEL_CODES.get(channel_id_lower)
         if not channel_code:
@@ -107,10 +107,14 @@ class MediasetExtractor(BaseExtractor):
             check_data = check_resp.json()
 
             if not check_data.get("isOk"):
-                # Token expirado — limpiar caché y reintentar una vez
+                # Token expirado o Error de Geo-bloqueo — limpiar caché y reintentar una vez
                 MediasetExtractor._sid = None
                 MediasetExtractor._be_token = None
-                return await self.extract_stream(channel_id, raw_url)
+                if _retries < 1:
+                    return await self.extract_stream(channel_id, raw_url, _retries + 1)
+                else:
+                    error_msg = check_data.get("error", {}).get("message", "Unknown error")
+                    raise ValueError(f"Fallo en Playback Check de Mediaset (posible geo-bloqueo): {error_msg}")
 
             dai_key = check_data.get("response", {}).get("dai", {}).get("assetKey")
             if not dai_key:
