@@ -8,11 +8,6 @@ const { createClient } = require('@libsql/client');
 const https      = require('https');
 const http_mod   = require('http');
 const { URL }    = require('url');
-const crypto     = require('crypto');
-
-// TODO: Rellenar con claves de producción en el servidor real.
-const ADMIN_KEY = Buffer.alloc(16);
-const ADMIN_IV  = Buffer.alloc(16);
 
 // 1. Manejo Global de Errores para evitar caídas fatales del backend
 process.on('uncaughtException', (err) => {
@@ -80,37 +75,35 @@ function buildProxyUrlFromRequest(req, rawUrl) {
     return `${proto}://${host}/proxy-video?url=${encodeURIComponent(rawUrl)}`;
 }
 
-// ── Comprobar si un HLS responde (con reintentos, sin marcar offline a la primera) ──
+// ── Utilidad Global y Segura para Peticiones con Timeout ──
+async function safeFetch(url, options = {}, timeoutMs = 12000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (e) {
+        clearTimeout(timeoutId);
+        throw e;
+    }
+}
+
+// ── Comprobar si un HLS responde (Corregido Memory Leak en Catch) ──
 async function testUrl(urlStr, timeoutMs = 6000, retries = 2) {
     const { cleanUrl, referer, origin, userAgent } = parseStreamUrl(urlStr);
     let lastError = 'desconocido';
+    const reqHeaders = buildBrowserHeaders(referer, origin || null, userAgent || null);
 
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-            // HEAD primero (ligero); si falla, GET parcial
-            let res = await fetch(cleanUrl, {
-                method: 'HEAD',
-                headers: buildBrowserHeaders(referer, origin || null, userAgent || null),
-                signal: controller.signal,
-                redirect: 'follow',
-            });
-
+            let res = await safeFetch(cleanUrl, { method: 'HEAD', headers: reqHeaders, redirect: 'follow' }, timeoutMs);
             if (!res.ok || res.status === 405 || res.status === 501) {
-                res = await fetch(cleanUrl, {
-                    method: 'GET',
-                    headers: buildBrowserHeaders(referer, origin || null, userAgent || null),
-                    signal: controller.signal,
-                    redirect: 'follow',
-                });
+                res = await safeFetch(cleanUrl, { method: 'GET', headers: reqHeaders, redirect: 'follow' }, timeoutMs);
             }
 
-            clearTimeout(timeoutId);
-
             if (res.ok) {
-                                if (res.body) {
+                if (res.body) {
                     const reader = res.body.getReader();
                     await reader.read();
                     reader.cancel();
@@ -288,7 +281,7 @@ async function syncAllLists() {
 
         // 1. TDT España
         try {
-            const r = await fetch('https://www.tdtspain.com/canales/canalesv4.json', { signal: AbortSignal.timeout(10000) });
+            const r = await safeFetch('https://www.tdtspain.com/canales/canalesv4.json', {}, 10000);
             if (r.ok) {
                 const data = await r.json();
                 for (const c of data.canales || []) {
@@ -302,7 +295,7 @@ async function syncAllLists() {
 
         // 2. Iberoamericana
         try {
-            const r = await fetch('http://127.0.0.1:8090/api/channels', { signal: AbortSignal.timeout(10000) });
+            const r = await safeFetch('http://127.0.0.1:8090/api/channels', {}, 10000);
             if (r.ok) {
                 const data = await r.json();
                 for (const c of data.channels || []) {
@@ -316,7 +309,7 @@ async function syncAllLists() {
 
         // 3. Arabic
         try {
-            const r = await fetch('http://127.0.0.1:9080/api/channels?limit=500', { signal: AbortSignal.timeout(10000) });
+            const r = await safeFetch('http://127.0.0.1:9080/api/channels?limit=500', {}, 10000);
             if (r.ok) {
                 const data = await r.json();
                 for (const c of data.channels || []) {
@@ -494,19 +487,6 @@ app.get('/api/play/:channelId', async (req, res) => {
             const bases = ['http://127.0.0.1', 'http://localhost', 'http://192.168.0.17'];
             let r = null;
             let fetchError = null;
-
-            const safeFetch = async (url) => {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 12000);
-                try {
-                    const response = await fetch(url, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-                    return response;
-                } catch (e) {
-                    clearTimeout(timeoutId);
-                    throw e;
-                }
-            };
 
             try {
                 if (id.startsWith('tdt_')) {
