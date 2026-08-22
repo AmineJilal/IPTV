@@ -853,13 +853,12 @@ app.all('/proxy-video', (req, res) => {
                     const trimmed = line.trim();
                     if (trimmed && !trimmed.startsWith('#')) {
                         const absoluteUrl = trimmed.startsWith('http') ? trimmed : new URL(trimmed, cleanUrl).href;
-                        const isVideo = absoluteUrl.includes('.ts') || absoluteUrl.includes('.mp4') || absoluteUrl.includes('.m4s') || absoluteUrl.includes('.aac') || absoluteUrl.includes('.vtt') || absoluteUrl.includes('.webvtt') || absoluteUrl.includes('Fragments(');
-                        return isVideo ? absoluteUrl : buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
+                        // Forzamos que TODO pase por el proxy para inyectar cabeceras y evitar bloqueos CORS
+                        return buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
                     } else if (trimmed.startsWith('#EXT-X-STREAM-INF:') || trimmed.startsWith('#EXT-X-MEDIA:')) {
                         return line.replace(/URI="([^"]+)"/g, (match, p1) => {
                             const absoluteUri = p1.startsWith('http') ? p1 : new URL(p1, cleanUrl).href;
-                            const isSubVideo = absoluteUri.includes('.ts') || absoluteUri.includes('.mp4') || absoluteUri.includes('.m4s') || absoluteUri.includes('.aac') || absoluteUri.includes('.vtt');
-                            return `URI="${isSubVideo ? absoluteUri : buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
+                            return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
                         });
                     }
                     return line;
