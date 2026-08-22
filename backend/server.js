@@ -561,14 +561,12 @@ app.get('/api/play/:channelId', async (req, res) => {
         }
 
         const ahora = Date.now();
-        // TTL de caché: 5 min para TDT/España (por caducidad de tokens), 1 hora para el resto
-        const ttl = id.startsWith('tdt_') ? 300000 : 3600000;
+        const ttl = 3600000; // 1 hora de caché para todos los canales, sin hardcodear
         let finalStreamUrl = stream.stream_url;
         let headersList = stream.headers;
         let finalTipo = stream.tipo || 'hls';
         let fetchError = null;
 
-        // FIX: Prevenir corrupción de strings "null" o URLs no válidas en la BD
         if (!finalStreamUrl || finalStreamUrl === 'null' || finalStreamUrl === 'undefined' || (typeof finalStreamUrl === 'string' && !finalStreamUrl.startsWith('http'))) {
             finalStreamUrl = null;
         }
@@ -578,7 +576,7 @@ app.get('/api/play/:channelId', async (req, res) => {
             let nuevaUrl = null;
             let nuevosHeaders = null;
             
-            const bases = ['http://127.0.0.1', 'http://localhost', 'http://192.168.0.43'];
+            const baseApiUrl = process.env.API_HOST || 'http://127.0.0.1';
             let r = null;
 
             try {
@@ -647,15 +645,12 @@ app.get('/api/play/:channelId', async (req, res) => {
                     }
 
                     if (!nuevaUrl) {
-                        for (const base of bases) {
-                            try { 
-                                r = await safeFetch(`${base}:8080/api/stream/${rawPureId}`); 
-                                if (r && r.ok) break; 
-                                else console.error(`⚠️ [España API] Status ${r ? r.status : 'null'} para ${rawPureId} en ${base}:8080`);
-                            } catch(e){ 
-                                fetchError = e; 
-                                console.error(`🔥 [España API Error] ${base}:8080 para ${rawPureId} -> ${e.message}`);
-                            }
+                        try { 
+                            r = await safeFetch(`${baseApiUrl}:8080/api/stream/${rawPureId}`); 
+                            if (!r.ok) console.error(`⚠️ [España API] Status ${r.status} para ${rawPureId} en ${baseApiUrl}:8080`);
+                        } catch(e){ 
+                            fetchError = e; 
+                            console.error(`🔥 [España API Error] ${baseApiUrl}:8080 para ${rawPureId} -> ${e.message}`);
                         }
                         if (r && r.ok) {
                             const d = await r.json();
@@ -666,9 +661,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                     }
                 } else if (id.startsWith('ibero_')) {
                     const pureId = id.replace('ibero_', '');
-                    for (const base of bases) {
-                        try { r = await safeFetch(`${base}:8090/api/channels/${pureId}`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
-                    }
+                    try { r = await safeFetch(`${baseApiUrl}:8090/api/channels/${pureId}`, {}, 15000); } catch(e){ fetchError = e; }
                     if (r && r.ok) {
                         const d = await r.json();
                         nuevaUrl = d.m3u8_url || d.stream_url || d.url || null;
@@ -678,9 +671,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                     }
                 } else if (id.startsWith('bein_')) {
                     const pureId = id.replace('bein_', '');
-                    for (const base of bases) {
-                        try { r = await safeFetch(`${base}:8000/channel/${pureId}`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
-                    }
+                    try { r = await safeFetch(`${baseApiUrl}:8000/channel/${pureId}`, {}, 15000); } catch(e){ fetchError = e; }
                     if (r && r.ok) {
                         const d = await r.json();
                         if (d.data && d.data[0] && d.data[0].url) {
@@ -690,10 +681,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                     }
                 } else if (id.startsWith('arabic_')) {
                     const pureId = id.replace('arabic_', '');
-                    for (const base of bases) {
-                        // FIX: Evitar que la API Árabe devuelva un 307 Redirect (rompe el JSON.parse) usando ?redirect=false
-                        try { r = await safeFetch(`${base}:9080/api/channels/${pureId}/stream?redirect=false`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
-                    }
+                    try { r = await safeFetch(`${baseApiUrl}:9080/api/channels/${pureId}/stream?redirect=false`, {}, 15000); } catch(e){ fetchError = e; }
                     if (r && r.ok) {
                         const d = await r.json();
                         nuevaUrl = d.stream_url || d.url || null;
@@ -714,10 +702,13 @@ app.get('/api/play/:channelId', async (req, res) => {
                     );
                     console.log(`✅ [Cache] Guardado OK.`);
                 } else {
-                    finalStreamUrl = null; 
+                    console.error(`⚠️ [API PLAY] No se obtuvo nueva URL, usando la caché anterior si existe.`);
+                    // fallback to database stream URL if API fails, so we don't wipe it out!
+                    finalStreamUrl = stream.stream_url; 
                 }
             } catch (fetchErr) {
-                finalStreamUrl = null;
+                console.error(`⚠️ [API PLAY] Error de fetch global: ${fetchErr.message}`);
+                finalStreamUrl = stream.stream_url;
             }
         }
 
