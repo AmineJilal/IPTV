@@ -298,7 +298,9 @@ async function syncAllLists() {
             const r = await safeFetch('http://127.0.0.1:8090/api/channels', {}, 10000);
             if (r.ok) {
                 const data = await r.json();
-                for (const c of data.channels || []) {
+                // FIX: Soporte para APIs que devuelven un Array directo
+                const canalesIbero = Array.isArray(data) ? data : (data.channels || []);
+                for (const c of canalesIbero) {
                     if (c.stream_type === 'youtube') continue;
                     const id = 'ibero_' + c.id;
                     await db.execute(insertQuery, [id, c.name, 'Deportes', c.logo]);
