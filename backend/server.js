@@ -100,9 +100,7 @@ async function resolveNativeAtresmedia(slug) {
     const headers = {
         'Origin': 'https://www.atresplayer.com',
         'Referer': 'https://www.atresplayer.com/',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'X-Forwarded-For': '83.32.11.1',
-        'X-Real-IP': '83.32.11.1'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     };
     const href = encodeURIComponent(`/directos/${slug}/`);
     const r1 = await safeFetch(`https://api.atresplayer.com/client/v1/url?href=${href}&usp=true&device=desktop&NODRM=true`, { headers }, 8000);
@@ -578,7 +576,7 @@ app.get('/api/play/:channelId', async (req, res) => {
             let nuevaUrl = null;
             let nuevosHeaders = null;
             
-            const baseApiUrl = process.env.API_HOST || 'http://127.0.0.1';
+            const bases = ['http://127.0.0.1', 'http://localhost', 'http://192.168.0.43'];
             let r = null;
 
             try {
@@ -647,12 +645,15 @@ app.get('/api/play/:channelId', async (req, res) => {
                     }
 
                     if (!nuevaUrl) {
-                        try { 
-                            r = await safeFetch(`${baseApiUrl}:8080/api/stream/${rawPureId}`); 
-                            if (!r.ok) console.error(`⚠️ [España API] Status ${r.status} para ${rawPureId} en ${baseApiUrl}:8080`);
-                        } catch(e){ 
-                            fetchError = e; 
-                            console.error(`🔥 [España API Error] ${baseApiUrl}:8080 para ${rawPureId} -> ${e.message}`);
+                        for (const base of bases) {
+                            try { 
+                                r = await safeFetch(`${base}:8080/api/stream/${rawPureId}`); 
+                                if (r && r.ok) break; 
+                                else console.error(`⚠️ [España API] Status ${r ? r.status : 'null'} para ${rawPureId} en ${base}:8080`);
+                            } catch(e){ 
+                                fetchError = e; 
+                                console.error(`🔥 [España API Error] ${base}:8080 para ${rawPureId} -> ${e.message}`);
+                            }
                         }
                         if (r && r.ok) {
                             const d = await r.json();
@@ -663,7 +664,9 @@ app.get('/api/play/:channelId', async (req, res) => {
                     }
                 } else if (id.startsWith('ibero_')) {
                     const pureId = id.replace('ibero_', '');
-                    try { r = await safeFetch(`${baseApiUrl}:8090/api/channels/${pureId}`, {}, 15000); } catch(e){ fetchError = e; }
+                    for (const base of bases) {
+                        try { r = await safeFetch(`${base}:8090/api/channels/${pureId}`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                    }
                     if (r && r.ok) {
                         const d = await r.json();
                         nuevaUrl = d.m3u8_url || d.stream_url || d.url || null;
@@ -673,7 +676,9 @@ app.get('/api/play/:channelId', async (req, res) => {
                     }
                 } else if (id.startsWith('bein_')) {
                     const pureId = id.replace('bein_', '');
-                    try { r = await safeFetch(`${baseApiUrl}:8000/channel/${pureId}`, {}, 15000); } catch(e){ fetchError = e; }
+                    for (const base of bases) {
+                        try { r = await safeFetch(`${base}:8000/channel/${pureId}`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                    }
                     if (r && r.ok) {
                         const d = await r.json();
                         if (d.data && d.data[0] && d.data[0].url) {
@@ -683,7 +688,10 @@ app.get('/api/play/:channelId', async (req, res) => {
                     }
                 } else if (id.startsWith('arabic_')) {
                     const pureId = id.replace('arabic_', '');
-                    try { r = await safeFetch(`${baseApiUrl}:9080/api/channels/${pureId}/stream?redirect=false`, {}, 15000); } catch(e){ fetchError = e; }
+                    for (const base of bases) {
+                        // FIX: Evitar que la API Árabe devuelva un 307 Redirect (rompe el JSON.parse) usando ?redirect=false
+                        try { r = await safeFetch(`${base}:9080/api/channels/${pureId}/stream?redirect=false`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                    }
                     if (r && r.ok) {
                         const d = await r.json();
                         nuevaUrl = d.stream_url || d.url || null;
