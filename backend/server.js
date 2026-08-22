@@ -343,17 +343,27 @@ async function syncAllLists() {
     return total;
 }
 
+let isSyncingLists = false;
+
 app.get('/api/sync-lists', async (req, res) => {
-    const total = await syncAllLists();
-    res.json({ success: true, count: total });
+    if (isSyncingLists) return res.json({ success: false, message: 'Sincronización ya en curso.' });
+    isSyncingLists = true;
+    try {
+        const total = await syncAllLists();
+        res.json({ success: true, count: total });
+    } finally {
+        isSyncingLists = false;
+    }
 });
 
 app.get('/api/streams', async (req, res) => {
     try {
         let streams = await obtenerStreamsDb();
-        if (streams.length === 0) {
+        if (streams.length === 0 && !isSyncingLists) {
             console.log('[API] DB vacía, sincronizando listas...');
+            isSyncingLists = true;
             await syncAllLists();
+            isSyncingLists = false;
             streams = await obtenerStreamsDb();
         }
         res.json(streams);
@@ -675,16 +685,28 @@ app.all('/proxy-video', (req, res) => {
         delete headers['x-frame-options']; delete headers['content-security-policy']; delete headers['x-content-type-options'];
         headers['access-control-allow-origin'] = '*';
 
-        const isM3U8 = cleanUrl.includes('.m3u8') || (headers['content-type'] && headers['content-type'].includes('mpegurl'));
+        // FIX: Detección estricta para no confundir .ts con .m3u8
+        const isM3U8 = parsed.pathname.toLowerCase().endsWith('.m3u8') || (headers['content-type'] && headers['content-type'].includes('mpegurl'));
 
         if (isM3U8) {
             delete headers['content-length'];
             res.writeHead(proxyRes.statusCode, headers);
 
-            // FIX: Usar array de Buffers para evitar corrupción UTF-8 al cortar chunks
             let chunks = [];
-            proxyRes.on('data', chunk => chunks.push(chunk));
+            let totalSize = 0;
+            const MAX_PLAYLIST_SIZE = 10 * 1024 * 1024; // 10MB limit para evitar OOM
+
+            proxyRes.on('data', chunk => {
+                totalSize += chunk.length;
+                if (totalSize > MAX_PLAYLIST_SIZE) {
+                    proxyReq.destroy();
+                    return;
+                }
+                chunks.push(chunk);
+            });
+            
             proxyRes.on('end', () => {
+                if (totalSize > MAX_PLAYLIST_SIZE) return res.end(); // Abortado por seguridad
                 const body = Buffer.concat(chunks).toString('utf-8');
                 const rewritten = body.split('\n').map(line => {
                     const trimmed = line.trim();
@@ -710,6 +732,12 @@ app.all('/proxy-video', (req, res) => {
     proxyReq.on('error', (err) => {
         if (!res.headersSent) res.status(502).send('Error del proxy: ' + err.message);
     });
+    
+    // FIX CRÍTICO: Fuga de Conexiones. Si el cliente cierra el vídeo, matamos la descarga remota.
+    req.on('close', () => {
+        proxyReq.destroy();
+    });
+
     proxyReq.end();
 });
 
@@ -719,8 +747,21 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
         const streams = await obtenerStreamsDb();
         const stream = streams.find(s => s.id === channelId || s.nombre.toLowerCase().replace(/ /g, '_') === channelId.toLowerCase());
         if (!stream) return res.status(404).send('Canal no encontrado.');
-        if (!stream.url) return res.status(404).send('Sin URL HLS para este canal.');
-        const target = encodeURIComponent(stream.url);
+        if (!stream.stream_url) return res.status(404).send('Sin URL HLS resuelta para este canal. Ábrelo primero en la web.');
+        
+        let finalUrl = stream.stream_url;
+        
+        // Acoplar cabeceras si existen en la BD
+        if (stream.headers && stream.headers !== 'null') {
+            try {
+                const hdrs = JSON.parse(stream.headers);
+                if (hdrs['Referer']) finalUrl += `|Referer=${hdrs['Referer']}`;
+                if (hdrs['Origin']) finalUrl += `|Origin=${hdrs['Origin']}`;
+                if (hdrs['User-Agent'] || hdrs['user-agent']) finalUrl += `|User-Agent=${hdrs['User-Agent'] || hdrs['user-agent']}`;
+            } catch(e) {}
+        }
+
+        const target = encodeURIComponent(finalUrl);
         return res.redirect(302, `/proxy-video?url=${target}`);
     } catch (e) {
         return res.status(500).send('Error al devolver la reproducción: ' + e.message);
