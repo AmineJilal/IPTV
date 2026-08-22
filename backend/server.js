@@ -492,17 +492,125 @@ app.get('/api/play/:channelId', async (req, res) => {
             let fetchError = null;
 
             try {
+async function resolveNativeAtresmedia(slug) {
+    try {
+        const headers = {
+            'Origin': 'https://www.atresplayer.com',
+            'Referer': 'https://www.atresplayer.com/',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        };
+        const href = encodeURIComponent(`/directos/${slug}/`);
+        const r1 = await safeFetch(`https://api.atresplayer.com/client/v1/url?href=${href}&usp=true&device=desktop&NODRM=true`, { headers }, 8000);
+        if (!r1 || !r1.ok) return null;
+        const d1 = await r1.json();
+        if (!d1.href) return null;
+        const r2 = await safeFetch(d1.href, { headers }, 8000);
+        if (!r2 || !r2.ok) return null;
+        const d2 = await r2.json();
+        if (!d2.urlVideo) return null;
+        const r3 = await safeFetch(d2.urlVideo, { headers }, 8000);
+        if (!r3 || !r3.ok) return null;
+        const d3 = await r3.json();
+        const sources = d3.sourcesLive || d3.sources || [];
+        let m3u8 = null;
+        for (const s of sources) {
+            if (s.src && (s.src.includes('.m3u8') || s.type?.includes('mpegurl') || s.type?.includes('hls'))) {
+                m3u8 = s.src;
+                if (s.src.includes('playlist.m3u8') || s.src.includes('master.m3u8')) break;
+            }
+        }
+        if (!m3u8 && sources[0]?.src) m3u8 = sources[0].src;
+        return m3u8 ? { stream_url: m3u8, headers } : null;
+    } catch (e) {
+        console.error(`[Native Atresmedia] Error para ${slug}:`, e.message);
+        return null;
+    }
+}
+
+async function resolveNativeMediaset(code) {
+    try {
+        const headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+            'Origin': 'https://www.mediasetinfinity.es',
+            'Referer': 'https://www.mediasetinfinity.es/',
+            'Accept': '*/*',
+            'Content-Type': 'application/json; charset=utf-8'
+        };
+        const r1 = await safeFetch('https://services-ott-prod-fe.mediaset.net/esp/idm/v3.0/anonymous/login', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ appName: 'web//mediasetplay-web/1.2.1-d1b2024', client_id: '12345678-1234-1234-1234-123456789012' })
+        }, 8000);
+        if (!r1 || !r1.ok) return null;
+        const d1 = await r1.json();
+        const sid = d1.response?.sid;
+        const beToken = d1.response?.beToken;
+        if (!sid || !beToken) return null;
+
+        const r2 = await safeFetch(`https://services-ott-prod-fe.mediaset.net/esp/playback/v3.0/check?sid=${sid}`, {
+            method: 'POST',
+            headers: { ...headers, 'Authorization': `Bearer ${beToken}` },
+            body: JSON.stringify({ channelCode: code, streamType: 'LIVE', delivery: 'Streaming', createDevice: true, overrideAppName: 'web//mediasetplay-web/1.2.1-d1b2024' })
+        }, 8000);
+        if (!r2 || !r2.ok) return null;
+        const d2 = await r2.json();
+        const daiKey = d2.response?.dai?.assetKey;
+        if (!daiKey) return null;
+
+        const r3 = await safeFetch(`https://pubads.g.doubleclick.net/ssai/event/${daiKey}/streams`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'User-Agent': headers['User-Agent'] }
+        }, 8000);
+        if (!r3 || !r3.ok) return null;
+        const d3 = await r3.json();
+        const raw = d3.stream_manifest || '';
+        if (!raw) return null;
+
+        let masterUrl = raw;
+        try {
+            const u = new URL(raw);
+            const hdnea = u.searchParams.get('hdnea');
+            const lastSlash = u.pathname.lastIndexOf('/');
+            const basePath = lastSlash !== -1 ? u.pathname.substring(0, lastSlash) : u.pathname;
+            masterUrl = `${u.origin}${basePath}/master.m3u8${hdnea ? '?hdnea=' + hdnea : ''}`;
+        } catch(e) {}
+
+        return { stream_url: masterUrl, headers: { 'Origin': 'https://www.mediasetinfinity.es', 'Referer': 'https://www.mediasetinfinity.es/', 'User-Agent': headers['User-Agent'] } };
+    } catch (e) {
+        console.error(`[Native Mediaset] Error para ${code}:`, e.message);
+        return null;
+    }
+}
+
                 if (id.startsWith('tdt_')) {
                     const rawPureId = id.replace('tdt_', '');
                     const pureIdLower = rawPureId.toLowerCase();
                     
-                    // FIX: Soporte masivo para todas las variantes de IDs de RTVE
                     const rtveMap = {
                         'la1': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8', 'la1.tv': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8', '1': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8',
                         'la2': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8', 'la2.tv': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8', '2': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8',
                         '24h': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8', '24h.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8', '24horas.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8',
                         'tdp': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'teledeporte': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'teledeporte.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'tdp.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8',
                         'clan': 'https://rtvelivestream.rtve.es/rtvesec/clan/clan_main.m3u8', 'clan.tv': 'https://rtvelivestream.rtve.es/rtvesec/clan/clan_main.m3u8'
+                    };
+
+                    const atresMap = {
+                        'antena3.tv': 'antena3', 'antena3': 'antena3',
+                        'lasexta.tv': 'lasexta', 'lasexta': 'lasexta',
+                        'neox.tv': 'neox', 'neox': 'neox',
+                        'nova.tv': 'nova', 'nova': 'nova',
+                        'mega.tv': 'mega', 'mega': 'mega',
+                        'atreseries.tv': 'atreseries', 'atreseries': 'atreseries'
+                    };
+
+                    const mediasetMap = {
+                        'telecinco.tv': 'T5', 'telecinco': 'T5',
+                        'cuatro.tv': 'CT', 'cuatro': 'CT',
+                        'fdf.tv': 'FD', 'fdf': 'FD',
+                        'energy.tv': 'EN', 'energy': 'EN',
+                        'divinity.tv': 'DV', 'divinity': 'DV',
+                        'bemad.tv': 'BM', 'bemad': 'BM',
+                        'boing.tv': 'BO', 'boing': 'BO'
                     };
                     
                     if (rtveMap[pureIdLower]) {
@@ -512,7 +620,21 @@ app.get('/api/play/:channelId', async (req, res) => {
                             "Referer": "https://www.rtve.es/",
                             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                         });
-                    } else {
+                    } else if (atresMap[pureIdLower]) {
+                        const resAtres = await resolveNativeAtresmedia(atresMap[pureIdLower]);
+                        if (resAtres) {
+                            nuevaUrl = resAtres.stream_url;
+                            nuevosHeaders = JSON.stringify(resAtres.headers);
+                        }
+                    } else if (mediasetMap[pureIdLower]) {
+                        const resMedia = await resolveNativeMediaset(mediasetMap[pureIdLower]);
+                        if (resMedia) {
+                            nuevaUrl = resMedia.stream_url;
+                            nuevosHeaders = JSON.stringify(resMedia.headers);
+                        }
+                    }
+
+                    if (!nuevaUrl) {
                         for (const base of bases) {
                             try { 
                                 r = await safeFetch(`${base}:8080/api/stream/${rawPureId}`); 
