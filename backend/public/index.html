@@ -209,9 +209,25 @@
             init() {
                 this.bindEvents();
                 this.connectSocket();
-                
-                // Fallback para desarrollo si no hay backend
-                setTimeout(() => { if (this.state.channels.length === 0) this.loadMockData(); }, 3000);
+                this.fetchChannelsHTTP();
+            }
+
+            async fetchChannelsHTTP() {
+                try {
+                    const res = await fetch('/api/streams');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                            this.state.channels = data;
+                            this.extractDynamicCategories();
+                            this.renderCategories();
+                            this.renderChannels();
+                            this.showToast(`✅ ${data.length} canales cargados desde la Base de Datos`, 'green');
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error cargando /api/streams:', e);
+                }
             }
 
             // ─── EVENT LISTENER REGISTRY ─────────────────────────────
@@ -237,42 +253,18 @@
                     this.renderChannels();
                 });
 
-                // Refresco de Streams (Contextual)
+                // Refresco de Streams (Solo lectura directa de la Base de Datos sin resolver)
                 this.dom.btnRefresh.addEventListener('click', async () => {
                     this.dom.btnRefreshIcon.classList.add('animate-spin');
                     this.dom.btnRefreshText.innerText = 'Cargando...';
                     
-                    let endpoint = '/api/sync-lists';
-                    if (this.state.activeFilter === null || this.state.activeFilter === 'all' || this.state.activeFilter === 'favs') {
-                        if (this.socket && this.socket.connected) {
-                            this.socket.emit('solicitar_streams');
-                            this.updateStatus('Refrescando...', 'blue', 'ph-arrows-clockwise animate-spin');
-                        }
-                        this.dom.btnRefreshIcon.classList.remove('animate-spin');
-                        this.updateContextualRefresh();
-                        return;
+                    if (this.socket && this.socket.connected) {
+                        this.socket.emit('solicitar_streams');
                     }
+                    await this.fetchChannelsHTTP();
                     
-                    try {
-                        const res = await fetch(endpoint);
-                        const data = await res.json();
-                        // Mostrar feedback del resultado
-                        const count = data.count || data.actualizados || data.canales_actualizados || 0;
-                        const ok = data.success !== false;
-                        this.showToast(
-                            ok
-                                ? `✅ ${count} canales actualizados`
-                                : `❌ Error: ${data.error || data.message || 'fallo desconocido'}`,
-                            ok ? 'green' : 'red'
-                        );
-                        if (ok && this.socket && this.socket.connected) this.socket.emit('solicitar_streams');
-                    } catch (e) {
-                        this.showToast('❌ Error de conexión con el servidor', 'red');
-                        console.error('Error fetching API:', e);
-                    } finally {
-                        this.dom.btnRefreshIcon.classList.remove('animate-spin');
-                        this.updateContextualRefresh();
-                    }
+                    this.dom.btnRefreshIcon.classList.remove('animate-spin');
+                    this.updateContextualRefresh();
                 });
 
                 // UX: Doble Clic para Pantalla Completa
@@ -477,7 +469,7 @@
                         return catName === 'Deportes' || id.startsWith('ibero_');
                     }
                     if (this.state.activeFilter === 'bein') {
-                        return catName === 'BeIN Sports' || name.includes('bein');
+                        return catName === 'BeIN Sports' || id.startsWith('bein_') || name.includes('bein');
                     }
                     
                     if (this.state.activeFilter === 'arabic_channels') {
