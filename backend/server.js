@@ -571,7 +571,7 @@ app.get('/api/play/:channelId', async (req, res) => {
         let stream = result.rows[0];
 
         if (!stream) {
-            return res.status(404).json({ error: 'Canal no encontrado en BD.' });
+            stream = { id: id, stream_url: null, headers: null, updated_at: 0, tipo: 'hls' };
         }
 
         const ahora = Date.now();
@@ -659,8 +659,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                     finalStreamUrl = nuevaUrl;
                     headersList = nuevosHeaders || '';
                     await db.execute(
-                        "UPDATE channel_cache SET stream_url = ?, headers = ?, updated_at = ?, tipo = ? WHERE id = ?",
-                        [finalStreamUrl, headersList, ahora, finalTipo, id]
+                        "INSERT INTO channel_cache (id, stream_url, headers, updated_at, tipo) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET stream_url=excluded.stream_url, headers=excluded.headers, updated_at=excluded.updated_at, tipo=excluded.tipo",
+                        [id, finalStreamUrl, headersList, ahora, finalTipo]
                     );
                     console.log(`✅ [Cache] Guardado OK.`);
                 } else {
