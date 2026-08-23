@@ -416,18 +416,8 @@ async function syncAllLists() {
             }
         } catch(e){ console.error('[Sync] Error en Arabic:', e.message); }
 
-        // 4. Yacine API (beIN, MBC, France, Turquía, Kids, Shahid...)
-        try {
-            const yacineChannels = require('./yacine_channels.json');
-            for (const c of yacineChannels) {
-                const id = 'bein_' + c.id;
-                await db.execute(insertQuery, [id, c.name, c.cat, '']);
-                total++;
-            }
-        } catch(e) {
-            console.error('[Sync] Error cargando canales de Yacine:', e.message);
-        }
-
+        // 4. (Canales de YacineTV / BeIN introducidos permanentemente en la base de datos Turso)
+        
         io.emit('actualizar_streams', await obtenerStreamsDb());
     } catch(e) {
         console.error('Error sincronizando listas:', e);
