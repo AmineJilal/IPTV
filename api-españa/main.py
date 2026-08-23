@@ -191,17 +191,19 @@ async def resolve_stream(id_canal: str):
         return {
             "canal": canal.get("name"),
             "type": "mediaset_stream",
-            "info": "Requiere autenticación anónima con el servidor OTT de Mediaset",
-            "web_url": raw_url,
-            "headers": headers
+            "stream_url": raw_url,
+            "headers_required": headers
         }
 
     # Caso genérico / fallback
     return {
         "canal": canal.get("name"),
         "type": stype,
-        "raw_url": raw_url,
-        "note": "Canal con método de stream personalizado"
+        "stream_url": raw_url,
+        "headers_required": {
+            "User-Agent": USER_AGENT,
+            "Referer": "https://www.tdtspain.com/"
+        }
     }
 
 from extractors.factory import StreamFactory

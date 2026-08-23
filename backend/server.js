@@ -610,7 +610,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                     }
                     if (r && r.ok) {
                         const d = await r.json();
-                        nuevaUrl = d.m3u8_url || d.stream_url || d.hls_url || d.mpd_url || d.url || null;
+                        nuevaUrl = d.m3u8_url || d.stream_url || d.hls_url || d.mpd_url || d.url || d.raw_url || d.web_url || null;
                         nuevosHeaders = d.headers_required || d.headers || null;
                         if (nuevosHeaders && typeof nuevosHeaders === 'object') nuevosHeaders = JSON.stringify(nuevosHeaders);
                     }
