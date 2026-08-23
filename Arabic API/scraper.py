@@ -183,7 +183,24 @@ def resolve_channel_details(channel_id, force_refresh=False):
     if not force_refresh and cached and (now - cached['timestamp'] < CACHE_TTL):
         return cached['data']
 
-    url = f"https://venolie.com/navo/view/p/{channel_id}.php"
+    ALIAS_MAP = {
+        "mbc2": "bc2",
+        "mbc-2": "bc2",
+        "mbc1": "bc",
+        "mbc-1": "bc",
+        "mbc3": "bc3",
+        "mbc-3": "bc3",
+        "mbc4": "bc4",
+        "mbc-4": "bc4",
+        "mbc5": "bc5",
+        "mbc-5": "bc5",
+        "mbcaction": "bcaction",
+        "mbcmax": "bcmax",
+        "mbcbollywood": "bcbollywood",
+        "mbcdrama": "bcdrama"
+    }
+    target_id = ALIAS_MAP.get(channel_id.lower(), channel_id)
+    url = f"https://venolie.com/navo/view/p/{target_id}.php"
     session = get_session()
     try:
         res = session.get(url, timeout=8)
@@ -241,11 +258,27 @@ def resolve_channel_details(channel_id, force_refresh=False):
                     stream_type = "hls"
             elif 'azrogo.com' in full_embed_url or 'jawaltv.com' in full_embed_url:
                 try:
-                    iframe_res = session.get(full_embed_url, timeout=4, headers={'Referer': url})
+                    clean_embed_url = full_embed_url
+                    if '/ext/http' in clean_embed_url:
+                        clean_embed_url = clean_embed_url.split('/ext/')[-1]
+                    iframe_res = session.get(clean_embed_url, timeout=5, headers={'Referer': 'https://venolie.com/'})
                     iframe_m3u8 = re.findall(r'https?://[^\s\"\'<>\\]+\.m3u8[^\s\"\'<>\\]*', iframe_res.text)
                     if iframe_m3u8:
                         stream_url = iframe_m3u8[0]
                         stream_type = "hls"
+                    else:
+                        # Decodificar transmisiones Base64 (atob) en Azrogo / JawalTV
+                        atob_matches = re.findall(r'atob\(["\']([^"\']+)["\']\)', iframe_res.text)
+                        for b64 in atob_matches:
+                            try:
+                                import base64
+                                dec = base64.b64decode(b64).decode('utf-8', errors='ignore')
+                                if dec.startswith('http'):
+                                    stream_url = dec
+                                    stream_type = "hls"
+                                    break
+                            except Exception:
+                                pass
                 except Exception:
                     pass
             elif 'easybroadcast.io' in full_embed_url:

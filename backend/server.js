@@ -416,12 +416,27 @@ async function syncAllLists() {
             }
         } catch(e){ console.error('[Sync] Error en Arabic:', e.message); }
 
-        // 4. BeIN
-        for (const c of BEIN_CHANNELS.concat(BEIN_CHANNELS_720)) {
-            const id = 'bein_' + c.id;
-            await db.execute(insertQuery, [id, c.name, 'BeIN Sports', c.logo]);
-            total++;
-        }
+        // 4. Yacine TV API (Todos los canales dinámicos en la categoría BeIN Sports)
+        try {
+            const rCat = await safeFetch('http://127.0.0.1:8000/categories', {}, 15000);
+            if (rCat.ok) {
+                const cats = await rCat.json();
+                for (const cat of cats.data || []) {
+                    // Omitir calidades duplicadas si es necesario (5=720p, 6=360p, 7=244p)
+                    if ([5, 6, 7].includes(cat.id)) continue;
+
+                    const rCh = await safeFetch(`http://127.0.0.1:8000/categories/${cat.id}/channels`, {}, 15000);
+                    if (rCh.ok) {
+                        const chData = await rCh.json();
+                        for (const c of chData.data || []) {
+                            const id = 'bein_' + c.id;
+                            await db.execute(insertQuery, [id, c.name, 'BeIN Sports', c.logo || '']);
+                            total++;
+                        }
+                    }
+                }
+            }
+        } catch(e){ console.error('[Sync] Error en Yacine API:', e.message); }
 
         io.emit('actualizar_streams', await obtenerStreamsDb());
     } catch(e) {
