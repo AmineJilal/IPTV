@@ -1,5 +1,6 @@
 from extractors.atresmedia import AtresmediaExtractor
 from extractors.mediaset import MediasetExtractor
+from extractors.rtve import RtveExtractor
 from extractors.base import BaseExtractor
 
 class StreamFactory:
@@ -16,6 +17,11 @@ class StreamFactory:
         # Check Mediaset channels
         if any(x in cid for x in ['telecinco', 'cuatro', 'fdf', 'divinity', 'energy', 'bemad', 'boing']):
             return MediasetExtractor()
+
+        # Check RTVE channels
+        if any(x in cid for x in ['la1', 'la2', '24h', 'teledeporte', 'tdp', 'clan', 'rtve']):
+            return RtveExtractor()
             
         return None
+
 

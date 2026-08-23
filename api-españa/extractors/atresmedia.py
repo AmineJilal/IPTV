@@ -24,7 +24,7 @@ class AtresmediaExtractor(BaseExtractor):
         'atreseries': 'atreseries'
     }
     
-    async def extract_stream(self, channel_id: str, raw_url: str) -> Dict[str, Any]:
+    async def extract_stream(self, channel_id: str, raw_url: str = "") -> Dict[str, Any]:
         slug = self.SLUGS.get(channel_id.lower(), channel_id.lower().replace('.tv', ''))
         
         headers = {

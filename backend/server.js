@@ -598,83 +598,21 @@ app.get('/api/play/:channelId', async (req, res) => {
 
                 if (id.startsWith('tdt_')) {
                     const rawPureId = id.replace('tdt_', '');
-                    const pureIdLower = rawPureId.toLowerCase();
-                    
-                    const rtveMap = {
-                        'la1': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8', 'la1.tv': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8', '1': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8',
-                        'la2': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8', 'la2.tv': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8', '2': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8',
-                        '24h': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8', '24h.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8', '24horas.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8',
-                        'tdp': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'teledeporte': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'teledeporte.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8', 'tdp.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8',
-                        'clan': 'https://rtvelivestream.rtve.es/rtvesec/clan/clan_main.m3u8', 'clan.tv': 'https://rtvelivestream.rtve.es/rtvesec/clan/clan_main.m3u8'
-                    };
-
-                    const atresMap = {
-                        'antena3.tv': 'antena3', 'antena3': 'antena3',
-                        'lasexta.tv': 'lasexta', 'lasexta': 'lasexta',
-                        'neox.tv': 'neox', 'neox': 'neox',
-                        'nova.tv': 'nova', 'nova': 'nova',
-                        'mega.tv': 'mega', 'mega': 'mega',
-                        'atreseries.tv': 'atreseries', 'atreseries': 'atreseries'
-                    };
-
-                    const mediasetMap = {
-                        'telecinco.tv': 'T5', 'telecinco': 'T5',
-                        'cuatro.tv': 'CT', 'cuatro': 'CT',
-                        'fdf.tv': 'FD', 'fdf': 'FD',
-                        'energy.tv': 'EN', 'energy': 'EN',
-                        'divinity.tv': 'DV', 'divinity': 'DV',
-                        'bemad.tv': 'BM', 'bemad': 'BM',
-                        'boing.tv': 'BO', 'boing': 'BO'
-                    };
-                    
-                    if (rtveMap[pureIdLower]) {
-                        nuevaUrl = rtveMap[pureIdLower];
-                        nuevosHeaders = JSON.stringify({
-                            "Origin": "https://www.rtve.es",
-                            "Referer": "https://www.rtve.es/",
-                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                        });
-                    } else if (atresMap[pureIdLower]) {
-                        try {
-                            const resAtres = await resolveNativeAtresmedia(atresMap[pureIdLower]);
-                            if (resAtres) {
-                                nuevaUrl = resAtres.stream_url;
-                                nuevosHeaders = JSON.stringify(resAtres.headers);
-                            }
-                        } catch (err) {
-                            fetchError = err;
-                            console.error(`🔥 [Native Atresmedia Error] ${err.message}`);
-                        }
-                    } else if (mediasetMap[pureIdLower]) {
-                        try {
-                            const resMedia = await resolveNativeMediaset(mediasetMap[pureIdLower]);
-                            if (resMedia) {
-                                nuevaUrl = resMedia.stream_url;
-                                nuevosHeaders = JSON.stringify(resMedia.headers);
-                            }
-                        } catch (err) {
-                            fetchError = err;
-                            console.error(`🔥 [Native Mediaset Error] ${err.message}`);
+                    for (const base of bases) {
+                        try { 
+                            r = await safeFetch(`${base}:8080/api/stream/${rawPureId}`); 
+                            if (r && r.ok) break; 
+                            else console.error(`⚠️ [España API] Status ${r ? r.status : 'null'} para ${rawPureId} en ${base}:8080`);
+                        } catch(e){ 
+                            fetchError = e; 
+                            console.error(`🔥 [España API Error] ${base}:8080 para ${rawPureId} -> ${e.message}`);
                         }
                     }
-
-                    if (!nuevaUrl) {
-                        for (const base of bases) {
-                            try { 
-                                r = await safeFetch(`${base}:8080/api/stream/${rawPureId}`); 
-                                if (r && r.ok) break; 
-                                else console.error(`⚠️ [España API] Status ${r ? r.status : 'null'} para ${rawPureId} en ${base}:8080`);
-                            } catch(e){ 
-                                fetchError = e; 
-                                console.error(`🔥 [España API Error] ${base}:8080 para ${rawPureId} -> ${e.message}`);
-                            }
-                        }
-                        if (r && r.ok) {
-                            const d = await r.json();
-                            nuevaUrl = d.stream_url || d.m3u8_url || d.hls_url || d.mpd_url || d.url || null;
-                            nuevosHeaders = d.headers || d.headers_required || null;
-                            if (nuevosHeaders) nuevosHeaders = JSON.stringify(nuevosHeaders);
-                        }
+                    if (r && r.ok) {
+                        const d = await r.json();
+                        nuevaUrl = d.m3u8_url || d.stream_url || d.hls_url || d.mpd_url || d.url || null;
+                        nuevosHeaders = d.headers_required || d.headers || null;
+                        if (nuevosHeaders && typeof nuevosHeaders === 'object') nuevosHeaders = JSON.stringify(nuevosHeaders);
                     }
                 } else if (id.startsWith('ibero_')) {
                     const pureId = id.replace('ibero_', '');

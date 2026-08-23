@@ -22,3 +22,11 @@ run
 
 # Mac/OS
 .DS_Store
+
+# DB, Logs & Temp Files
+*.db
+*.log
+response.json
+test_mediaset.py
+test_socket.js
+
