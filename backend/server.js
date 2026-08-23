@@ -416,8 +416,13 @@ async function syncAllLists() {
             }
         } catch(e){ console.error('[Sync] Error en Arabic:', e.message); }
 
-        // 4. (Canales de YacineTV / BeIN introducidos permanentemente en la base de datos Turso)
-        
+        // 4. BeIN
+        for (const c of BEIN_CHANNELS.concat(BEIN_CHANNELS_720)) {
+            const id = 'bein_' + c.id;
+            await db.execute(insertQuery, [id, c.name, 'BeIN Sports', c.logo]);
+            total++;
+        }
+
         io.emit('actualizar_streams', await obtenerStreamsDb());
     } catch(e) {
         console.error('Error sincronizando listas:', e);
