@@ -218,15 +218,9 @@ async def resolve_unified_stream(channel_id: str):
         try:
             return await extractor.extract_stream(channel_id, "")
         except Exception as e:
-            import traceback
-            print(f"Error en extracción unificada para {channel_id}: {e}")
-            traceback.print_exc()
-            raise HTTPException(
-                status_code=500,
-                detail={"error": "Extraction Failed", "message": str(e), "channel_id": channel_id}
-            )
+            print(f"⚠️ [Extractor Error] Fallo en extractor para {channel_id}: {e}. Usando fallback general...")
 
-    # Fallback a la resolución original si no hay extractor avanzado
+    # Fallback a la resolución original si no hay extractor o si el extractor falló
     return await resolve_stream(channel_id)
 
 @app.get("/playlist.m3u8")
