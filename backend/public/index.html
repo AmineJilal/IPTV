@@ -253,9 +253,23 @@
                     this.renderChannels();
                 });
 
-                // Refresco de Streams (Solo lectura directa de la Base de Datos sin resolver)
+                // Refresco de Streams con sincronización de la API
                 this.dom.btnRefresh.addEventListener('click', async () => {
                     this.dom.btnRefreshIcon.classList.add('animate-spin');
+                    this.dom.btnRefreshText.innerText = 'Sincronizando...';
+                    
+                    try {
+                        const syncRes = await fetch('/api/sync-lists');
+                        if (syncRes.ok) {
+                            const syncData = await syncRes.json();
+                            if (syncData.success) {
+                                this.showToast(`Sincronización completa: ${syncData.count} canales verificados`, 'green');
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error sincronizando:', e);
+                    }
+
                     this.dom.btnRefreshText.innerText = 'Cargando...';
                     
                     if (this.socket && this.socket.connected) {
