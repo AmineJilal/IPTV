@@ -108,7 +108,8 @@ async def resolve_stream(id_canal: str):
     
     canal = None
     for c in canales:
-        if c.get("id", "").lower() == id_canal.lower():
+        cid = c.get("id", "").lower()
+        if cid == id_canal.lower() or cid.replace(".tv", "") == id_canal.lower():
             canal = c
             break
             
@@ -141,18 +142,33 @@ async def resolve_stream(id_canal: str):
                 res = await client.get(api_url, headers=headers)
                 if res.status_code == 200:
                     json_res = res.json()
-                    # Retornamos los enlaces de video extraídos
                     sources = json_res.get("sources", [])
-                    stream_url = None
-                    if sources:
-                        stream_url = sources[0].get("src")
-                    elif "urlVideo" in json_res:
-                        stream_url = json_res.get("urlVideo")
+                    m3u8_url = None
+                    for source in sources:
+                        src = source.get("src", "")
+                        stype = str(source.get("type") or "").lower()
+                        if not src or "dash" in stype or ".mpd" in src.lower():
+                            continue
                         
+                        if "application/vnd.apple.mpegurl" in stype or "mpegurl" in stype or ".m3u8" in src.lower() or "hls" in stype:
+                            if "atres-live.atresmedia.com" in src:
+                                m3u8_url = src
+                                break
+                            elif not m3u8_url:
+                                m3u8_url = src
+                                
+                    if not m3u8_url and sources:
+                        for source in sources:
+                            src = source.get("src", "")
+                            stype2 = str(source.get("type") or "").lower()
+                            if src and not "dash" in stype2 and not ".mpd" in src.lower():
+                                m3u8_url = src
+                                break
+                                
                     return {
                         "canal": canal.get("name"),
                         "type": "atresmedia_hls",
-                        "stream_url": stream_url,
+                        "stream_url": m3u8_url,
                         "raw_response": json_res,
                         "headers": headers
                     }

@@ -72,8 +72,8 @@ class AtresmediaExtractor(BaseExtractor):
             # Buscamos primero en atres-live y application/vnd.apple.mpegurl
             for source in sources:
                 src = source.get("src", "")
-                stype = source.get("type", "").lower()
-                if not src or "dash" in stype.lower() or ".mpd" in src.lower():
+                stype = str(source.get("type") or "").lower()
+                if not src or "dash" in stype or ".mpd" in src.lower():
                     continue
                 
                 if "application/vnd.apple.mpegurl" in stype or "mpegurl" in stype or ".m3u8" in src.lower() or "hls" in stype:
@@ -86,7 +86,8 @@ class AtresmediaExtractor(BaseExtractor):
             if not m3u8_url and sources:
                 for source in sources:
                     src = source.get("src", "")
-                    if src and not "dash" in source.get("type", "").lower() and not ".mpd" in src.lower():
+                    stype2 = str(source.get("type") or "").lower()
+                    if src and not "dash" in stype2 and not ".mpd" in src.lower():
                         m3u8_url = src
                         break
                 

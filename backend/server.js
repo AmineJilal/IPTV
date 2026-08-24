@@ -614,10 +614,18 @@ app.get('/api/play/:channelId', async (req, res) => {
 
                 if (id.startsWith('tdt_')) {
                     const rawPureId = id.replace('tdt_', '');
+                    let responseBodyText = '';
                     for (const base of bases) {
+                        const targetUrl = `${base}:8080/api/stream/${rawPureId}`;
+                        console.log(`[DEBUG] Solicitando API Externa: ${targetUrl} (channelId original: ${id})`);
                         try { 
-                            r = await safeFetch(`${base}:8080/api/stream/${rawPureId}`); 
-                            if (r && r.ok) break; 
+                            r = await safeFetch(targetUrl); 
+                            console.log(`[DEBUG] HTTP Status de API Externa: ${r ? r.status : 'null'}`);
+                            if (r && r.ok) {
+                                responseBodyText = await r.text();
+                                console.log(`[DEBUG] Response Body crudo: ${responseBodyText}`);
+                                break; 
+                            }
                             else console.error(`⚠️ [España API] Status ${r ? r.status : 'null'} para ${rawPureId} en ${base}:8080`);
                         } catch(e){ 
                             fetchError = e; 
@@ -625,10 +633,17 @@ app.get('/api/play/:channelId', async (req, res) => {
                         }
                     }
                     if (r && r.ok) {
-                        const d = await r.json();
-                        nuevaUrl = d.m3u8_url || d.stream_url || d.hls_url || d.mpd_url || d.url || d.raw_url || d.web_url || null;
-                        nuevosHeaders = d.headers_required || d.headers || null;
-                        if (nuevosHeaders && typeof nuevosHeaders === 'object') nuevosHeaders = JSON.stringify(nuevosHeaders);
+                        try {
+                            const d = JSON.parse(responseBodyText);
+                            console.log(`[DEBUG] JSON Parseado OK. keys: ${Object.keys(d)}`);
+                            console.log(`[DEBUG] Extractor/Type: ${d.type || d.provider || 'desconocido'}`);
+                            nuevaUrl = d.m3u8_url || d.stream_url || d.hls_url || d.mpd_url || d.url || d.raw_url || d.web_url || null;
+                            nuevosHeaders = d.headers_required || d.headers || null;
+                            console.log(`[DEBUG] URL extraída: ${nuevaUrl}`);
+                            if (nuevosHeaders && typeof nuevosHeaders === 'object') nuevosHeaders = JSON.stringify(nuevosHeaders);
+                        } catch (e) {
+                            console.error(`[DEBUG] Error parseando JSON de API Externa: ${e.message}`);
+                        }
                     }
                 } else if (id.startsWith('ibero_')) {
                     const pureId = id.replace('ibero_', '');
