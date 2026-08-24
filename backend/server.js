@@ -600,8 +600,14 @@ app.get('/api/play/:channelId', async (req, res) => {
         if (!finalStreamUrl || finalStreamUrl === 'null' || finalStreamUrl === 'undefined' || (typeof finalStreamUrl === 'string' && !finalStreamUrl.startsWith('http'))) {
             finalStreamUrl = null;
         }
+        
+        // Si la caché guarda una URL web de atresplayer en lugar del M3U8, la descartamos
+        if (finalStreamUrl && finalStreamUrl.includes('atresplayer.com/directos/')) {
+            console.log(`⚠️ [Cache] Descartando URL HTML de Atresmedia en caché: ${finalStreamUrl}`);
+            finalStreamUrl = null;
+        }
 
-        if (!finalStreamUrl || ahora - (stream.updated_at || 0) > ttl) {
+        if (!finalStreamUrl || ahora - (stream.updated_at || 0) > ttl || req.query.refresh) {
             console.log(`🔄 [Cache-Aside] Resolviendo m3u8...`);
             let nuevaUrl = null;
             let nuevosHeaders = null;
