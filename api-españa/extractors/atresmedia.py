@@ -65,23 +65,29 @@ class AtresmediaExtractor(BaseExtractor):
                 raise Exception(f"Failed to fetch Atresmedia video sources: HTTP {res3.status_code}")
                 
             data3 = res3.json()
-            # En Atresmedia los directos están en 'sourcesLive' o 'sources'
-            sources = data3.get("sourcesLive", []) or data3.get("sources", []) or data3.get("sourcesStartOver", [])
+            # Prioridad: sourcesLive > sources > sourcesStartOver
+            sources = data3.get("sourcesLive") or data3.get("sources") or data3.get("sourcesStartOver") or []
             m3u8_url = None
             
+            # Buscamos primero en atres-live y application/vnd.apple.mpegurl
             for source in sources:
                 src = source.get("src", "")
                 stype = source.get("type", "").lower()
-                # Priorizar HLS m3u8 sobre MPD y SSAI
-                if (".m3u8" in src or "mpegurl" in stype or "hls" in stype) and src:
-                    m3u8_url = src
-                    if "master.m3u8" in src or "playlist.m3u8" in src:
+                if not src or "dash" in stype.lower() or ".mpd" in src.lower():
+                    continue
+                
+                if "application/vnd.apple.mpegurl" in stype or "mpegurl" in stype or ".m3u8" in src.lower() or "hls" in stype:
+                    if "atres-live.atresmedia.com" in src:
+                        m3u8_url = src
                         break
-                    
+                    elif not m3u8_url:
+                        m3u8_url = src # Fallback if atres-live not found but is HLS
+                        
             if not m3u8_url and sources:
                 for source in sources:
-                    if source.get("src"):
-                        m3u8_url = source.get("src")
+                    src = source.get("src", "")
+                    if src and not "dash" in source.get("type", "").lower() and not ".mpd" in src.lower():
+                        m3u8_url = src
                         break
                 
             if not m3u8_url:

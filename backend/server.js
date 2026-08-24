@@ -118,16 +118,32 @@ async function resolveNativeAtresmedia(slug) {
     const r3 = await safeFetch(d2.urlVideo, { headers }, 8000);
     if (!r3 || !r3.ok) throw new Error(`[Atres Step 3] HTTP ${r3 ? r3.status : 'timeout'}`);
     const d3 = await r3.json();
-    const sources = d3.sourcesLive || d3.sources || [];
+    const sources = d3.sourcesLive || d3.sources || d3.sourcesStartOver || [];
     let m3u8 = null;
+    
     for (const s of sources) {
-        if (s.src && (s.src.includes('.m3u8') || s.type?.includes('mpegurl') || s.type?.includes('hls'))) {
-            m3u8 = s.src;
-            if (s.src.includes('playlist.m3u8') || s.src.includes('master.m3u8')) break;
+        if (!s.src || (s.type && s.type.toLowerCase().includes('dash')) || s.src.toLowerCase().includes('.mpd')) continue;
+        
+        if (s.type?.toLowerCase().includes('mpegurl') || s.type?.toLowerCase().includes('hls') || s.src.toLowerCase().includes('.m3u8')) {
+            if (s.src.includes('atres-live.atresmedia.com')) {
+                m3u8 = s.src;
+                break;
+            } else if (!m3u8) {
+                m3u8 = s.src; // fallback
+            }
         }
     }
-    if (!m3u8 && sources[0]?.src) m3u8 = sources[0].src;
-    if (!m3u8) throw new Error(`[Atres Step 3] No m3u8 source found`);
+    
+    if (!m3u8 && sources.length > 0) {
+        for (const s of sources) {
+            if (s.src && !(s.type && s.type.toLowerCase().includes('dash')) && !s.src.toLowerCase().includes('.mpd')) {
+                m3u8 = s.src;
+                break;
+            }
+        }
+    }
+    
+    if (!m3u8) throw new Error(`[Atres Step 3] No HLS m3u8 source found`);
     return { stream_url: m3u8, headers };
 }
 
@@ -803,12 +819,19 @@ app.all('/proxy-video', (req, res) => {
                     const trimmed = line.trim();
                     if (trimmed && !trimmed.startsWith('#')) {
                         const absoluteUrl = trimmed.startsWith('http') ? trimmed : new URL(trimmed, cleanUrl).href;
-                        // Forzamos que TODO pase por el proxy para inyectar cabeceras y evitar bloqueos CORS
-                        return buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
+                        // Solo pasamos por el proxy las playlists (.m3u8) para seguir parseando.
+                        // Los segmentos (.ts, .mp4, etc.) van directos al CDN para ahorrar RAM/CPU.
+                        if (absoluteUrl.split('?')[0].toLowerCase().endsWith('.m3u8')) {
+                            return buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
+                        }
+                        return absoluteUrl;
                     } else if (trimmed.startsWith('#EXT-X-STREAM-INF:') || trimmed.startsWith('#EXT-X-MEDIA:')) {
                         return line.replace(/URI="([^"]+)"/g, (match, p1) => {
                             const absoluteUri = p1.startsWith('http') ? p1 : new URL(p1, cleanUrl).href;
-                            return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
+                            if (absoluteUri.split('?')[0].toLowerCase().endsWith('.m3u8')) {
+                                return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
+                            }
+                            return `URI="${absoluteUri}"`;
                         });
                     }
                     return line;
