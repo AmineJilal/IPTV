@@ -1,15 +1,15 @@
 require('dotenv').config();
 const dns = require('dns');
-try { dns.setDefaultResultOrder('ipv4first'); } catch (_) {}
-const express    = require('express');
-const http       = require('http');
+try { dns.setDefaultResultOrder('ipv4first'); } catch (_) { }
+const express = require('express');
+const http = require('http');
 const { Server } = require('socket.io');
-const path       = require('path');
-const fs         = require('fs').promises;
+const path = require('path');
+const fs = require('fs').promises;
 const { createClient } = require('@libsql/client');
-const https      = require('https');
-const http_mod   = require('http');
-const { URL }    = require('url');
+const https = require('https');
+const http_mod = require('http');
+const { URL } = require('url');
 
 // 1. Manejo Global de Errores para evitar caídas fatales del backend
 process.on('uncaughtException', (err) => {
@@ -21,7 +21,7 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Extractor eliminado del servidor principal (Se ejecuta en pc_worker.js)
 
-const app    = express();
+const app = express();
 const server = http.createServer(app);
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
@@ -109,7 +109,7 @@ async function resolveNativeAtresmedia(slug) {
     if (!r1 || !r1.ok) throw new Error(`[Atres Step 1] HTTP ${r1 ? r1.status : 'timeout'}`);
     const d1 = await r1.json();
     if (!d1.href) throw new Error(`[Atres Step 1] Missing d1.href in ${JSON.stringify(d1)}`);
-    
+
     const r2 = await safeFetch(d1.href, { headers }, 8000);
     if (!r2 || !r2.ok) throw new Error(`[Atres Step 2] HTTP ${r2 ? r2.status : 'timeout'}`);
     const d2 = await r2.json();
@@ -120,10 +120,10 @@ async function resolveNativeAtresmedia(slug) {
     const d3 = await r3.json();
     const sources = d3.sourcesLive || d3.sources || d3.sourcesStartOver || [];
     let m3u8 = null;
-    
+
     for (const s of sources) {
         if (!s.src || (s.type && s.type.toLowerCase().includes('dash')) || s.src.toLowerCase().includes('.mpd')) continue;
-        
+
         if (s.type?.toLowerCase().includes('mpegurl') || s.type?.toLowerCase().includes('hls') || s.src.toLowerCase().includes('.m3u8')) {
             if (s.src.includes('atres-live.atresmedia.com')) {
                 m3u8 = s.src;
@@ -133,7 +133,7 @@ async function resolveNativeAtresmedia(slug) {
             }
         }
     }
-    
+
     if (!m3u8 && sources.length > 0) {
         for (const s of sources) {
             if (s.src && !(s.type && s.type.toLowerCase().includes('dash')) && !s.src.toLowerCase().includes('.mpd')) {
@@ -142,7 +142,7 @@ async function resolveNativeAtresmedia(slug) {
             }
         }
     }
-    
+
     if (!m3u8) throw new Error(`[Atres Step 3] No HLS m3u8 source found`);
     return { stream_url: m3u8, headers };
 }
@@ -192,7 +192,7 @@ async function resolveNativeMediaset(code) {
         const lastSlash = u.pathname.lastIndexOf('/');
         const basePath = lastSlash !== -1 ? u.pathname.substring(0, lastSlash) : u.pathname;
         masterUrl = `${u.origin}${basePath}/master.m3u8${hdnea ? '?hdnea=' + hdnea : ''}`;
-    } catch(e) {}
+    } catch (e) { }
 
     return { stream_url: masterUrl, headers: { 'Origin': 'https://www.mediasetinfinity.es', 'Referer': 'https://www.mediasetinfinity.es/', 'User-Agent': headers['User-Agent'] } };
 }
@@ -300,7 +300,7 @@ async function validarTodosLosStreams() {
     // Desactivado para evitar lentitud y bombardeo a los orígenes
     // setTimeout(validarTodosLosStreams, 600000);
 }
-const io     = new Server(server, { cors: { origin: '*' } });
+const io = new Server(server, { cors: { origin: '*' } });
 
 
 // ─────────────────────────────────────────────
@@ -309,7 +309,7 @@ const io     = new Server(server, { cors: { origin: '*' } });
 const dbUrl = process.env.TURSO_DATABASE_URL || 'libsql://iptv-db-aminejilal.aws-eu-west-1.turso.io';
 const dbToken = process.env.TURSO_AUTH_TOKEN || '';
 
-const db = dbToken 
+const db = dbToken
     ? createClient({ url: dbUrl, authToken: dbToken })
     : createClient({ url: 'file:local.db' });
 
@@ -393,13 +393,13 @@ async function syncAllLists() {
             if (r.ok) {
                 const data = await r.json();
                 for (const c of data.canales || []) {
-                    if (c.url && (c.url.includes('youtube') || c.url.includes('youtu.be'))) continue; 
+                    if (c.url && (c.url.includes('youtube') || c.url.includes('youtu.be'))) continue;
                     const id = 'tdt_' + c.id;
                     await db.execute(insertQuery, [id, c.name || c.nombre, 'España', c.logo]);
                     total++;
                 }
             }
-        } catch(e){ console.error('[Sync] Error en TDT España:', e.message); }
+        } catch (e) { console.error('[Sync] Error en TDT España:', e.message); }
 
         // 2. Iberoamericana
         try {
@@ -415,7 +415,7 @@ async function syncAllLists() {
                     total++;
                 }
             }
-        } catch(e){ console.error('[Sync] Error en Iberoamericana:', e.message); }
+        } catch (e) { console.error('[Sync] Error en Iberoamericana:', e.message); }
 
         // 3. Arabic
         try {
@@ -430,7 +430,7 @@ async function syncAllLists() {
                     total++;
                 }
             }
-        } catch(e){ console.error('[Sync] Error en Arabic:', e.message); }
+        } catch (e) { console.error('[Sync] Error en Arabic:', e.message); }
 
         // 4. Yacine TV API (Todos los 317 canales dinámicos en la categoría BeIN Sports)
         try {
@@ -449,10 +449,10 @@ async function syncAllLists() {
                     }
                 }
             }
-        } catch(e){ console.error('[Sync] Error en Yacine API:', e.message); }
+        } catch (e) { console.error('[Sync] Error en Yacine API:', e.message); }
 
         io.emit('actualizar_streams', await obtenerStreamsDb());
-    } catch(e) {
+    } catch (e) {
         console.error('Error sincronizando listas:', e);
     }
     return total;
@@ -482,7 +482,7 @@ app.get('/api/streams', async (req, res) => {
             streams = await obtenerStreamsDb();
         }
         res.json(streams);
-    } catch(e) {
+    } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
@@ -498,14 +498,14 @@ app.patch('/api/streams/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { nombre, categoria } = req.body;
-        
+
         let query = "UPDATE channel_cache SET ";
         const args = [];
         if (nombre) { query += "nombre = ?, "; args.push(nombre); }
         if (categoria) { query += "categoria = ?, "; args.push(categoria); }
         query = query.slice(0, -2) + " WHERE id = ?";
         args.push(id);
-        
+
         await db.execute(query, args);
         io.emit('actualizar_streams', await obtenerStreamsDb());
         res.json({ success: true });
@@ -523,7 +523,7 @@ app.post('/api/update-stream', async (req, res) => {
             "UPDATE channel_cache SET stream_url = ?, estado = 'online', updated_at = ? WHERE id = ?",
             [url, Date.now(), id]
         );
-        
+
         io.emit('actualizar_streams', await obtenerStreamsDb());
         res.json({ success: true });
     } catch (e) {
@@ -539,14 +539,14 @@ app.post('/api/update-stream', async (req, res) => {
 async function initDirectories() {
     const directorios = [path.join(__dirname, 'public')];
     for (const dir of directorios) {
-        try { await fs.mkdir(dir, { recursive: true }); } catch (e) {}
+        try { await fs.mkdir(dir, { recursive: true }); } catch (e) { }
     }
 }
 
 async function startServer() {
     await initDirectories();
     const PORT = process.env.PORT || 3000;
-    
+
     server.on('error', (e) => {
         if (e.code === 'EADDRINUSE') {
             console.error(`⚠️ Puerto ${PORT} ocupado. Reintentando escuchar en 3 segundos...`);
@@ -600,7 +600,7 @@ app.get('/api/play/:channelId', async (req, res) => {
         if (!finalStreamUrl || finalStreamUrl === 'null' || finalStreamUrl === 'undefined' || (typeof finalStreamUrl === 'string' && !finalStreamUrl.startsWith('http'))) {
             finalStreamUrl = null;
         }
-        
+
         // Si la caché guarda una URL web de atresplayer en lugar del M3U8, la descartamos
         if (finalStreamUrl && finalStreamUrl.includes('atresplayer.com/directos/')) {
             console.log(`⚠️ [Cache] Descartando URL HTML de Atresmedia en caché: ${finalStreamUrl}`);
@@ -611,7 +611,7 @@ app.get('/api/play/:channelId', async (req, res) => {
             console.log(`🔄 [Cache-Aside] Resolviendo m3u8...`);
             let nuevaUrl = null;
             let nuevosHeaders = null;
-            
+
             const bases = ['http://127.0.0.1', 'http://localhost'];
             let r = null;
 
@@ -624,28 +624,23 @@ app.get('/api/play/:channelId', async (req, res) => {
                     for (const base of bases) {
                         const targetUrl = `${base}:8080/api/stream/${rawPureId}`;
                         console.log(`[DEBUG] Solicitando API Externa: ${targetUrl} (channelId original: ${id})`);
-                        try { 
-                            r = await safeFetch(targetUrl, {}, 25000); 
-                            console.log(`[DEBUG] HTTP Status de API Externa: ${r ? r.status : 'null'}`);
-                            if (r && r.ok) {
+                        try {
+                            r = await safeFetch(targetUrl, {}, 25000);
+                            if (r) {
                                 responseBodyText = await r.text();
+                                console.log(`[DEBUG] HTTP Status de API Externa: ${r.status}`);
                                 console.log(`[DEBUG] Response Body crudo: ${responseBodyText}`);
-                                break; 
+                                break;
                             }
-                            else console.error(`⚠️ [España API] Status ${r ? r.status : 'null'} para ${rawPureId} en ${base}:8080`);
-                        } catch(e){ 
-                            fetchError = e; 
+                        } catch (e) {
+                            fetchError = e;
                             console.error(`🔥 [España API Error] ${base}:8080 para ${rawPureId} -> ${e.message}`);
                         }
                     }
                     if (r) {
-                        try {
-                            responseBodyText = await r.text();
-                        } catch (_) {}
-                        
                         let d = null;
                         try { d = JSON.parse(responseBodyText); } catch (_) {}
-                        
+
                         if (!r.ok || (d && d.error)) {
                             console.error(`❌ [Node] API Externa devolvió error (HTTP ${r.status}):`, d || responseBodyText);
                             const errStatus = (d && d.status && d.status >= 400 && d.status < 600) ? d.status : (r.status >= 400 ? r.status : 502);
@@ -657,7 +652,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                                 error: (d && (d.message || d.error)) || `API Externa devolvió status HTTP ${r.status}`
                             });
                         }
-                        
+
                         if (d) {
                             console.log(`[DEBUG] JSON Parseado OK. keys: ${Object.keys(d)}`);
                             console.log(`[DEBUG] Extractor/Type: ${d.type || d.provider || 'desconocido'}`);
@@ -675,7 +670,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                 } else if (id.startsWith('ibero_')) {
                     const pureId = id.replace('ibero_', '');
                     for (const base of bases) {
-                        try { r = await safeFetch(`${base}:8090/api/channels/${pureId}`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                        try { r = await safeFetch(`${base}:8090/api/channels/${pureId}`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
                     if (r && r.ok) {
                         const d = await r.json();
@@ -687,7 +682,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                 } else if (id.startsWith('bein_')) {
                     const pureId = id.replace('bein_', '');
                     for (const base of bases) {
-                        try { r = await safeFetch(`${base}:8000/channel/${pureId}`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                        try { r = await safeFetch(`${base}:8000/channel/${pureId}`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
                     if (r && r.ok) {
                         const d = await r.json();
@@ -700,7 +695,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                     const pureId = id.replace('arabic_', '');
                     for (const base of bases) {
                         // FIX: Evitar que la API Árabe devuelva un 307 Redirect (rompe el JSON.parse) usando ?redirect=false
-                        try { r = await safeFetch(`${base}:9080/api/channels/${pureId}/stream?redirect=false`, {}, 30000); if (r && r.ok) break; } catch(e){ fetchError = e; }
+                        try { r = await safeFetch(`${base}:9080/api/channels/${pureId}/stream?redirect=false`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
                     if (r && r.ok) {
                         const d = await r.json();
@@ -724,7 +719,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                 } else {
                     console.error(`⚠️ [API PLAY] No se obtuvo nueva URL, usando la caché anterior si existe.`);
                     // fallback to database stream URL if API fails, so we don't wipe it out!
-                    finalStreamUrl = stream.stream_url; 
+                    finalStreamUrl = stream.stream_url;
                 }
             } catch (fetchErr) {
                 console.error(`⚠️ [API PLAY] Error de fetch global: ${fetchErr.message}`);
@@ -732,12 +727,11 @@ app.get('/api/play/:channelId', async (req, res) => {
             }
         }
 
-        if (!finalStreamUrl || (typeof finalStreamUrl === 'string' && finalStreamUrl.includes('atresplayer.com/directos/'))) {
-            return res.status(422).json({ 
-                success: false,
-                error: 'La API externa no devolvió enlace m3u8 válido.', 
+        if (!finalStreamUrl) {
+            return res.status(422).json({
+                error: 'La API externa no devolvió enlace.',
                 channelId: id,
-                fetchError: fetchError ? fetchError.message : 'Invalid stream URL'
+                fetchError: fetchError ? fetchError.message : 'Unknown'
             });
         }
 
@@ -748,13 +742,13 @@ app.get('/api/play/:channelId', async (req, res) => {
                 ref = hdrs['Referer'] || '';
                 ori = hdrs['Origin'] || '';
                 ua = hdrs['User-Agent'] || hdrs['user-agent'] || ua;
-            } catch(e) {
+            } catch (e) {
                 if (typeof headersList === 'string' && headersList.includes('=')) {
-                     const parts = headersList.split('|');
-                     parts.forEach(p => {
-                         if (p.startsWith('Referer=')) ref = decodeURIComponent(p.split('=')[1]);
-                         if (p.startsWith('User-Agent=')) ua = decodeURIComponent(p.split('=')[1]);
-                     });
+                    const parts = headersList.split('|');
+                    parts.forEach(p => {
+                        if (p.startsWith('Referer=')) ref = decodeURIComponent(p.split('=')[1]);
+                        if (p.startsWith('User-Agent=')) ua = decodeURIComponent(p.split('=')[1]);
+                    });
                 }
             }
         }
@@ -853,11 +847,11 @@ app.all('/proxy-video', (req, res) => {
                 }
                 chunks.push(chunk);
             });
-            
+
             proxyRes.on('end', () => {
                 if (totalSize > MAX_PLAYLIST_SIZE) return res.end(); // Abortado por seguridad
                 const body = Buffer.concat(chunks).toString('utf-8');
-                
+
                 let lastTag = '';
                 const rewritten = body.split('\n').map(line => {
                     const trimmed = line.trim();
@@ -866,11 +860,11 @@ app.all('/proxy-video', (req, res) => {
                     if (trimmed.startsWith('#')) {
                         if (trimmed.startsWith('#EXT-X-STREAM-INF')) lastTag = 'STREAM-INF';
                         else if (trimmed.startsWith('#EXTINF') || trimmed.startsWith('#EXT-X-BYTERANGE')) lastTag = 'EXTINF';
-                        
+
                         if (trimmed.includes('URI="')) {
                             return line.replace(/URI="([^"]+)"/g, (match, p1) => {
                                 const absoluteUri = p1.startsWith('http') ? p1 : new URL(p1, cleanUrl).href;
-                                
+
                                 return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
                             });
                         }
@@ -894,7 +888,7 @@ app.all('/proxy-video', (req, res) => {
     proxyReq.on('error', (err) => {
         if (!res.headersSent) res.status(502).send('Error del proxy: ' + err.message);
     });
-    
+
     // FIX CRÍTICO: Fuga de Conexiones. Si el cliente cierra el vídeo, matamos la descarga remota.
     req.on('close', () => {
         proxyReq.destroy();
@@ -910,9 +904,9 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
         const stream = streams.find(s => s.id === channelId || s.nombre.toLowerCase().replace(/ /g, '_') === channelId.toLowerCase());
         if (!stream) return res.status(404).send('Canal no encontrado.');
         if (!stream.stream_url) return res.status(404).send('Sin URL HLS resuelta para este canal. Ábrelo primero en la web.');
-        
+
         let finalUrl = stream.stream_url;
-        
+
         // Acoplar cabeceras si existen en la BD
         if (stream.headers && stream.headers !== 'null') {
             try {
@@ -920,7 +914,7 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
                 if (hdrs['Referer']) finalUrl += `|Referer=${hdrs['Referer']}`;
                 if (hdrs['Origin']) finalUrl += `|Origin=${hdrs['Origin']}`;
                 if (hdrs['User-Agent'] || hdrs['user-agent']) finalUrl += `|User-Agent=${hdrs['User-Agent'] || hdrs['user-agent']}`;
-            } catch(e) {}
+            } catch (e) { }
         }
 
         const target = encodeURIComponent(finalUrl);
@@ -952,7 +946,7 @@ io.on('connection', async (socket) => {
                 [id, nombre, url, Date.now()]
             );
             io.emit('actualizar_streams', await obtenerStreamsDb());
-        } catch(e){}
+        } catch (e) { }
     });
 
     // ── Borrar Todos los Canales ───────────────────────────────────────
@@ -960,7 +954,7 @@ io.on('connection', async (socket) => {
         try {
             await db.execute("DELETE FROM channel_cache");
             io.emit('actualizar_streams', []);
-        } catch(e){}
+        } catch (e) { }
     });
 
     // ── Marcar / Desmarcar Favorito ──────────────────────────────────
@@ -972,7 +966,7 @@ io.on('connection', async (socket) => {
                 await db.execute("UPDATE channel_cache SET favorito = ? WHERE id = ?", [nuevo, id]);
                 io.emit('actualizar_streams', await obtenerStreamsDb());
             }
-        } catch(e) {}
+        } catch (e) { }
     });
 
     socket.on('disconnect', () => {
@@ -987,17 +981,21 @@ io.on('connection', async (socket) => {
 async function initDirectories() {
     const directorios = [path.join(__dirname, 'public')];
     for (const dir of directorios) {
-        try { await fs.mkdir(dir, { recursive: true }); } catch (e) {}
+        try { await fs.mkdir(dir, { recursive: true }); } catch (e) { }
     }
 }
 
 async function startServer() {
     await initDirectories();
     const PORT = process.env.PORT || 3000;
-    
+
     server.on('error', (e) => {
         if (e.code === 'EADDRINUSE') {
-            console.error(`⚠️ Puerto ${PORT} ocupado. El proceso finalizará o esperará a que el puerto se libere.`);
+            console.error(`⚠️ Puerto ${PORT} ocupado. Reintentando escuchar en 3 segundos...`);
+            setTimeout(() => {
+                server.close();
+                server.listen(PORT, '0.0.0.0');
+            }, 3000);
         } else {
             console.error('🔥 Error en el servidor HTTP:', e);
         }
