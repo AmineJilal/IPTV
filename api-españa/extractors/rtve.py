@@ -9,26 +9,34 @@ class RtveExtractor(BaseExtractor):
     MAP = {
         'la1': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8',
         'la1.tv': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8',
+        'tdt_la1.tv': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8',
         '1': 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8',
         'la2': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8',
         'la2.tv': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8',
+        'tdt_la2.tv': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8',
         '2': 'https://rtvelivestream.rtve.es/rtvesec/la2/la2_main.m3u8',
         '24h': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8',
         '24h.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8',
+        'tdt_24h.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8',
         '24horas.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8',
+        'tdt_24horas.tv': 'https://rtvelivestream.rtve.es/rtvesec/24h/24h_main.m3u8',
         'tdp': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8',
         'tdp.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8',
+        'tdt_tdp.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8',
         'teledeporte': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8',
         'teledeporte.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8',
+        'tdt_teledeporte.tv': 'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8',
         'clan': 'https://rtvelivestream.rtve.es/rtvesec/clan/clan_main.m3u8',
-        'clan.tv': 'https://rtvelivestream.rtve.es/rtvesec/clan/clan_main.m3u8'
+        'clan.tv': 'https://rtvelivestream.rtve.es/rtvesec/clan/clan_main.m3u8',
+        'tdt_clan.tv': 'https://rtvelivestream.rtve.es/rtvesec/clan/clan_main.m3u8'
     }
 
     async def extract_stream(self, channel_id: str, raw_url: str = "") -> Dict[str, Any]:
         cid = channel_id.lower()
-        m3u8_url = self.MAP.get(cid)
+        clean_cid = cid.replace('tdt_', '')
+        m3u8_url = self.MAP.get(cid) or self.MAP.get(clean_cid) or self.MAP.get(clean_cid.replace('.tv', ''))
         if not m3u8_url:
-            m3u8_url = f"https://ztnr.rtve.es/ztnr/{cid}.m3u8"
+            m3u8_url = 'https://rtvelivestream.rtve.es/rtvesec/la1/la1_main.m3u8'
 
         headers = {
             "Origin": "https://www.rtve.es",

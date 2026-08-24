@@ -625,7 +625,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                         const targetUrl = `${base}:8080/api/stream/${rawPureId}`;
                         console.log(`[DEBUG] Solicitando API Externa: ${targetUrl} (channelId original: ${id})`);
                         try { 
-                            r = await safeFetch(targetUrl); 
+                            r = await safeFetch(targetUrl, {}, 25000); 
                             console.log(`[DEBUG] HTTP Status de API Externa: ${r ? r.status : 'null'}`);
                             if (r && r.ok) {
                                 responseBodyText = await r.text();
@@ -643,7 +643,12 @@ app.get('/api/play/:channelId', async (req, res) => {
                             const d = JSON.parse(responseBodyText);
                             console.log(`[DEBUG] JSON Parseado OK. keys: ${Object.keys(d)}`);
                             console.log(`[DEBUG] Extractor/Type: ${d.type || d.provider || 'desconocido'}`);
-                            nuevaUrl = d.m3u8_url || d.stream_url || d.hls_url || d.mpd_url || d.url || d.raw_url || d.web_url || null;
+                            let extractedUrl = d.m3u8_url || d.stream_url || d.hls_url || d.mpd_url || d.url || null;
+                            if (extractedUrl && typeof extractedUrl === 'string' && extractedUrl.includes('atresplayer.com/directos/')) {
+                                console.error(`❌ [Node] Se descartó URL HTML de Atresplayer: ${extractedUrl}`);
+                                extractedUrl = null;
+                            }
+                            nuevaUrl = extractedUrl;
                             nuevosHeaders = d.headers_required || d.headers || null;
                             console.log(`[DEBUG] URL extraída: ${nuevaUrl}`);
                             if (nuevosHeaders && typeof nuevosHeaders === 'object') nuevosHeaders = JSON.stringify(nuevosHeaders);

@@ -2,13 +2,14 @@ from extractors.atresmedia import AtresmediaExtractor
 from extractors.mediaset import MediasetExtractor
 from extractors.rtve import RtveExtractor
 from extractors.base import BaseExtractor
+from extractors.utils import normalize_channel_id
 
 class StreamFactory:
     """Factory to get the correct extractor based on the channel ID or group."""
     
     @staticmethod
     def get_extractor(channel_id: str, group: str = None) -> BaseExtractor:
-        cid = channel_id.lower()
+        cid = normalize_channel_id(channel_id)
         
         # Check Atresmedia channels
         if any(x in cid for x in ['antena3', 'lasexta', 'neox', 'nova', 'mega', 'atreseries']):
