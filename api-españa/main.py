@@ -130,50 +130,23 @@ async def resolve_stream(id_canal: str):
         
     # 2. Atresmedia (Antena 3, La Sexta, Neox, Nova, Mega, Atreseries) -> stream11
     elif stype == "stream11":
-        href_encoded = urllib.parse.quote(raw_url, safe="")
-        api_url = f"https://api.atresplayer.com/client/v1/url?href={href_encoded}"
-        headers = {
-            "Origin": "https://www.atresplayer.com",
-            "Referer": "https://www.atresplayer.com/",
-            "User-Agent": USER_AGENT
+        from extractors.factory import StreamFactory
+        extractor = StreamFactory.get_extractor(canal.get("id", ""))
+        if extractor:
+            try:
+                # El extractor usará el ID del canal
+                res = await extractor.extract_stream(canal.get("id", ""), raw_url)
+                return res
+            except Exception as e:
+                print(f"Error Atresmedia extractor fallback: {e}")
+                
+        # Fallback de emergencia
+        return {
+            "canal": canal.get("name"),
+            "type": "atresmedia_fallback",
+            "stream_url": f"https://www.atresplayer.com{raw_url}",
+            "headers": {"User-Agent": USER_AGENT}
         }
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                res = await client.get(api_url, headers=headers)
-                if res.status_code == 200:
-                    json_res = res.json()
-                    sources = json_res.get("sources", [])
-                    m3u8_url = None
-                    for source in sources:
-                        src = source.get("src", "")
-                        stype = str(source.get("type") or "").lower()
-                        if not src or "dash" in stype or ".mpd" in src.lower():
-                            continue
-                        
-                        if "application/vnd.apple.mpegurl" in stype or "mpegurl" in stype or ".m3u8" in src.lower() or "hls" in stype:
-                            if "atres-live.atresmedia.com" in src:
-                                m3u8_url = src
-                                break
-                            elif not m3u8_url:
-                                m3u8_url = src
-                                
-                    if not m3u8_url and sources:
-                        for source in sources:
-                            src = source.get("src", "")
-                            stype2 = str(source.get("type") or "").lower()
-                            if src and not "dash" in stype2 and not ".mpd" in src.lower():
-                                m3u8_url = src
-                                break
-                                
-                    return {
-                        "canal": canal.get("name"),
-                        "type": "atresmedia_hls",
-                        "stream_url": m3u8_url,
-                        "raw_response": json_res,
-                        "headers": headers
-                    }
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error resolviendo stream de Atresmedia: {str(e)}")
 
     # 3. RTVE (La 1, La 2, 24h, Teledeporte) -> stream1
     elif stype == "stream1":
