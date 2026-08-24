@@ -204,11 +204,24 @@ async def resolve_unified_stream(channel_id: str):
     if extractor:
         try:
             res = await extractor.extract_stream(channel_id, "")
-            print(f"✅ [/api/stream/{channel_id}] Éxito con {extractor_name}: m3u8_url='{res.get('m3u8_url')}'")
+            if isinstance(res, dict) and res.get("error"):
+                st = res.get("status")
+                status_code = st if isinstance(st, int) and 400 <= st < 600 else 502
+                print(f"❌ [/api/stream/{channel_id}] Error en {extractor_name} (HTTP {status_code}): {res}")
+                return JSONResponse(status_code=status_code, content=res)
+            print(f"✅ [/api/stream/{channel_id}] Éxito con {extractor_name}: m3u8_url='{res.get('m3u8_url') if isinstance(res, dict) else res}'")
             return res
         except Exception as e:
-            print(f"❌ [/api/stream/{channel_id}] Error en {extractor_name}: {e}")
-            raise HTTPException(status_code=500, detail=f"Extractor error for '{channel_id}': {str(e)}")
+            print(f"❌ [/api/stream/{channel_id}] Excepción en {extractor_name}: {e}")
+            err_payload = {
+                "error": True,
+                "provider": "atresmedia" if "atres" in extractor_name.lower() else "unknown",
+                "stage": "extractor_exception",
+                "status": 500,
+                "url_host": "",
+                "message": f"Excepción en extractor {extractor_name}: {str(e)}"
+            }
+            return JSONResponse(status_code=500, content=err_payload)
 
     # Fallback a la resolución general si no hay extractor específico
     return await resolve_stream(channel_id)

@@ -638,9 +638,21 @@ app.get('/api/play/:channelId', async (req, res) => {
                             console.error(`🔥 [España API Error] ${base}:8080 para ${rawPureId} -> ${e.message}`);
                         }
                     }
-                    if (r && r.ok) {
+                    if (r) {
                         try {
+                            responseBodyText = await r.text();
                             const d = JSON.parse(responseBodyText);
+                            if (d.error || !r.ok) {
+                                console.error(`❌ [Node] API Externa devolvió error (HTTP ${r.status}):`, d);
+                                const errStatus = (d.status && d.status >= 400 && d.status < 600) ? d.status : (r.status >= 400 ? r.status : 502);
+                                return res.status(errStatus).json({
+                                    success: false,
+                                    channelId: id,
+                                    provider: d.provider || 'atresmedia',
+                                    stage: d.stage || 'sources',
+                                    error: d.message || d.error || `Atresmedia returned HTTP ${r.status}`
+                                });
+                            }
                             console.log(`[DEBUG] JSON Parseado OK. keys: ${Object.keys(d)}`);
                             console.log(`[DEBUG] Extractor/Type: ${d.type || d.provider || 'desconocido'}`);
                             let extractedUrl = d.m3u8_url || d.stream_url || d.hls_url || d.mpd_url || d.url || null;
@@ -716,11 +728,12 @@ app.get('/api/play/:channelId', async (req, res) => {
             }
         }
 
-        if (!finalStreamUrl) {
+        if (!finalStreamUrl || (typeof finalStreamUrl === 'string' && finalStreamUrl.includes('atresplayer.com/directos/'))) {
             return res.status(422).json({ 
-                error: 'La API externa no devolvió enlace.', 
+                success: false,
+                error: 'La API externa no devolvió enlace m3u8 válido.', 
                 channelId: id,
-                fetchError: fetchError ? fetchError.message : 'Unknown'
+                fetchError: fetchError ? fetchError.message : 'Invalid stream URL'
             });
         }
 
