@@ -815,26 +815,46 @@ app.all('/proxy-video', (req, res) => {
                 if (totalSize > MAX_PLAYLIST_SIZE) return res.end(); // Abortado por seguridad
                 const body = Buffer.concat(chunks).toString('utf-8');
                 
+                let lastTag = '';
                 const rewritten = body.split('\n').map(line => {
                     const trimmed = line.trim();
-                    if (trimmed && !trimmed.startsWith('#')) {
+                    if (!trimmed) return line;
+
+                    if (trimmed.startsWith('#')) {
+                        if (trimmed.startsWith('#EXT-X-STREAM-INF')) lastTag = 'STREAM-INF';
+                        else if (trimmed.startsWith('#EXTINF')) lastTag = 'EXTINF';
+                        
+                        if (trimmed.includes('URI="')) {
+                            return line.replace(/URI="([^"]+)"/g, (match, p1) => {
+                                const absoluteUri = p1.startsWith('http') ? p1 : new URL(p1, cleanUrl).href;
+                                
+                                if (trimmed.startsWith('#EXT-X-MEDIA') || trimmed.startsWith('#EXT-X-KEY') || trimmed.startsWith('#EXT-X-I-FRAME-STREAM-INF')) {
+                                    return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
+                                } else if (trimmed.startsWith('#EXT-X-MAP')) {
+                                    return `URI="${absoluteUri}"`;
+                                }
+                                
+                                if (absoluteUri.split('?')[0].toLowerCase().endsWith('.m3u8')) {
+                                    return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
+                                }
+                                return `URI="${absoluteUri}"`;
+                            });
+                        }
+                        return line;
+                    } else {
                         const absoluteUrl = trimmed.startsWith('http') ? trimmed : new URL(trimmed, cleanUrl).href;
-                        // Solo pasamos por el proxy las playlists (.m3u8) para seguir parseando.
-                        // Los segmentos (.ts, .mp4, etc.) van directos al CDN para ahorrar RAM/CPU.
+                        
+                        if (lastTag === 'STREAM-INF') {
+                            return buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
+                        } else if (lastTag === 'EXTINF') {
+                            return absoluteUrl;
+                        }
+
                         if (absoluteUrl.split('?')[0].toLowerCase().endsWith('.m3u8')) {
                             return buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
                         }
                         return absoluteUrl;
-                    } else if (trimmed.startsWith('#EXT-X-STREAM-INF:') || trimmed.startsWith('#EXT-X-MEDIA:')) {
-                        return line.replace(/URI="([^"]+)"/g, (match, p1) => {
-                            const absoluteUri = p1.startsWith('http') ? p1 : new URL(p1, cleanUrl).href;
-                            if (absoluteUri.split('?')[0].toLowerCase().endsWith('.m3u8')) {
-                                return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
-                            }
-                            return `URI="${absoluteUri}"`;
-                        });
                     }
-                    return line;
                 }).join('\n');
                 res.end(rewritten);
             });
