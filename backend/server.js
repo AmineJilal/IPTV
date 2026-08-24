@@ -641,18 +641,24 @@ app.get('/api/play/:channelId', async (req, res) => {
                     if (r) {
                         try {
                             responseBodyText = await r.text();
-                            const d = JSON.parse(responseBodyText);
-                            if (d.error || !r.ok) {
-                                console.error(`❌ [Node] API Externa devolvió error (HTTP ${r.status}):`, d);
-                                const errStatus = (d.status && d.status >= 400 && d.status < 600) ? d.status : (r.status >= 400 ? r.status : 502);
-                                return res.status(errStatus).json({
-                                    success: false,
-                                    channelId: id,
-                                    provider: d.provider || 'atresmedia',
-                                    stage: d.stage || 'sources',
-                                    error: d.message || d.error || `Atresmedia returned HTTP ${r.status}`
-                                });
-                            }
+                        } catch (_) {}
+                        
+                        let d = null;
+                        try { d = JSON.parse(responseBodyText); } catch (_) {}
+                        
+                        if (!r.ok || (d && d.error)) {
+                            console.error(`❌ [Node] API Externa devolvió error (HTTP ${r.status}):`, d || responseBodyText);
+                            const errStatus = (d && d.status && d.status >= 400 && d.status < 600) ? d.status : (r.status >= 400 ? r.status : 502);
+                            return res.status(errStatus).json({
+                                success: false,
+                                channelId: id,
+                                provider: (d && d.provider) || 'atresmedia',
+                                stage: (d && d.stage) || 'sources',
+                                error: (d && (d.message || d.error)) || `API Externa devolvió status HTTP ${r.status}`
+                            });
+                        }
+                        
+                        if (d) {
                             console.log(`[DEBUG] JSON Parseado OK. keys: ${Object.keys(d)}`);
                             console.log(`[DEBUG] Extractor/Type: ${d.type || d.provider || 'desconocido'}`);
                             let extractedUrl = d.m3u8_url || d.stream_url || d.hls_url || d.mpd_url || d.url || null;
@@ -664,8 +670,6 @@ app.get('/api/play/:channelId', async (req, res) => {
                             nuevosHeaders = d.headers_required || d.headers || null;
                             console.log(`[DEBUG] URL extraída: ${nuevaUrl}`);
                             if (nuevosHeaders && typeof nuevosHeaders === 'object') nuevosHeaders = JSON.stringify(nuevosHeaders);
-                        } catch (e) {
-                            console.error(`[DEBUG] Error parseando JSON de API Externa: ${e.message}`);
                         }
                     }
                 } else if (id.startsWith('ibero_')) {
