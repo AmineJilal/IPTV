@@ -822,21 +822,28 @@ app.all('/proxy-video', (req, res) => {
 
                     if (trimmed.startsWith('#')) {
                         if (trimmed.startsWith('#EXT-X-STREAM-INF')) lastTag = 'STREAM-INF';
-                        else if (trimmed.startsWith('#EXTINF')) lastTag = 'EXTINF';
+                        else if (trimmed.startsWith('#EXTINF') || trimmed.startsWith('#EXT-X-BYTERANGE')) lastTag = 'EXTINF';
                         
                         if (trimmed.includes('URI="')) {
                             return line.replace(/URI="([^"]+)"/g, (match, p1) => {
                                 const absoluteUri = p1.startsWith('http') ? p1 : new URL(p1, cleanUrl).href;
                                 
+                                // Proxy para Playlists (MEDIA, I-FRAME) y llaves de DRM/Cifrado (KEY)
                                 if (trimmed.startsWith('#EXT-X-MEDIA') || trimmed.startsWith('#EXT-X-KEY') || trimmed.startsWith('#EXT-X-I-FRAME-STREAM-INF')) {
                                     return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
-                                } else if (trimmed.startsWith('#EXT-X-MAP')) {
+                                } 
+                                // Directo al CDN para recursos pesados (MAP, PART, PRELOAD-HINT)
+                                else if (trimmed.startsWith('#EXT-X-MAP') || trimmed.startsWith('#EXT-X-PART') || trimmed.startsWith('#EXT-X-PRELOAD-HINT')) {
                                     return `URI="${absoluteUri}"`;
                                 }
                                 
-                                if (absoluteUri.split('?')[0].toLowerCase().endsWith('.m3u8')) {
-                                    return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
-                                }
+                                // Fallback inteligente por extensión sin romper el query string original
+                                try {
+                                    const parsedUri = new URL(absoluteUri);
+                                    if (parsedUri.pathname.toLowerCase().endsWith('.m3u8')) {
+                                        return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
+                                    }
+                                } catch (e) {}
                                 return `URI="${absoluteUri}"`;
                             });
                         }
@@ -850,9 +857,12 @@ app.all('/proxy-video', (req, res) => {
                             return absoluteUrl;
                         }
 
-                        if (absoluteUrl.split('?')[0].toLowerCase().endsWith('.m3u8')) {
-                            return buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
-                        }
+                        try {
+                            const parsedUri = new URL(absoluteUrl);
+                            if (parsedUri.pathname.toLowerCase().endsWith('.m3u8')) {
+                                return buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
+                            }
+                        } catch (e) {}
                         return absoluteUrl;
                     }
                 }).join('\n');
