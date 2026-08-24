@@ -739,30 +739,25 @@ app.get('/api/play/:channelId', async (req, res) => {
         if (headersList) {
             try {
                 const hdrs = JSON.parse(headersList);
-                ref = hdrs['Referer'] || '';
-                ori = hdrs['Origin'] || '';
+                ref = hdrs['Referer'] || hdrs['referer'] || '';
+                ori = hdrs['Origin'] || hdrs['origin'] || '';
                 ua = hdrs['User-Agent'] || hdrs['user-agent'] || ua;
-            } catch (e) {
-                if (typeof headersList === 'string' && headersList.includes('=')) {
-                    const parts = headersList.split('|');
-                    parts.forEach(p => {
-                        if (p.startsWith('Referer=')) ref = decodeURIComponent(p.split('=')[1]);
-                        if (p.startsWith('User-Agent=')) ua = decodeURIComponent(p.split('=')[1]);
-                    });
-                }
-            }
+            } catch (e) {}
         }
 
-        let finalStreamUrlWithHeaders = finalStreamUrl;
-        if (ref) finalStreamUrlWithHeaders += `|Referer=${ref}`;
-        if (ori) finalStreamUrlWithHeaders += `|Origin=${ori}`;
-        if (ua && ua !== 'Mozilla/5.0') finalStreamUrlWithHeaders += `|User-Agent=${ua}`;
-
-        const isDirect = finalTipo === 'iframe';
-        const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'http').split(',')[0].trim();
-        const proxyUrl = isDirect ? null : (`${proto}://` + (req.headers.host || '127.0.0.1:' + (process.env.PORT || 3000)) + '/proxy-video?url=' + encodeURIComponent(finalStreamUrlWithHeaders));
-
-        return res.json({ success: true, streamUrl: finalStreamUrl, proxyUrl: proxyUrl, tipo: finalTipo, referer: ref, origin: ori, userAgent: ua });
+        return res.json({ 
+            success: true, 
+            streamUrl: finalStreamUrl, 
+            tipo: finalTipo, 
+            headers: {
+                'Referer': ref,
+                'Origin': ori,
+                'User-Agent': ua
+            },
+            referer: ref, 
+            origin: ori, 
+            userAgent: ua 
+        });
     } catch (err) {
         console.error('🔥 [API PLAY ERROR]', err);
         return res.status(500).json({ error: 'Error interno de BD.', details: err.message });
@@ -770,131 +765,16 @@ app.get('/api/play/:channelId', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// PROXY VIDEO — Manejo de Chunks y CORS
+// REDIRECCIÓN DIRECTA (Cero consumo de ancho de banda)
 // ─────────────────────────────────────────────
 app.all('/proxy-video', (req, res) => {
-    // FIX: Habilitar preflight OPTIONS para peticiones de byte-range de HLS.js
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Range');
-    if (req.method === 'OPTIONS') return res.sendStatus(200);
-
     const rawTargetUrl = req.query.url;
     if (!rawTargetUrl) return res.status(400).send('URL requerida.');
-
-    let adaptedTarget = rawTargetUrl;
-    if (adaptedTarget.includes('192.168.') || adaptedTarget.includes('localhost')) {
-        adaptedTarget = adaptedTarget.replace(/https?:\/\/(192\.168\.\d+\.\d+|localhost)/, 'http://127.0.0.1');
-    }
-
-    const { cleanUrl, referer, origin: originFromUrl, userAgent } = parseStreamUrl(adaptedTarget);
+    const { cleanUrl } = parseStreamUrl(rawTargetUrl);
     if (!cleanUrl || !cleanUrl.startsWith('http')) return res.status(400).send('URL inválida.');
-
-    let parsed;
-    try { parsed = new URL(cleanUrl); } catch { return res.status(400).send('URL inválida.'); }
-
-    const lib = parsed.protocol === 'https:' ? https : http_mod;
-    const requestHeaders = { 'User-Agent': userAgent || UA, 'Accept': '*/*', 'Accept-Language': 'es-ES,es;q=0.9', 'Connection': 'keep-alive' };
-    if (referer) requestHeaders.Referer = referer;
-    let origin = originFromUrl || '';
-    if (!origin && referer) { try { origin = new URL(referer).origin; } catch { origin = ''; } }
-    if (!origin) origin = `${parsed.protocol}//${parsed.host}`;
-    if (origin) requestHeaders.Origin = origin;
-
-    const withMetadata = (absoluteUrl) => {
-        const metadata = [];
-        if (referer) metadata.push(`Referer=${encodeURIComponent(referer)}`);
-        if (origin) metadata.push(`Origin=${encodeURIComponent(origin)}`);
-        if (userAgent) metadata.push(`User-Agent=${encodeURIComponent(userAgent)}`);
-        return metadata.length ? `${absoluteUrl}|${metadata.join('|')}` : absoluteUrl;
-    };
-
-    const options = {
-        hostname: parsed.hostname,
-        port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
-        path: parsed.pathname + parsed.search,
-        method: 'GET',
-        headers: requestHeaders,
-        rejectUnauthorized: false // FIX: Ignorar certificados SSL caducados de CDNs
-    };
-
-    const proxyReq = lib.request(options, (proxyRes) => {
-        if ([301, 302, 307, 308].includes(proxyRes.statusCode) && proxyRes.headers.location) {
-            const newUrl = proxyRes.headers.location.startsWith('http') ? proxyRes.headers.location : `${parsed.protocol}//${parsed.host}${proxyRes.headers.location}`;
-            return res.redirect(`/proxy-video?url=${encodeURIComponent(withMetadata(newUrl))}`);
-        }
-
-        const headers = { ...proxyRes.headers };
-        delete headers['x-frame-options']; delete headers['content-security-policy']; delete headers['x-content-type-options'];
-        headers['access-control-allow-origin'] = '*';
-
-        // FIX: Detección estricta para no confundir .ts con .m3u8
-        const isM3U8 = parsed.pathname.toLowerCase().endsWith('.m3u8') || (headers['content-type'] && headers['content-type'].includes('mpegurl'));
-
-        if (isM3U8) {
-            delete headers['content-length'];
-            res.writeHead(proxyRes.statusCode, headers);
-
-            let chunks = [];
-            let totalSize = 0;
-            const MAX_PLAYLIST_SIZE = 10 * 1024 * 1024; // 10MB limit para evitar OOM
-
-            proxyRes.on('data', chunk => {
-                totalSize += chunk.length;
-                if (totalSize > MAX_PLAYLIST_SIZE) {
-                    proxyReq.destroy();
-                    return;
-                }
-                chunks.push(chunk);
-            });
-
-            proxyRes.on('end', () => {
-                if (totalSize > MAX_PLAYLIST_SIZE) return res.end(); // Abortado por seguridad
-                const body = Buffer.concat(chunks).toString('utf-8');
-
-                let lastTag = '';
-                const rewritten = body.split('\n').map(line => {
-                    const trimmed = line.trim();
-                    if (!trimmed) return line;
-
-                    if (trimmed.startsWith('#')) {
-                        if (trimmed.startsWith('#EXT-X-STREAM-INF')) lastTag = 'STREAM-INF';
-                        else if (trimmed.startsWith('#EXTINF') || trimmed.startsWith('#EXT-X-BYTERANGE')) lastTag = 'EXTINF';
-
-                        if (trimmed.includes('URI="')) {
-                            return line.replace(/URI="([^"]+)"/g, (match, p1) => {
-                                const absoluteUri = p1.startsWith('http') ? p1 : new URL(p1, cleanUrl).href;
-
-                                return `URI="${buildProxyUrlFromRequest(req, withMetadata(absoluteUri))}"`;
-                            });
-                        }
-                        return line;
-                    } else {
-                        const absoluteUrl = trimmed.startsWith('http') ? trimmed : new URL(trimmed, cleanUrl).href;
-                        // Todo (.m3u8, .ts, .mp4) debe pasar por el proxy obligatoriamente.
-                        // Muchos CDNs (como los de deportes) usan IP-locking o validan el Referer
-                        // en cada segmento individual (.ts).
-                        return buildProxyUrlFromRequest(req, withMetadata(absoluteUrl));
-                    }
-                }).join('\n');
-                res.end(rewritten);
-            });
-        } else {
-            res.writeHead(proxyRes.statusCode, headers);
-            proxyRes.pipe(res, { end: true });
-        }
-    });
-
-    proxyReq.on('error', (err) => {
-        if (!res.headersSent) res.status(502).send('Error del proxy: ' + err.message);
-    });
-
-    // FIX CRÍTICO: Fuga de Conexiones. Si el cliente cierra el vídeo, matamos la descarga remota.
-    req.on('close', () => {
-        proxyReq.destroy();
-    });
-
-    proxyReq.end();
+    
+    res.header('Access-Control-Allow-Origin', '*');
+    return res.redirect(302, cleanUrl);
 });
 
 app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
@@ -902,25 +782,12 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
     try {
         const streams = await obtenerStreamsDb();
         const stream = streams.find(s => s.id === channelId || s.nombre.toLowerCase().replace(/ /g, '_') === channelId.toLowerCase());
-        if (!stream) return res.status(404).send('Canal no encontrado.');
-        if (!stream.stream_url) return res.status(404).send('Sin URL HLS resuelta para este canal. Ábrelo primero en la web.');
+        if (!stream || !stream.stream_url) return res.status(404).send('Canal no disponible.');
 
-        let finalUrl = stream.stream_url;
-
-        // Acoplar cabeceras si existen en la BD
-        if (stream.headers && stream.headers !== 'null') {
-            try {
-                const hdrs = JSON.parse(stream.headers);
-                if (hdrs['Referer']) finalUrl += `|Referer=${hdrs['Referer']}`;
-                if (hdrs['Origin']) finalUrl += `|Origin=${hdrs['Origin']}`;
-                if (hdrs['User-Agent'] || hdrs['user-agent']) finalUrl += `|User-Agent=${hdrs['User-Agent'] || hdrs['user-agent']}`;
-            } catch (e) { }
-        }
-
-        const target = encodeURIComponent(finalUrl);
-        return res.redirect(302, `/proxy-video?url=${target}`);
+        const { cleanUrl } = parseStreamUrl(stream.stream_url);
+        return res.redirect(302, cleanUrl);
     } catch (e) {
-        return res.status(500).send('Error al devolver la reproducción: ' + e.message);
+        return res.status(500).send('Error al resolver stream: ' + e.message);
     }
 });
 
