@@ -35,7 +35,10 @@ class AtresmediaExtractor(BaseExtractor):
             "Sec-Fetch-Site": "same-site",
             "sec-ch-ua": '"Chromium";v="137", "Not:A-Brand";v="24"',
             "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"Windows"'
+            "sec-ch-ua-platform": '"Windows"',
+            "X-Forwarded-For": "83.32.0.1",
+            "X-Real-IP": "83.32.0.1",
+            "Client-IP": "83.32.0.1"
         }
         
         async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
@@ -159,6 +162,11 @@ class AtresmediaExtractor(BaseExtractor):
                     "url_host": urlparse(page_url).hostname if page_url else "",
                     "message": "Falta el campo 'urlVideo' en la respuesta de Fase 2"
                 }
+
+            if "?" not in video_url:
+                video_url += "?device=desktop&NODRM=true"
+            elif "device=" not in video_url:
+                video_url += "&device=desktop&NODRM=true"
 
             # ──────────────────────────────────────────────────────────
             # FASE 3: Inspeccionar video_url y obtener las fuentes del reproductor

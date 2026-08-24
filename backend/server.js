@@ -997,11 +997,7 @@ async function startServer() {
     
     server.on('error', (e) => {
         if (e.code === 'EADDRINUSE') {
-            console.error(`⚠️ Puerto ${PORT} ocupado. Reintentando escuchar en 3 segundos...`);
-            setTimeout(() => {
-                server.close();
-                server.listen(PORT, '0.0.0.0');
-            }, 3000);
+            console.error(`⚠️ Puerto ${PORT} ocupado. El proceso finalizará o esperará a que el puerto se libere.`);
         } else {
             console.error('🔥 Error en el servidor HTTP:', e);
         }
