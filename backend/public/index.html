@@ -525,11 +525,12 @@
                     const isOnline = channel.estado !== 'offline';
                     
                     // Inicial de reserva por si falla el logo
-                    const initial = channel.nombre.charAt(0).toUpperCase();
+                    const safeName = channel.nombre || 'Sin Nombre';
+                    const initial = safeName.charAt(0).toUpperCase();
                     
                     // OPTIMIZACIÓN: loading="lazy" inyectado en el img tag
                     const logoHtml = channel.logo 
-                        ? `<img src="${channel.logo}" loading="lazy" alt="${channel.nombre}" class="w-full h-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-110" onerror="this.outerHTML='<div class=\\'w-full h-full flex items-center justify-center font-bold text-2xl text-slate-500 bg-slate-900\\'>${initial}</div>'">`
+                        ? `<img src="${channel.logo}" loading="lazy" alt="${safeName}" class="w-full h-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-110" onerror="this.outerHTML='<div class=\\'w-full h-full flex items-center justify-center font-bold text-2xl text-slate-500 bg-slate-900\\'>${initial}</div>'">`
                         : `<div class="w-full h-full flex items-center justify-center font-bold text-2xl text-slate-500 bg-slate-900">${initial}</div>`;
 
                     const el = document.createElement('div');
@@ -547,7 +548,7 @@
                             </div>
                         </div>
                         <div class="flex-1 min-w-0 pr-10">
-                            <h3 class="font-bold text-[15px] truncate ${isActive ? 'text-white' : 'text-slate-200 group-hover:text-brand-300 transition-colors'}">${channel.nombre}</h3>
+                            <h3 class="font-bold text-[15px] truncate ${isActive ? 'text-white' : 'text-slate-200 group-hover:text-brand-300 transition-colors'}">${safeName}</h3>
                             <div class="flex items-center gap-2 mt-1">
                                 <span class="flex items-center gap-1 text-[11px] font-medium tracking-wide ${isOnline ? 'text-emerald-400' : 'text-rose-400'}">
                                     <span class="w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}"></span>
