@@ -180,36 +180,22 @@ def list_channels_resolved(
         except Exception:
             detail = None
 
-        if detail:
-            entry = {
-                'id': ch['id'],
-                'name': detail.get('name', ch.get('name', ch['id'])),
-                'country_slug': ch.get('country_slug', ''),
-                'country_name': ch.get('country_name', ''),
-                'category': ch.get('category', 'General'),
-                'logo': ch.get('logo'),
-                'stream_url': detail.get('stream_url'),
-                'stream_type': detail.get('stream_type', 'unknown'),
-                'embed_url': detail.get('embed_url'),
-                'headers': detail.get('headers', {}),
-            }
-        else:
-            entry = {
-                'id': ch['id'],
-                'name': ch.get('name', ch['id']),
-                'country_slug': ch.get('country_slug', ''),
-                'country_name': ch.get('country_name', ''),
-                'category': ch.get('category', 'General'),
-                'logo': ch.get('logo'),
-                'stream_url': None,
-                'stream_type': 'unknown',
-                'embed_url': None,
-                'headers': {},
-            }
+        entry = {
+            'id': ch['id'],
+            'name': detail.get('name', ch.get('name', ch['id'])) if detail else ch.get('name', ch['id']),
+            'country_slug': ch.get('country_slug', ''),
+            'country_name': ch.get('country_name', ''),
+            'category': ch.get('category', 'General'),
+            'logo': ch.get('logo'),
+            'stream_url': detail.get('stream_url') if detail else None,
+            'stream_type': detail.get('stream_type', 'unknown') if detail else 'unknown',
+            'embed_url': detail.get('embed_url') if detail else None,
+            'headers': detail.get('headers', {}) if detail else {},
+        }
         with result_lock:
             result.append(entry)
 
-    # Memoria optimizada para Cloud (Koyeb): máximo 2 workers para evitar OOM (Out Of Memory)
+    # Máximo 2 workers para evitar OOM en 512MB RAM
     with ThreadPoolExecutor(max_workers=2) as executor:
         futures = [executor.submit(resolve_one, ch) for ch in all_channels]
         for f in as_completed(futures):
@@ -257,9 +243,12 @@ def get_channel_stream(
         return RedirectResponse(url=stream_url, status_code=307)
 
     if proxy:
+        import asyncio
+        import httpx
         try:
             headers = channel.get("headers", {})
-            r = requests.get(stream_url, headers=headers, timeout=5)
+            async with httpx.AsyncClient(timeout=5) as hclient:
+                r = await hclient.get(stream_url, headers=headers)
             return Response(content=r.content, media_type="application/x-mpegurl")
         except Exception as e:
             raise HTTPException(status_code=502, detail=f"Error al proxear la lista HLS: {e}")

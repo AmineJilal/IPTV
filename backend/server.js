@@ -158,7 +158,7 @@ async function resolveNativeMediaset(code) {
     const r1 = await safeFetch('https://services-ott-prod-fe.mediaset.net/esp/idm/v3.0/anonymous/login', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ appName: 'web//mediasetplay-web/1.2.1-d1b2024', client_id: '12345678-1234-1234-1234-123456789012' })
+        body: JSON.stringify({ appName: 'web//mediasetplay-web/1.2.1-d1b2024', client_id: crypto.randomUUID() })
     }, 8000);
     if (!r1 || !r1.ok) throw new Error(`[Media Step 1 Login] HTTP ${r1 ? r1.status : 'timeout'}`);
     const d1 = await r1.json();
@@ -264,7 +264,7 @@ async function validarTodosLosStreams() {
                     return;
                 }
 
-                const res = await testUrl(s.url, 6000, 1, s.id);
+                const res = await testUrl(s.url, 6000, 1);
                 lastProbeAt.set(s.id, now);
 
                 if (res.status === 'OK') {
@@ -694,15 +694,14 @@ app.get('/api/play/:channelId', async (req, res) => {
                 } else if (id.startsWith('arabic_')) {
                     const pureId = id.replace('arabic_', '');
                     for (const base of bases) {
-                        // FIX: Evitar que la API Árabe devuelva un 307 Redirect (rompe el JSON.parse) usando ?redirect=false
                         try { r = await safeFetch(`${base}:9080/api/channels/${pureId}/stream?redirect=false`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
                     if (r && r.ok) {
                         const d = await r.json();
-                        nuevaUrl = d.stream_url || d.url || null;
-                        if (!nuevaUrl && d.embed_url) {
-                            nuevaUrl = d.embed_url;
-                            finalTipo = 'iframe';
+                        const rawUrl = d.stream_url || d.url || null;
+                        // Solo aceptar URLs HLS reales, no embed_url ni URLs de YouTube
+                        if (rawUrl && rawUrl.startsWith('http') && !rawUrl.includes('youtube') && !rawUrl.includes('youtu.be')) {
+                            nuevaUrl = rawUrl;
                         }
                         if (d.headers) nuevosHeaders = JSON.stringify(d.headers);
                     }

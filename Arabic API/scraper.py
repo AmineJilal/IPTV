@@ -289,7 +289,20 @@ def resolve_channel_details(channel_id, force_refresh=False):
                         stream_url = eb_m3u8[0]
                         stream_type = "hls"
                     else:
-                        stream_type = "easybroadcast"
+                        # También buscar en atob() por si está cifrado
+                        atob_matches = re.findall(r'atob\(["\']([^"\']+)["\']\)', eb_res.text)
+                        for b64 in atob_matches:
+                            try:
+                                import base64
+                                dec = base64.b64decode(b64).decode('utf-8', errors='ignore')
+                                if dec.startswith('http') and '.m3u8' in dec:
+                                    stream_url = dec
+                                    stream_type = "hls"
+                                    break
+                            except Exception:
+                                pass
+                        if not stream_url:
+                            stream_type = "easybroadcast"
                 except Exception:
                     stream_type = "easybroadcast"
             elif 'dailymotion.com' in full_embed_url:
@@ -340,7 +353,7 @@ def get_all_channels_parallel(force_refresh=False):
     countries = fetch_countries(force_refresh=force_refresh)
     all_channels = []
     
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=3) as executor:
         future_to_country = {executor.submit(fetch_country_channels, c['slug'], force_refresh): c for c in countries}
         for future in as_completed(future_to_country):
             c_info = future_to_country[future]
