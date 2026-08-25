@@ -132,9 +132,21 @@ async def resolve_stream(id_canal: str):
     elif stype == "stream11":
         from extractors.factory import StreamFactory
         extractor = StreamFactory.get_extractor(canal.get("id", ""))
-        if not extractor:
-            raise HTTPException(status_code=501, detail={"error": True, "provider": "atresmedia", "message": "No hay extractor disponible para este canal"})
-        return await extractor.extract_stream(canal.get("id", ""), raw_url)
+        if extractor:
+            try:
+                # El extractor usará el ID del canal
+                res = await extractor.extract_stream(canal.get("id", ""), raw_url)
+                return res
+            except Exception as e:
+                print(f"Error Atresmedia extractor fallback: {e}")
+                
+        # Fallback de emergencia
+        return {
+            "canal": canal.get("name"),
+            "type": "atresmedia_fallback",
+            "stream_url": f"https://www.atresplayer.com{raw_url}",
+            "headers": {"User-Agent": USER_AGENT}
+        }
 
     # 3. RTVE (La 1, La 2, 24h, Teledeporte) -> stream1
     elif stype == "stream1":
@@ -160,11 +172,17 @@ async def resolve_stream(id_canal: str):
 
     # 4. Mediaset (Telecinco, Cuatro, FDF, Divinity, etc.) -> stream10
     elif stype == "stream10":
-        from extractors.factory import StreamFactory
-        extractor = StreamFactory.get_extractor(canal.get("id", ""))
-        if not extractor:
-            raise HTTPException(status_code=501, detail={"error": True, "provider": "mediaset", "message": "No hay extractor disponible para este canal Mediaset"})
-        return await extractor.extract_stream(canal.get("id", ""), raw_url)
+        headers = {
+            "Origin": "https://www.mediasetinfinity.es",
+            "Referer": "https://www.mediasetinfinity.es/",
+            "User-Agent": USER_AGENT
+        }
+        return {
+            "canal": canal.get("name"),
+            "type": "mediaset_stream",
+            "stream_url": raw_url,
+            "headers_required": headers
+        }
 
     # Caso genérico / fallback
     return {
@@ -184,27 +202,17 @@ async def resolve_unified_stream(channel_id: str):
     """
     Endpoint unificado que delega la extracción del stream (.m3u8 puro)
     al módulo correspondiente (Atresmedia, Mediaset, etc.) usando el Patrón Factory.
-    Nunca hace fallback a HTML: si el extractor falla, propaga el error limpiamente.
     """
-    from fastapi.responses import JSONResponse
     extractor = StreamFactory.get_extractor(channel_id)
+    
+    if extractor:
+        try:
+            return await extractor.extract_stream(channel_id, "")
+        except Exception as e:
+            print(f"⚠️ [Extractor Error] Fallo en extractor para {channel_id}: {e}. Usando fallback general...")
 
-    if not extractor:
-        raise HTTPException(status_code=404, detail={"error": True, "message": f"No hay extractor para: {channel_id}"})
-
-    try:
-        result = await extractor.extract_stream(channel_id, "")
-    except Exception as e:
-        print(f"❌ [/api/stream/{channel_id}] Excepción en extractor: {e}")
-        raise HTTPException(status_code=500, detail={"error": True, "message": str(e)})
-
-    # Si el extractor devolvió un dict de error, propagarlo con el status correcto
-    if isinstance(result, dict) and result.get("error"):
-        status_code = result.get("status", 500)
-        print(f"❌ [/api/stream/{channel_id}] Error en extractor ({status_code}): {result}")
-        return JSONResponse(status_code=status_code, content=result)
-
-    return result
+    # Fallback a la resolución original si no hay extractor o si el extractor falló
+    return await resolve_stream(channel_id)
 
 @app.get("/playlist.m3u8")
 async def generate_m3u_playlist():
@@ -229,4 +237,5 @@ async def generate_m3u_playlist():
     return Response(content="\n".join(m3u_lines), media_type="application/x-mpegURL")
 
 if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=False)
     uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=False)
