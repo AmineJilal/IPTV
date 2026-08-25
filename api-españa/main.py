@@ -2,15 +2,9 @@ import os
 import json
 import urllib.parse
 import httpx
-import time
-import asyncio
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-
-from extractors.factory import StreamFactory
-from extractors.utils import normalize_channel_id
 
 app = FastAPI(
     title="API TDT España",
@@ -29,6 +23,9 @@ app.add_middleware(
 
 TDT_CHANNELS_URL = "https://www.tdtspain.com/canales/canalesv4.json"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+
+import time
+import asyncio
 
 # Cache en memoria con TTL de 10 minutos
 data_cache = {
@@ -95,10 +92,8 @@ async def get_canal_detail(id_canal: str):
     """Devuelve los detalles de un canal específico."""
     data = await fetch_tdt_data()
     canales = data.get("canales", [])
-    norm_id = normalize_channel_id(id_canal)
     for c in canales:
-        cid = c.get("id", "").lower()
-        if cid == id_canal.lower() or cid.replace(".tv", "") == norm_id:
+        if c.get("id", "").lower() == id_canal.lower():
             return c
     raise HTTPException(status_code=404, detail="Canal no encontrado")
 
@@ -107,42 +102,39 @@ async def resolve_stream(id_canal: str):
     """
     Resuelve y devuelve el enlace final directo (.m3u8, .mpd) o la estructura de reproducción del canal.
     """
-    norm_id = normalize_channel_id(id_canal)
-    extractor = StreamFactory.get_extractor(id_canal)
-    if extractor:
-        return await extractor.extract_stream(id_canal, "")
-        
     data = await fetch_tdt_data()
     canales = data.get("canales", [])
+    streamstype = data.get("streamstype", {})
     
     canal = None
     for c in canales:
         cid = c.get("id", "").lower()
-        if cid == id_canal.lower() or cid.replace(".tv", "") == norm_id or normalize_channel_id(cid) == norm_id:
+        if cid == id_canal.lower() or cid.replace(".tv", "") == id_canal.lower():
             canal = c
             break
             
     if not canal:
-        raise HTTPException(status_code=404, detail=f"Canal '{id_canal}' no encontrado")
+        raise HTTPException(status_code=404, detail="Canal no encontrado")
         
     stype = canal.get("streamtype")
     raw_url = canal.get("url", "")
     
     # 1. Canales con URL directa (stream0 o HTTP directo m3u8)
-    if stype in ["stream0", "stream"] or (raw_url.startswith("http") and raw_url.endswith(".m3u8")):
+    if stype in ["stream0", "stream"] or raw_url.startswith("http") and raw_url.endswith(".m3u8"):
         return {
             "canal": canal.get("name"),
             "type": "direct_m3u8",
-            "m3u8_url": raw_url,
-            "headers_required": {"User-Agent": USER_AGENT}
+            "stream_url": raw_url,
+            "headers": {"User-Agent": USER_AGENT}
         }
         
-    # 2. Atresmedia -> delegar al extractor obligatoriamente
+    # 2. Atresmedia (Antena 3, La Sexta, Neox, Nova, Mega, Atreseries) -> stream11
     elif stype == "stream11":
-        ext = StreamFactory.get_extractor(canal.get("id", ""))
-        if ext:
-            return await ext.extract_stream(canal.get("id", ""), raw_url)
-        raise HTTPException(status_code=500, detail=f"No extractor available for stream11 channel: {id_canal}")
+        from extractors.factory import StreamFactory
+        extractor = StreamFactory.get_extractor(canal.get("id", ""))
+        if not extractor:
+            raise HTTPException(status_code=501, detail={"error": True, "provider": "atresmedia", "message": "No hay extractor disponible para este canal"})
+        return await extractor.extract_stream(canal.get("id", ""), raw_url)
 
     # 3. RTVE (La 1, La 2, 24h, Teledeporte) -> stream1
     elif stype == "stream1":
@@ -163,22 +155,16 @@ async def resolve_stream(id_canal: str):
             "mpd_url": mpd_url,
             "m3u8_url": m3u8_url,
             "token_api": token_api,
-            "headers_required": headers
+            "headers": headers
         }
 
     # 4. Mediaset (Telecinco, Cuatro, FDF, Divinity, etc.) -> stream10
     elif stype == "stream10":
-        headers = {
-            "Origin": "https://www.mediasetinfinity.es",
-            "Referer": "https://www.mediasetinfinity.es/",
-            "User-Agent": USER_AGENT
-        }
-        return {
-            "canal": canal.get("name"),
-            "type": "mediaset_stream",
-            "stream_url": raw_url,
-            "headers_required": headers
-        }
+        from extractors.factory import StreamFactory
+        extractor = StreamFactory.get_extractor(canal.get("id", ""))
+        if not extractor:
+            raise HTTPException(status_code=501, detail={"error": True, "provider": "mediaset", "message": "No hay extractor disponible para este canal Mediaset"})
+        return await extractor.extract_stream(canal.get("id", ""), raw_url)
 
     # Caso genérico / fallback
     return {
@@ -191,41 +177,34 @@ async def resolve_stream(id_canal: str):
         }
     }
 
+from extractors.factory import StreamFactory
+
 @app.get("/api/stream/{channel_id}")
 async def resolve_unified_stream(channel_id: str):
     """
     Endpoint unificado que delega la extracción del stream (.m3u8 puro)
     al módulo correspondiente (Atresmedia, Mediaset, etc.) usando el Patrón Factory.
+    Nunca hace fallback a HTML: si el extractor falla, propaga el error limpiamente.
     """
-    norm_id = normalize_channel_id(channel_id)
+    from fastapi.responses import JSONResponse
     extractor = StreamFactory.get_extractor(channel_id)
-    extractor_name = extractor.__class__.__name__ if extractor else "None"
-    print(f"🚀 [/api/stream/{channel_id}] Recibido: '{channel_id}' | norm_id: '{norm_id}' | Extractor: '{extractor_name}'")
-    
-    if extractor:
-        try:
-            res = await extractor.extract_stream(channel_id, "")
-            if isinstance(res, dict) and res.get("error"):
-                st = res.get("status")
-                status_code = st if isinstance(st, int) and 400 <= st < 600 else 502
-                print(f"❌ [/api/stream/{channel_id}] Error en {extractor_name} (HTTP {status_code}): {res}")
-                return JSONResponse(status_code=status_code, content=res)
-            print(f"✅ [/api/stream/{channel_id}] Éxito con {extractor_name}: m3u8_url='{res.get('m3u8_url') if isinstance(res, dict) else res}'")
-            return res
-        except Exception as e:
-            print(f"❌ [/api/stream/{channel_id}] Excepción en {extractor_name}: {e}")
-            err_payload = {
-                "error": True,
-                "provider": "atresmedia" if "atres" in extractor_name.lower() else "unknown",
-                "stage": "extractor_exception",
-                "status": 500,
-                "url_host": "",
-                "message": f"Excepción en extractor {extractor_name}: {str(e)}"
-            }
-            return JSONResponse(status_code=500, content=err_payload)
 
-    # Fallback a la resolución general si no hay extractor específico
-    return await resolve_stream(channel_id)
+    if not extractor:
+        raise HTTPException(status_code=404, detail={"error": True, "message": f"No hay extractor para: {channel_id}"})
+
+    try:
+        result = await extractor.extract_stream(channel_id, "")
+    except Exception as e:
+        print(f"❌ [/api/stream/{channel_id}] Excepción en extractor: {e}")
+        raise HTTPException(status_code=500, detail={"error": True, "message": str(e)})
+
+    # Si el extractor devolvió un dict de error, propagarlo con el status correcto
+    if isinstance(result, dict) and result.get("error"):
+        status_code = result.get("status", 500)
+        print(f"❌ [/api/stream/{channel_id}] Error en extractor ({status_code}): {result}")
+        return JSONResponse(status_code=status_code, content=result)
+
+    return result
 
 @app.get("/playlist.m3u8")
 async def generate_m3u_playlist():
