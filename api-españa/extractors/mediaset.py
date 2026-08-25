@@ -131,36 +131,32 @@ class MediasetExtractor(BaseExtractor):
             if not raw_manifest:
                 raise ValueError("SSAI no devolvió stream_manifest")
 
-            # 4. Construir URL master.m3u8 limpia con hdnea token
-            parsed = urllib.parse.urlparse(raw_manifest)
-            params = urllib.parse.parse_qs(parsed.query)
-            hdnea = params.get("hdnea", [""])[0]
+            # 4. La URL correcta a devolver es stream_manifest SSAI (/dai.m3u8) directamente.
+            #    Razón: /dai.m3u8 entrega variantes absolutas en dai.google.com que NO requieren
+            #    la cookie hdntl. Si construimos /master.m3u8 (como antes), sus variantes son
+            #    RELATIVAS y sus segmentos requieren hdntl (cookie Akamai emitida solo al
+            #    descargar /dai.m3u8 en el servidor, que el cliente Flutter nunca recibirá).
+            #    Resultado anterior: segmentos 403. Con /dai.m3u8: segmentos 200.
+            m3u8_url = raw_manifest
 
-            # Ruta base del isml (quitar el ultimo segmento /dai.m3u8 o /main.isml/...)
-            base_path = parsed.path.rsplit("/", 1)[0]
-            master_url = (
-                f"{parsed.scheme}://{parsed.netloc}{base_path}/master.m3u8"
-                + (f"?hdnea={hdnea}" if hdnea else "")
-            )
-
-            # 5. Verificar que el master.m3u8 responde y obtener la URL de variante 720p
-            #    para que el reproductor no tenga que resolver URLs relativas con token.
+            # 5. Verificar que el master SSAI responde (sanity check, sin modificar la URL)
             try:
                 m_resp = await client.get(
-                    master_url,
+                    m3u8_url,
                     headers={k: v for k, v in BASE_HEADERS.items() if k != "Content-Type"},
                     timeout=8,
                 )
                 m_resp.raise_for_status()
-                variant_url = self._pick_best_variant(m_resp.text, master_url, hdnea)
-            except Exception:
-                # Si falla el master, devolver de todas formas la URL (el proxy lo manejará)
-                variant_url = master_url
+                first_line = m_resp.text.lstrip()[:7]
+                if not first_line.startswith("#EXTM3U"):
+                    raise ValueError(f"Respuesta no es HLS válido: {first_line!r}")
+            except Exception as e:
+                raise ValueError(f"SSAI master no accesible: {e}")
 
             return {
                 "channel_id": channel_id,
                 "provider": "mediaset",
-                "m3u8_url": variant_url,
+                "m3u8_url": m3u8_url,
                 "headers_required": {
                     "User-Agent": BASE_HEADERS["User-Agent"],
                     "Referer": BASE_HEADERS["Referer"],
