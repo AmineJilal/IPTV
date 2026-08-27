@@ -784,25 +784,22 @@ app.get('/api/play/:channelId', async (req, res) => {
 const hlsSessions = new Map();
 const HLS_SESSION_TTL = 5 * 60 * 1000;
 
-function hlsGetCookieHeader(sid, host) {
+function hlsGetCookieHeader(sid) {
     const session = hlsSessions.get(sid);
     if (!session || !session.cookies) return '';
-    const jar = session.cookies.get(host) || new Map();
-    return [...jar.entries()].map(([k, v]) => `${k}=${v}`).join('; ');
+    return [...session.cookies.entries()].map(([k, v]) => `${k}=${v}`).join('; ');
 }
 
-function hlsSetCookiesFromResponse(sid, host, setCookieHeaders) {
+function hlsSetCookiesFromResponse(sid, setCookieHeaders) {
     if (!setCookieHeaders) return;
     const list = Array.isArray(setCookieHeaders) ? setCookieHeaders : [setCookieHeaders];
     let session = hlsSessions.get(sid);
     if (!session) { session = { cookies: new Map(), ts: Date.now() }; hlsSessions.set(sid, session); }
-    let jar = session.cookies.get(host) || new Map();
     for (const c of list) {
         const nv = c.split(';')[0].trim();
         const eqIdx = nv.indexOf('=');
-        if (eqIdx > 0) jar.set(nv.slice(0, eqIdx), nv.slice(eqIdx + 1));
+        if (eqIdx > 0) session.cookies.set(nv.slice(0, eqIdx), nv.slice(eqIdx + 1));
     }
-    session.cookies.set(host, jar);
     session.ts = Date.now();
 }
 
@@ -824,7 +821,7 @@ function getHlsUpstreamHeaders(targetUrl, sid) {
         'Origin':  isAtres ? 'https://www.atresplayer.com' : 'https://www.mediasetinfinity.es',
     };
     if (isMediaset) {
-        const cookies = hlsGetCookieHeader(sid, host);
+        const cookies = hlsGetCookieHeader(sid);
         if (cookies) headers['Cookie'] = cookies;
     }
     return headers;
@@ -842,8 +839,8 @@ function rewriteHlsManifest(text, targetUrl, sid) {
                 return line.replace(/URI="([^"]+)"/g, (_, p1) => {
                     try {
                         const abs = new URL(p1, targetUrl).href;
-                        const isSegment = /\.(ts|m4s|aac|mp4)(\?|$)/i.test(abs);
-                        const ep = `/hls-${isSegment ? 'seg' : 'm3u8'}?url=${encodeURIComponent(abs)}${encoded}`;
+                        const isManifest = /\.m3u8(\?|$)/i.test(abs) || abs.includes('manifest');
+                        const ep = `/hls-${isManifest ? 'm3u8' : 'seg'}?url=${encodeURIComponent(abs)}${encoded}`;
                         return `URI="${ep}"`;
                     } catch (_) { return `URI="${p1}"`; }
                 });
@@ -854,8 +851,8 @@ function rewriteHlsManifest(text, targetUrl, sid) {
         // Línea de URL (variante o segmento)
         try {
             const abs = new URL(t, targetUrl).href;
-            const isSegment = /\.(ts|m4s|aac|mp4)(\?|$)/i.test(abs);
-            return `/hls-${isSegment ? 'seg' : 'm3u8'}?url=${encodeURIComponent(abs)}${encoded}`;
+            const isManifest = /\.m3u8(\?|$)/i.test(abs) || abs.includes('manifest');
+            return `/hls-${isManifest ? 'm3u8' : 'seg'}?url=${encodeURIComponent(abs)}${encoded}`;
         } catch (_) { return line; }
     }).join('\n');
 }
@@ -881,7 +878,7 @@ app.get('/hls-m3u8', async (req, res) => {
 
         // Capturar cookies de sesión (especialmente hdntl de Akamai)
         const sc = response.headers.get('set-cookie') || response.headers.raw?.()?.['set-cookie'];
-        if (sc) hlsSetCookiesFromResponse(sid, host, sc);
+        if (sc) hlsSetCookiesFromResponse(sid, sc);
 
         if (!response.ok) {
             console.error(`❌ [HLS-M3U8] HTTP ${response.status} ${targetUrl.substring(0, 80)}`);
@@ -905,19 +902,46 @@ app.get('/hls-m3u8', async (req, res) => {
     }
 });
 
-// ── /hls-seg — Redirect 302 puro al CDN (0 bytes de vídeo por el servidor) ──
-// El navegador sigue el redirect y descarga el segmento directamente de Akamai.
-// NOTA: Funciona para canales donde Akamai NO verifica Origin estrictamente.
-// Para Mediaset (que sí verifica), hls.js necesitará estar configurado con
-// withCredentials o el segmento se solicitará desde el mismo Origin del servidor.
-app.get('/hls-seg', (req, res) => {
+// ── /hls-seg — Proxy de segmentos SOLO para el navegador web ───────────────
+// Los navegadores no pueden falsificar Referer ni enviar la cookie hdntl 
+// en un redirect 302 hacia un dominio de terceros. Por tanto, para el 
+// reproductor web (Dashboard) debemos proxiar el segmento. 
+// NOTA: Flutter (usuarios reales) no usa este endpoint; Flutter descarga
+// directamente desde el CDN gracias a libmpv, salvando el ancho de banda.
+app.get('/hls-seg', async (req, res) => {
     const rawUrl = req.query.url;
     if (!rawUrl) return res.status(400).send('URL requerida.');
     let targetUrl;
     try { targetUrl = decodeURIComponent(rawUrl); } catch (_) { return res.status(400).send('URL inválida.'); }
     if (!targetUrl.startsWith('http')) return res.status(400).send('URL inválida.');
-    res.header('Access-Control-Allow-Origin', '*');
-    return res.redirect(302, targetUrl);
+
+    const sid = req.query.sid;
+    const upstreamHeaders = getHlsUpstreamHeaders(targetUrl, sid);
+
+    try {
+        const response = await fetch(targetUrl, {
+            method: 'GET',
+            headers: upstreamHeaders,
+            redirect: 'follow'
+        });
+
+        if (!response.ok) {
+            console.error(`❌ [HLS-SEG] HTTP ${response.status} ${targetUrl.substring(0, 80)}`);
+            res.header('Access-Control-Allow-Origin', '*');
+            return res.status(response.status).send(`Upstream HTTP ${response.status}`);
+        }
+
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Content-Type', response.headers.get('content-type') || 'video/MP2T');
+        
+        // Convertimos a arrayBuffer y mandamos el binario para evitar saturar RAM con strings
+        const buffer = await response.arrayBuffer();
+        return res.send(Buffer.from(buffer));
+    } catch (e) {
+        console.error(`🔥 [HLS-SEG] Error proxiando segmento: ${e.message}`);
+        res.header('Access-Control-Allow-Origin', '*');
+        return res.status(502).send('Error de red al obtener segmento');
+    }
 });
 
 // ── /api/play/:channelId — Devuelve hlsUrl para usar con /hls-m3u8 ───────
