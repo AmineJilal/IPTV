@@ -3,6 +3,7 @@ node_modules/
 __pycache__/
 *.pyc
 venv/
+.venv/
 .env
 
 # Aplicación móvil (no se despliega en backend)
