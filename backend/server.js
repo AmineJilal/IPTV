@@ -185,14 +185,8 @@ async function resolveNativeMediaset(code) {
     const raw = d3.stream_manifest || '';
     if (!raw) throw new Error(`[Media Step 3] Missing stream_manifest`);
 
+    // Devolver el stream_manifest /dai.m3u8 directo
     let masterUrl = raw;
-    try {
-        const u = new URL(raw);
-        const hdnea = u.searchParams.get('hdnea');
-        const lastSlash = u.pathname.lastIndexOf('/');
-        const basePath = lastSlash !== -1 ? u.pathname.substring(0, lastSlash) : u.pathname;
-        masterUrl = `${u.origin}${basePath}/master.m3u8${hdnea ? '?hdnea=' + hdnea : ''}`;
-    } catch (e) { }
 
     return { stream_url: masterUrl, headers: { 'Origin': 'https://www.mediasetinfinity.es', 'Referer': 'https://www.mediasetinfinity.es/', 'User-Agent': headers['User-Agent'] } };
 }
@@ -591,7 +585,8 @@ app.get('/api/play/:channelId', async (req, res) => {
         }
 
         const ahora = Date.now();
-        const ttl = 3600000; // 1 hora de caché para todos los canales, sin hardcodear
+        const isTokenizedStream = (id.toLowerCase().includes('telecinco') || id.toLowerCase().includes('cuatro') || id.toLowerCase().includes('fdf') || id.toLowerCase().includes('energy') || id.toLowerCase().includes('divinity') || id.toLowerCase().includes('bemad') || id.toLowerCase().includes('boing') || (stream.stream_url && stream.stream_url.includes('hdnea=')));
+        const ttl = isTokenizedStream ? 240000 : 3600000; // 4 minutos de TTL para Mediaset (token hdnea dura 5 min)
         let finalStreamUrl = stream.stream_url;
         let headersList = stream.headers;
         let finalTipo = stream.tipo || 'hls';
@@ -744,9 +739,22 @@ app.get('/api/play/:channelId', async (req, res) => {
             } catch (e) {}
         }
 
+        // hlsUrl: para canales Mediaset, /hls-m3u8 proxea solo el manifest (~2KB)
+        // y captura la cookie hdntl de Akamai que necesitan los segmentos.
+        // El navegador (hls.js) usa hlsUrl; Flutter usa streamUrl directamente.
+        const isMediaset = finalStreamUrl && (
+            finalStreamUrl.includes('mediasetinfinity') ||
+            finalStreamUrl.includes('dai.m3u8') ||
+            finalStreamUrl.includes('akamaized.net')
+        );
+        const hlsUrl = isMediaset
+            ? `${req.protocol}://${req.get('host')}/hls-m3u8?url=${encodeURIComponent(finalStreamUrl)}`
+            : null;
+
         return res.json({ 
             success: true, 
             streamUrl: finalStreamUrl, 
+            hlsUrl: hlsUrl,
             tipo: finalTipo, 
             headers: {
                 'Referer': ref,
@@ -763,15 +771,166 @@ app.get('/api/play/:channelId', async (req, res) => {
     }
 });
 
+// ─────────────────────────────────────────────────────────────────────────
+// PROXY EFICIENTE DE MANIFESTS HLS — Solo texto (~2KB por request)
+// Filosofía: el servidor solo mueve MANIFESTS (M3U8), nunca segmentos de vídeo.
+//   - /hls-m3u8?url=<encoded>&sid=<session> → proxea y reescribe el manifest
+//   - /hls-seg?url=<encoded>&sid=<session>  → 302 redirect directo al CDN
+//                                              (0 bytes de vídeo por el servidor)
+// ─────────────────────────────────────────────────────────────────────────
+
+// Cookiejar por sesión: { sid → { host → { name → value } } }
+// TTL máximo 5 min (duración del token hdntl de Akamai)
+const hlsSessions = new Map();
+const HLS_SESSION_TTL = 5 * 60 * 1000;
+
+function hlsGetCookieHeader(sid, host) {
+    const session = hlsSessions.get(sid);
+    if (!session || !session.cookies) return '';
+    const jar = session.cookies.get(host) || new Map();
+    return [...jar.entries()].map(([k, v]) => `${k}=${v}`).join('; ');
+}
+
+function hlsSetCookiesFromResponse(sid, host, setCookieHeaders) {
+    if (!setCookieHeaders) return;
+    const list = Array.isArray(setCookieHeaders) ? setCookieHeaders : [setCookieHeaders];
+    let session = hlsSessions.get(sid);
+    if (!session) { session = { cookies: new Map(), ts: Date.now() }; hlsSessions.set(sid, session); }
+    let jar = session.cookies.get(host) || new Map();
+    for (const c of list) {
+        const nv = c.split(';')[0].trim();
+        const eqIdx = nv.indexOf('=');
+        if (eqIdx > 0) jar.set(nv.slice(0, eqIdx), nv.slice(eqIdx + 1));
+    }
+    session.cookies.set(host, jar);
+    session.ts = Date.now();
+}
+
+// Limpieza periódica de sesiones expiradas (cada 5 min)
+setInterval(() => {
+    const now = Date.now();
+    for (const [sid, s] of hlsSessions) if (now - s.ts > HLS_SESSION_TTL) hlsSessions.delete(sid);
+}, HLS_SESSION_TTL);
+
+function getHlsUpstreamHeaders(targetUrl, sid) {
+    let host = '';
+    try { host = new URL(targetUrl).hostname; } catch (_) {}
+    const isMediaset = host.includes('mediaset') || host.includes('akamai') || host.includes('dai.google');
+    const isAtres = host.includes('atresmedia') || host.includes('atresplayer');
+    const headers = {
+        'User-Agent': UA,
+        'Accept': '*/*',
+        'Referer': isAtres ? 'https://www.atresplayer.com/' : 'https://www.mediasetinfinity.es/',
+        'Origin':  isAtres ? 'https://www.atresplayer.com' : 'https://www.mediasetinfinity.es',
+    };
+    if (isMediaset) {
+        const cookies = hlsGetCookieHeader(sid, host);
+        if (cookies) headers['Cookie'] = cookies;
+    }
+    return headers;
+}
+
+function rewriteHlsManifest(text, targetUrl, sid) {
+    const encoded = sid ? `&sid=${encodeURIComponent(sid)}` : '';
+    return text.split(/\r?\n/).map(line => {
+        const t = line.trim();
+        if (!t) return line;
+
+        if (t.startsWith('#')) {
+            // Reescribir URI="..." dentro de etiquetas (#EXT-X-MEDIA, #EXT-X-KEY, #EXT-X-MAP)
+            if (t.includes('URI="')) {
+                return line.replace(/URI="([^"]+)"/g, (_, p1) => {
+                    try {
+                        const abs = new URL(p1, targetUrl).href;
+                        const isSegment = /\.(ts|m4s|aac|mp4)(\?|$)/i.test(abs);
+                        const ep = `/hls-${isSegment ? 'seg' : 'm3u8'}?url=${encodeURIComponent(abs)}${encoded}`;
+                        return `URI="${ep}"`;
+                    } catch (_) { return `URI="${p1}"`; }
+                });
+            }
+            return line;
+        }
+
+        // Línea de URL (variante o segmento)
+        try {
+            const abs = new URL(t, targetUrl).href;
+            const isSegment = /\.(ts|m4s|aac|mp4)(\?|$)/i.test(abs);
+            return `/hls-${isSegment ? 'seg' : 'm3u8'}?url=${encodeURIComponent(abs)}${encoded}`;
+        } catch (_) { return line; }
+    }).join('\n');
+}
+
+// ── /hls-m3u8 — Solo proxea manifiestos (texto, ~2–15 KB) ────────────────
+app.get('/hls-m3u8', async (req, res) => {
+    const rawUrl = req.query.url;
+    if (!rawUrl) return res.status(400).send('URL requerida.');
+    let targetUrl;
+    try { targetUrl = decodeURIComponent(rawUrl); } catch (_) { return res.status(400).send('URL inválida.'); }
+    if (!targetUrl.startsWith('http')) return res.status(400).send('URL inválida.');
+
+    // Generar o reutilizar session id (lo manda el cliente como ?sid=)
+    const sid = req.query.sid || `s_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+    let host = '';
+    try { host = new URL(targetUrl).hostname; } catch (_) {}
+
+    const upstreamHeaders = getHlsUpstreamHeaders(targetUrl, sid);
+
+    try {
+        const response = await safeFetch(targetUrl, { method: 'GET', headers: upstreamHeaders, redirect: 'follow' }, 12000);
+
+        // Capturar cookies de sesión (especialmente hdntl de Akamai)
+        const sc = response.headers.get('set-cookie') || response.headers.raw?.()?.['set-cookie'];
+        if (sc) hlsSetCookiesFromResponse(sid, host, sc);
+
+        if (!response.ok) {
+            console.error(`❌ [HLS-M3U8] HTTP ${response.status} ${targetUrl.substring(0, 80)}`);
+            res.header('Access-Control-Allow-Origin', '*');
+            return res.status(response.status).send(`Upstream HTTP ${response.status}`);
+        }
+
+        const text = await response.text();
+        const rewritten = rewriteHlsManifest(text, targetUrl, sid);
+
+        console.log(`📋 [HLS-M3U8] ${response.status} sid=${sid.slice(-6)} ${targetUrl.substring(0, 70)}`);
+
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Content-Type', 'application/vnd.apple.mpegurl');
+        res.header('X-HLS-Session', sid); // Devolver sid al cliente para usarlo en variantes/seg
+        return res.status(200).send(rewritten);
+    } catch (e) {
+        console.error(`🔥 [HLS-M3U8] Error: ${e.message}`);
+        res.header('Access-Control-Allow-Origin', '*');
+        return res.status(502).send('Error de red: ' + e.message);
+    }
+});
+
+// ── /hls-seg — Redirect 302 puro al CDN (0 bytes de vídeo por el servidor) ──
+// El navegador sigue el redirect y descarga el segmento directamente de Akamai.
+// NOTA: Funciona para canales donde Akamai NO verifica Origin estrictamente.
+// Para Mediaset (que sí verifica), hls.js necesitará estar configurado con
+// withCredentials o el segmento se solicitará desde el mismo Origin del servidor.
+app.get('/hls-seg', (req, res) => {
+    const rawUrl = req.query.url;
+    if (!rawUrl) return res.status(400).send('URL requerida.');
+    let targetUrl;
+    try { targetUrl = decodeURIComponent(rawUrl); } catch (_) { return res.status(400).send('URL inválida.'); }
+    if (!targetUrl.startsWith('http')) return res.status(400).send('URL inválida.');
+    res.header('Access-Control-Allow-Origin', '*');
+    return res.redirect(302, targetUrl);
+});
+
+// ── /api/play/:channelId — Devuelve hlsUrl para usar con /hls-m3u8 ───────
+// (El endpoint ya existe más arriba; esta función solo añade hlsUrl al JSON)
+
 // ─────────────────────────────────────────────
-// REDIRECCIÓN DIRECTA (Cero consumo de ancho de banda)
+// REDIRECT LIMPIO — Para canales no-Mediaset (sin proxy de vídeo)
 // ─────────────────────────────────────────────
 app.all('/proxy-video', (req, res) => {
     const rawTargetUrl = req.query.url;
     if (!rawTargetUrl) return res.status(400).send('URL requerida.');
     const { cleanUrl } = parseStreamUrl(rawTargetUrl);
     if (!cleanUrl || !cleanUrl.startsWith('http')) return res.status(400).send('URL inválida.');
-    
     res.header('Access-Control-Allow-Origin', '*');
     return res.redirect(302, cleanUrl);
 });

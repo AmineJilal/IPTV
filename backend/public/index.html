@@ -608,30 +608,34 @@
                     const res = await fetch(`/api/play/${encodeURIComponent(channel.id)}`);
                     if (res.ok) {
                         const data = await res.json();
-                        finalUrl = data.proxyUrl ? data.proxyUrl : (data.streamUrl || finalUrl);
+                        // hlsUrl → manifest proxy eficiente (Mediaset/Akamai)
+                        // streamUrl → URL directa para canales sin restricciones CORS
+                        finalUrl = data.hlsUrl || data.streamUrl || finalUrl;
                         if (data.tipo) channel.tipo = data.tipo;
                     } else {
                         const err = await res.json();
                         this.showToast('❌ ' + (err.error || 'Error al obtener el canal'), 'red');
-                        return; // Abortar reproducción
+                        return;
                     }
                 } catch(e) { 
                     this.showToast('❌ Backend inaccesible.', 'red');
                     return; 
                 }
 
-                // Detectar si la URL es un stream .m3u8 / playlist
+                // Detectar si la URL es un stream HLS
                 const isDirectM3u8 = finalUrl && (
                     finalUrl.includes('.m3u8') ||
                     finalUrl.includes('manifest') ||
+                    finalUrl.includes('/hls-m3u8') ||
                     finalUrl.includes('.ts') ||
                     finalUrl.includes('playlist')
                 );
                 const esIframe = channel.tipo === 'iframe' && !isDirectM3u8;
 
-                // Si es HLS y es una URL remota externa, forzar pasaje por /proxy-video
-                // Esto evita que m3u8 Sniffer o extensiones de navegador abran ventanas externas y soluciona CORS
-                if (!esIframe && finalUrl && (finalUrl.startsWith('http://') || finalUrl.startsWith('https://')) && !finalUrl.includes('/proxy-video')) {
+                // Solo wrapear con /proxy-video si la URL va a un host externo directamente
+                // (para canales no-Mediaset que no tienen hlsUrl)
+                if (!esIframe && finalUrl && !finalUrl.includes('/hls-m3u8') && !finalUrl.includes('/proxy-video') &&
+                    (finalUrl.startsWith('http://') || finalUrl.startsWith('https://'))) {
                     finalUrl = `/proxy-video?url=${encodeURIComponent(finalUrl)}`;
                 }
 
