@@ -4,8 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List
 import time
 import os
-import requests
-
 from scraper import (
     fetch_countries,
     fetch_country_channels,
@@ -220,7 +218,7 @@ def get_channel_detail(channel_id: str, refresh: bool = False):
     return channel
 
 @app.get("/api/channels/{channel_id}/stream", tags=["Streams"])
-def get_channel_stream(
+async def get_channel_stream(
     channel_id: str,
     redirect: bool = Query(True, description="Redirigir (HTTP 307) a la URL .m3u8 resuelta"),
     proxy: bool = Query(False, description="Proxear la lista .m3u8 directamente"),
