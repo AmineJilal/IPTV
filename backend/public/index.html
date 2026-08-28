@@ -291,6 +291,13 @@
                 // Asociamos tanto al contenedor como al propio video
                 this.dom.videoContainer.addEventListener('dblclick', handleDoubleClick);
                 this.dom.video.addEventListener('dblclick', handleDoubleClick);
+
+                // UX: Cerrar menús de la ruedita al hacer clic en cualquier otra parte
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.btn-gear') && !e.target.closest('.gear-menu')) {
+                        document.querySelectorAll('.gear-menu').forEach(m => m.classList.add('hidden'));
+                    }
+                });
             }
 
             // ─── PANTALLA COMPLETA ──────────────────────────────────
@@ -547,7 +554,7 @@
                                 <i class="ph-fill ${isActive ? 'ph-pause-circle' : 'ph-play-circle'} text-2xl text-white drop-shadow-md"></i>
                             </div>
                         </div>
-                        <div class="flex-1 min-w-0 pr-10">
+                        <div class="flex-1 min-w-0 pr-2">
                             <h3 class="font-bold text-[15px] truncate ${isActive ? 'text-white' : 'text-slate-200 group-hover:text-brand-300 transition-colors'}">${safeName}</h3>
                             <div class="flex items-center gap-2 mt-1">
                                 <span class="flex items-center gap-1 text-[11px] font-medium tracking-wide ${isOnline ? 'text-emerald-400' : 'text-rose-400'}">
@@ -557,22 +564,98 @@
                                 ${channel.tipo === 'hls' ? `<span class="text-[9px] font-bold uppercase tracking-wider bg-slate-700/80 text-slate-300 px-1.5 py-0.5 rounded border border-slate-600">HLS</span>` : ''}
                             </div>
                         </div>
-                        ${isActive ? `
-                        <div class="absolute right-4 flex items-center justify-center text-brand-400 text-xs font-bold">
-                            <div class="flex items-end gap-[3px] h-3.5">
+
+                        <!-- Ecualizador (Activo) + Ruedita de Ajustes de Emergencia -->
+                        <div class="relative shrink-0 z-20 flex items-center gap-1">
+                            ${isActive ? `
+                            <div class="flex items-end gap-[3px] h-3.5 mr-1 text-brand-400">
                                 <div class="w-1 bg-brand-400 rounded-t-sm animate-[bounce_1s_infinite] h-2"></div>
                                 <div class="w-1 bg-brand-400 rounded-t-sm animate-[bounce_1s_infinite_0.2s] h-3.5"></div>
                                 <div class="w-1 bg-brand-400 rounded-t-sm animate-[bounce_1s_infinite_0.4s] h-1.5"></div>
                             </div>
+                            ` : ''}
+                            
+                            <button type="button" class="btn-gear p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/70 transition-all focus:outline-none" title="Opciones de emergencia">
+                                <i class="ph-gear-six text-lg"></i>
+                            </button>
+
+                            <!-- Menú Desplegable de Ajustes -->
+                            <div class="gear-menu hidden absolute right-0 top-10 z-30 bg-slate-900/95 border border-slate-700/80 rounded-xl shadow-2xl p-1 text-xs w-48 backdrop-blur-xl">
+                                <button type="button" class="btn-action-refresh-url w-full text-left px-3 py-2 text-slate-200 hover:bg-brand-500/20 hover:text-brand-300 rounded-lg font-semibold flex items-center gap-2 transition-colors">
+                                    <i class="ph-arrows-clockwise text-base text-brand-400 icon-refresh-gear"></i>
+                                    <span>Refrescar URL API</span>
+                                </button>
+                            </div>
                         </div>
-                        ` : ''}
                     `;
 
-                    el.addEventListener('click', () => this.playChannel(channel));
+                    // Click card: Reproducir canal
+                    el.addEventListener('click', (e) => {
+                        // Si hace clic en la ruedita o dentro de su menú, no reproducir
+                        if (e.target.closest('.btn-gear') || e.target.closest('.gear-menu')) return;
+                        this.playChannel(channel);
+                    });
+
+                    // Eventos de la Ruedita
+                    const btnGear = el.querySelector('.btn-gear');
+                    const gearMenu = el.querySelector('.gear-menu');
+                    const btnRefreshUrl = el.querySelector('.btn-action-refresh-url');
+                    const iconRefreshGear = el.querySelector('.icon-refresh-gear');
+
+                    btnGear.addEventListener('click', (evt) => {
+                        evt.stopPropagation();
+                        // Cerrar otros menús abiertos
+                        document.querySelectorAll('.gear-menu').forEach(m => {
+                            if (m !== gearMenu) m.classList.add('hidden');
+                        });
+                        gearMenu.classList.toggle('hidden');
+                    });
+
+                    btnRefreshUrl.addEventListener('click', (evt) => {
+                        evt.stopPropagation();
+                        gearMenu.classList.add('hidden');
+                        this.refreshChannelApi(channel, iconRefreshGear, btnGear);
+                    });
+
                     fragment.appendChild(el);
                 });
 
                 this.dom.list.appendChild(fragment);
+            }
+
+            // ─── LOGIC: REFRESCAR CANAL DESDE API (EMERGENCIA) ───────
+            async refreshChannelApi(channel, iconGear, btnGear) {
+                if (iconGear) iconGear.classList.add('animate-spin');
+                if (btnGear) btnGear.classList.add('text-brand-400');
+                const chName = channel.nombre || channel.id;
+                this.showToast(`🔄 Solicitando nueva URL a la API para ${chName}...`, 'blue');
+
+                try {
+                    const res = await fetch(`/api/play/${encodeURIComponent(channel.id)}?refresh=true`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.streamUrl) {
+                            channel.stream_url = data.streamUrl;
+                            if (data.headers) channel.headers = JSON.stringify(data.headers);
+                            
+                            this.showToast(`✅ URL de ${chName} actualizada y guardada en BD.`, 'green');
+                            
+                            // Si es el canal reproduciéndose actualmente, recargar reproducción
+                            if (this.state.activeChannelId === channel.id) {
+                                this.playChannel(channel);
+                            }
+                        } else {
+                            this.showToast(`⚠️ Sin nueva URL: ${data.error || 'Respuesta incompleta'}`, 'red');
+                        }
+                    } else {
+                        this.showToast(`❌ Error de servidor HTTP ${res.status}`, 'red');
+                    }
+                } catch (e) {
+                    this.showToast(`❌ Error de red al consultar API.`, 'red');
+                } finally {
+                    if (iconGear) iconGear.classList.remove('animate-spin');
+                    if (btnGear) btnGear.classList.remove('text-brand-400');
+                }
             }
 
             // ─── LOGIC: REPRODUCTOR ──────────────────────────────────
