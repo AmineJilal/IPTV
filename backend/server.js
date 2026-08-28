@@ -323,11 +323,171 @@ async function initDb() {
                 updated_at INTEGER
             )
         `);
+        // Tabla de claves de acceso para autenticación JWT
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS auth_keys (
+                key TEXT PRIMARY KEY,
+                label TEXT,
+                device_id TEXT,
+                jwt_token TEXT,
+                created_at INTEGER,
+                last_login INTEGER,
+                active INTEGER DEFAULT 1
+            )
+        `);
     } catch (e) {
         console.error("🔥 Error crítico inicializando Turso DB. Revisa tus credenciales (TURSO_DATABASE_URL y TURSO_AUTH_TOKEN).", e.message);
     }
 }
 initDb();
+
+// ─────────────────────────────────────────────
+// AUTENTICACIÓN JWT — Sesión de Dispositivo Único
+// ─────────────────────────────────────────────
+const crypto = require('crypto');
+
+// Clave secreta para firmar JWT (generada una vez, o usa variable de entorno)
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+const JWT_EXPIRY_HOURS = 720; // 30 días
+
+function createJwt(payload) {
+    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+    const now = Math.floor(Date.now() / 1000);
+    const body = Buffer.from(JSON.stringify({
+        ...payload,
+        iat: now,
+        exp: now + JWT_EXPIRY_HOURS * 3600
+    })).toString('base64url');
+    const signature = crypto.createHmac('sha256', JWT_SECRET).update(`${header}.${body}`).digest('base64url');
+    return `${header}.${body}.${signature}`;
+}
+
+function verifyJwt(token) {
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+        const [header, body, signature] = parts;
+        const expected = crypto.createHmac('sha256', JWT_SECRET).update(`${header}.${body}`).digest('base64url');
+        if (signature !== expected) return null;
+        const payload = JSON.parse(Buffer.from(body, 'base64url').toString());
+        if (payload.exp && Math.floor(Date.now() / 1000) >= payload.exp) return null;
+        return payload;
+    } catch (_) { return null; }
+}
+
+// Generar clave de acceso aleatoria formato KTV-xxxx-xxxx-xxxx
+function generateAccessKey() {
+    const seg = () => crypto.randomBytes(2).toString('hex');
+    return `KTV-${seg()}-${seg()}-${seg()}`;
+}
+
+const ADMIN_SECRET = process.env.ADMIN_SECRET || 'kovalsky_admin_2026';
+
+// Mapa de sockets autenticados por clave (para force_logout)
+const authenticatedSockets = new Map(); // key -> socket.id
+
+// POST /api/auth/generate-key — Solo admin
+app.post('/api/auth/generate-key', async (req, res) => {
+    const adminSecret = req.headers['x-admin-secret'];
+    if (adminSecret !== ADMIN_SECRET) return res.status(403).json({ error: 'Acceso denegado.' });
+
+    const label = req.body?.label || 'usuario';
+    const key = generateAccessKey();
+
+    try {
+        await db.execute(
+            "INSERT INTO auth_keys (key, label, created_at, active) VALUES (?, ?, ?, 1)",
+            [key, label, Date.now()]
+        );
+        console.log(`🔑 [Auth] Nueva clave generada: ${key} para "${label}"`);
+        return res.json({ key, label });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+});
+
+// POST /api/auth/login — Login con clave + deviceId
+app.post('/api/auth/login', async (req, res) => {
+    const { key, deviceId } = req.body || {};
+    if (!key || !deviceId) return res.status(400).json({ error: 'key y deviceId requeridos.' });
+
+    try {
+        const result = await db.execute("SELECT * FROM auth_keys WHERE key = ?", [key.trim()]);
+        const row = result.rows[0];
+        if (!row) return res.status(401).json({ error: 'Clave de acceso inválida.' });
+        if (!row.active) return res.status(403).json({ error: 'Clave desactivada.' });
+
+        const oldDeviceId = row.device_id;
+        const token = createJwt({ key: row.key, label: row.label, deviceId });
+
+        // Actualizar device_id y token en la BD
+        await db.execute(
+            "UPDATE auth_keys SET device_id = ?, jwt_token = ?, last_login = ? WHERE key = ?",
+            [deviceId, token, Date.now(), row.key]
+        );
+
+        // Si había otro dispositivo conectado, enviar force_logout
+        if (oldDeviceId && oldDeviceId !== deviceId) {
+            const oldSocketId = authenticatedSockets.get(row.key);
+            if (oldSocketId) {
+                const oldSocket = io.sockets.sockets.get(oldSocketId);
+                if (oldSocket) {
+                    oldSocket.emit('force_logout', { reason: 'Sesión transferida a otro dispositivo.' });
+                    console.log(`🔒 [Auth] force_logout enviado al dispositivo anterior de "${row.label}"`);
+                }
+            }
+        }
+
+        console.log(`🔑 [Auth] Login OK: "${row.label}" en dispositivo ${deviceId.substring(0, 20)}`);
+        return res.json({ token, label: row.label, deviceId });
+    } catch (e) {
+        console.error(`🔥 [Auth] Error en login:`, e.message);
+        return res.status(500).json({ error: 'Error interno.' });
+    }
+});
+
+// POST /api/auth/logout
+app.post('/api/auth/logout', async (req, res) => {
+    const auth = req.headers.authorization;
+    if (!auth) return res.status(401).json({ error: 'No autorizado.' });
+    const token = auth.replace('Bearer ', '');
+    const payload = verifyJwt(token);
+    if (!payload) return res.status(401).json({ error: 'Token inválido.' });
+
+    try {
+        await db.execute(
+            "UPDATE auth_keys SET device_id = NULL, jwt_token = NULL WHERE key = ?",
+            [payload.key]
+        );
+        authenticatedSockets.delete(payload.key);
+        console.log(`🔑 [Auth] Logout: "${payload.label}"`);
+        return res.json({ success: true });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+});
+
+// GET /api/auth/validate — Verifica que el token sigue activo para este dispositivo
+app.get('/api/auth/validate', async (req, res) => {
+    const auth = req.headers.authorization;
+    if (!auth) return res.status(401).json({ error: 'No autorizado.' });
+    const token = auth.replace('Bearer ', '');
+    const payload = verifyJwt(token);
+    if (!payload) return res.status(401).json({ error: 'Token expirado o inválido.' });
+
+    try {
+        const result = await db.execute("SELECT device_id, active FROM auth_keys WHERE key = ?", [payload.key]);
+        const row = result.rows[0];
+        if (!row || !row.active) return res.status(403).json({ error: 'Clave desactivada.' });
+        // Verificar que el device_id coincide (sesión no fue robada)
+        if (row.device_id && row.device_id !== payload.deviceId) {
+            return res.status(401).json({ error: 'Sesión transferida a otro dispositivo.' });
+        }
+        return res.json({ valid: true, label: payload.label });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+});
 
 async function obtenerStreamsDb() {
     try {
