@@ -904,8 +904,7 @@ app.get('/api/play/:channelId', async (req, res) => {
         // El navegador (hls.js) usa hlsUrl; Flutter usa streamUrl directamente.
         const isMediaset = finalStreamUrl && (
             finalStreamUrl.includes('mediasetinfinity') ||
-            finalStreamUrl.includes('dai.m3u8') ||
-            finalStreamUrl.includes('akamaized.net')
+            finalStreamUrl.includes('dai.m3u8')
         );
         const hlsUrl = isMediaset
             ? `${req.protocol}://${req.get('host')}/hls-m3u8?url=${encodeURIComponent(finalStreamUrl)}`
@@ -972,13 +971,26 @@ setInterval(() => {
 function getHlsUpstreamHeaders(targetUrl, sid) {
     let host = '';
     try { host = new URL(targetUrl).hostname; } catch (_) {}
-    const isMediaset = host.includes('mediaset') || host.includes('akamai') || host.includes('dai.google');
+    const isMediaset = host.includes('mediaset');
     const isAtres = host.includes('atresmedia') || host.includes('atresplayer');
+    const isMbc = host.includes('edgenextcdn') || host.includes('shahid') || targetUrl.includes('mbc');
+
+    let referer = 'https://www.mediasetinfinity.es/';
+    let origin = 'https://www.mediasetinfinity.es';
+
+    if (isAtres) {
+        referer = 'https://www.atresplayer.com/';
+        origin = 'https://www.atresplayer.com';
+    } else if (isMbc) {
+        referer = 'https://shahid.mbc.net/';
+        origin = 'https://shahid.mbc.net';
+    }
+
     const headers = {
         'User-Agent': UA,
         'Accept': '*/*',
-        'Referer': isAtres ? 'https://www.atresplayer.com/' : 'https://www.mediasetinfinity.es/',
-        'Origin':  isAtres ? 'https://www.atresplayer.com' : 'https://www.mediasetinfinity.es',
+        'Referer': referer,
+        'Origin': origin,
     };
     if (isMediaset) {
         const cookies = hlsGetCookieHeader(sid);
