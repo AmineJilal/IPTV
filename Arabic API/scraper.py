@@ -197,7 +197,9 @@ def resolve_channel_details(channel_id, force_refresh=False):
         "mbcaction": "bcaction",
         "mbcmax": "bcmax",
         "mbcbollywood": "bcbollywood",
-        "mbcdrama": "bcdrama"
+        "mbcdrama": "bcdrama",
+        "2m-tv": "2m",
+        "arryadia-tv": "arryadia"
     }
     target_id = ALIAS_MAP.get(channel_id.lower(), channel_id)
     url = f"https://venolie.com/navo/view/p/{target_id}.php"
@@ -324,6 +326,14 @@ def resolve_channel_details(channel_id, force_refresh=False):
             elif 'easybroadcast.io' in embed_url:
                 required_headers['Referer'] = 'https://snrt.player.easybroadcast.io/'
                 required_headers['Origin'] = 'https://snrt.player.easybroadcast.io'
+
+        # Ajuste crítico para CDNs de MBC (EdgeNext / Akamai): venolie.com y azrogo.com causan HTTP 403
+        if stream_url and ('edgenextcdn.net' in stream_url or 'akamaized.net' in stream_url or 'shahid' in stream_url or 'mbc' in channel_id.lower()):
+            required_headers = {
+                'User-Agent': DEFAULT_HEADERS['User-Agent'],
+                'Referer': 'https://shahid.mbc.net/',
+                'Origin': 'https://shahid.mbc.net'
+            }
 
         result = {
             'id': channel_id,
