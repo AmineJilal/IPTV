@@ -66,53 +66,68 @@ class ChannelModel(BaseModel):
 async def resolve_embed_m3u8(embed_url: str, referer: str = "https://nowfutbol.xyz/") -> str:
     """
     Desofusca y extrae la URL M3U8 fresca con token activo desde la URL del reproductor iframe.
+    Soporta fallback a Tor SOCKS5 si el ISP de España bloquea la conexión directa.
     """
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "Referer": referer
     }
-    async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
-        res = await client.get(embed_url, headers=headers)
-        if res.status_code != 200:
-            raise ValueError(f"Servidor embed devolvió código HTTP {res.status_code}")
+    
+    res = None
+    # 1. Intentar con Tor SOCKS5 para evitar bloqueos por SNI de Vodafone/Movistar
+    try:
+        async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", timeout=10.0, follow_redirects=True, verify=False) as client:
+            r = await client.get(embed_url, headers=headers)
+            if r.status_code == 200:
+                res = r
+    except Exception:
+        pass
+        
+    # 2. Fallback a cliente HTTPS directo
+    if not res:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True, verify=False) as client:
+            res = await client.get(embed_url, headers=headers)
             
-        scripts = re.findall(r'<script[^>]*>(.*?)</script>', res.text, re.DOTALL)
-        target_script = None
-        for s in scripts:
-            if "Clappr" in s or "playbackURL" in s:
-                target_script = s
+    if not res or res.status_code != 200:
+        raise ValueError(f"Servidor embed devolvió código HTTP {res.status_code if res else 'No response'}")
+        
+    scripts = re.findall(r'<script[^>]*>(.*?)</script>', res.text, re.DOTALL)
+    target_script = None
+    for s in scripts:
+        if "Clappr" in s or "playbackURL" in s:
+            target_script = s
+            break
+            
+    if not target_script:
+        raise ValueError("No se encontró el script de reproducción en el embed")
+        
+    mock_dom = """
+    const dummyEl = { setAttribute: () => {}, addEventListener: () => {}, style: {} };
+    const window = { addEventListener: () => {} };
+    const document = { addEventListener: () => {}, querySelector: () => dummyEl, getElementById: () => dummyEl, createElement: () => dummyEl, head: dummyEl, documentElement: dummyEl, body: dummyEl };
+    const localStorage = { getItem: () => null, setItem: () => {} };
+    const Clappr = { Player: function(opts) { console.log("RESOLVED_URL:" + opts.source); } };
+    """
+    
+    script_path = f"/tmp/eval_{os.getpid()}_{int(time.time()*1000)}.js"
+    with open(script_path, "w") as f:
+        f.write(mock_dom + target_script)
+        
+    try:
+        p = subprocess.run(["node", script_path], capture_output=True, text=True, timeout=5)
+        resolved_url = None
+        for line in p.stdout.splitlines():
+            if "RESOLVED_URL:" in line:
+                resolved_url = line.split("RESOLVED_URL:")[1].strip()
                 break
                 
-        if not target_script:
-            raise ValueError("No se encontró el script de reproducción en el embed")
+        if not resolved_url:
+            raise ValueError("No se pudo extraer la variable playbackURL")
             
-        mock_dom = """
-        const dummyEl = { setAttribute: () => {}, addEventListener: () => {}, style: {} };
-        const window = { addEventListener: () => {} };
-        const document = { addEventListener: () => {}, querySelector: () => dummyEl, getElementById: () => dummyEl, createElement: () => dummyEl, head: dummyEl, documentElement: dummyEl, body: dummyEl };
-        const localStorage = { getItem: () => null, setItem: () => {} };
-        const Clappr = { Player: function(opts) { console.log("RESOLVED_URL:" + opts.source); } };
-        """
-        
-        script_path = f"/tmp/eval_{os.getpid()}_{int(time.time()*1000)}.js"
-        with open(script_path, "w") as f:
-            f.write(mock_dom + target_script)
-            
-        try:
-            p = subprocess.run(["node", script_path], capture_output=True, text=True, timeout=5)
-            resolved_url = None
-            for line in p.stdout.splitlines():
-                if "RESOLVED_URL:" in line:
-                    resolved_url = line.split("RESOLVED_URL:")[1].strip()
-                    break
-                    
-            if not resolved_url:
-                raise ValueError("No se pudo extraer la variable playbackURL")
-                
-            return resolved_url
-        finally:
-            if os.path.exists(script_path):
-                os.remove(script_path)
+        return resolved_url
+    finally:
+        if os.path.exists(script_path):
+            os.remove(script_path)
 
 @app.get("/api/v1/channels", response_model=List[ChannelModel])
 async def get_channels(include_xameleon: bool = Query(True, description="Incluir catálogo dinámico de Xameleon")):
@@ -192,7 +207,14 @@ async def get_channel_stream_url(channel_id: str):
         raise HTTPException(status_code=404, detail="Canal no encontrado")
         
     try:
-        m3u8_url = await resolve_embed_m3u8(channel["embed_url"])
+        # Detectar si el embed apunta a un stream de Xameleon/Daddy (ej. stream-538.php)
+        embed_match = re.search(r"stream-(\d+)\.php", channel["embed_url"])
+        if embed_match:
+            raw_id = embed_match.group(1)
+            m3u8_url = await resolve_xameleon_stream(raw_id)
+        else:
+            m3u8_url = await resolve_embed_m3u8(channel["embed_url"])
+            
         return {
             "id": channel["id"],
             "name": channel["name"],
@@ -202,6 +224,21 @@ async def get_channel_stream_url(channel_id: str):
             "status": "active"
         }
     except Exception as e:
+        # Fallback de emergencia a extractor de Xameleon si embed_url falla
+        embed_id_match = re.search(r"(\d+)", channel["embed_url"])
+        if embed_id_match:
+            try:
+                m3u8_url = await resolve_xameleon_stream(embed_id_match.group(1))
+                return {
+                    "id": channel["id"],
+                    "name": channel["name"],
+                    "stream_key": channel["stream_key"],
+                    "embed_url": channel["embed_url"],
+                    "stream_url": m3u8_url,
+                    "status": "active"
+                }
+            except Exception:
+                pass
         raise HTTPException(status_code=500, detail=f"Error resolviendo stream dinámico: {str(e)}")
 
 @app.get("/api/v1/channel/{channel_id}/proxy-stream")
