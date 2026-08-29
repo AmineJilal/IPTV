@@ -20,6 +20,7 @@ RUN pip install --no-cache-dir -r "api-españa/requirements.txt"
 RUN pip install --no-cache-dir -r "Arabic API/requirements.txt"
 RUN pip install --no-cache-dir -r "yacinetv-api/requirements.txt"
 RUN pip install --no-cache-dir -r "API iberoamericana/requirements.txt"
+RUN pip install --no-cache-dir -r "api-movistar/requirements.txt"
 
 # Dar permisos al script de inicio
 RUN chmod +x start.sh

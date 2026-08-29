@@ -14,5 +14,8 @@ echo "🚀 Iniciando API España..."
 echo "🚀 Iniciando API Yacine..."
 (cd "$DIR/yacinetv-api" && python3 -m uvicorn app:app --host 0.0.0.0 --port 8000) &
 
+echo "🚀 Iniciando API Movistar..."
+(cd "$DIR/api-movistar" && python3 -m uvicorn main:app --host 0.0.0.0 --port 8070) &
+
 echo "🚀 Iniciando Node.js Backend..."
 cd "$DIR/backend" && npm start
