@@ -26,19 +26,24 @@ async def get_httpx_client(timeout: float = 10.0, use_proxy_if_available: bool =
 
 async def fetch_xameleon_channels() -> List[Dict[str, str]]:
     """
-    Obtiene el catálogo completo de canales desde dlstreams.st u omitiendo el bloqueo por Tor/Proxy.
+    Obtiene el catálogo completo de canales desde dlstreams.st omitiendo el bloqueo por Tor/Proxy.
     """
-    url = f"https://{ROMPONALIS_HOST}/24-7-channels.php"
+    url = f"https://{DLSTREAMS_HOST}/24-7-channels.php"
     headers = {
         **DEFAULT_HEADERS,
-        "Referer": "https://dlstreams.st/"
+        "Referer": f"https://{DLSTREAMS_HOST}/"
     }
     
     resp = None
     try:
-        async with await get_httpx_client(use_proxy_if_available=True) as client:
-            resp = await client.get(url, headers=headers)
+        async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=10.0, follow_redirects=True) as client:
+            res = await client.get(url, headers=headers)
+            if res.status_code == 200:
+                resp = res
     except Exception:
+        pass
+        
+    if not resp:
         # Fallback a IP directa
         direct_url = f"https://{DLSTREAMS_IP}/24-7-channels.php"
         headers_direct = {**headers, "Host": DLSTREAMS_HOST}
@@ -91,8 +96,8 @@ async def resolve_xameleon_stream(channel_raw_id: str) -> str:
             res = await client.get(url, headers=headers)
             if res.status_code == 200 and "window.atob" in res.text:
                 resp = res
-    except Exception as e:
-        print(f"[Xameleon] Tor SOCKS5 fetch failed/skipped: {e}")
+    except Exception:
+        pass
 
     # 2. Fallback a petición HTTPS directa si Tor no estaba listo o falló
     if not resp:
@@ -113,44 +118,52 @@ async def resolve_xameleon_stream(channel_raw_id: str) -> str:
 
 async def fetch_xameleon_m3u8_manifest(m3u8_url: str, base_proxy_url: Optional[str] = None) -> str:
     """
-    Descarga el contenido del manifiesto M3U8 aplicando bypass de SNI e IP directa,
+    Descarga el contenido del manifiesto M3U8 aplicando bypass por Tor/Proxy o IP directa,
     y reescribe las URLs relativas/submanifiestos para ser proxyeados a través de la API.
     """
     base_dir = m3u8_url.rsplit("/", 1)[0] + "/"
-    
-    # Reemplazar el dominio por la IP directa si viene con el dominio xameleon.phantemlis.top
-    target_url = m3u8_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
-    
     headers = {
         **DEFAULT_HEADERS,
-        "Host": XAMELEON_HOST,
         "Referer": f"https://{ROMPONALIS_HOST}/"
     }
     
-    async with httpx.AsyncClient(verify=False, timeout=10.0, follow_redirects=True) as client:
-        resp = await client.get(target_url, headers=headers)
-        if resp.status_code != 200:
-            raise ValueError(f"Error descargando M3U8: HTTP {resp.status_code}")
+    resp = None
+    # 1. Intentar por SOCKS5 Tor primero para omitir bloqueos ISP
+    try:
+        async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=10.0, follow_redirects=True) as client:
+            res = await client.get(m3u8_url, headers=headers)
+            if res.status_code == 200:
+                resp = res
+    except Exception:
+        pass
+        
+    # 2. Fallback a IP directa si no se usó SOCKS5
+    if not resp:
+        target_url = m3u8_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
+        headers_direct = {**headers, "Host": XAMELEON_HOST}
+        async with httpx.AsyncClient(verify=False, timeout=10.0, follow_redirects=True) as client:
+            resp = await client.get(target_url, headers=headers_direct)
             
-        lines = []
-        for line in resp.text.splitlines():
-            line_str = line.strip()
-            if line_str and not line_str.startswith("#"):
-                if not line_str.startswith("http://") and not line_str.startswith("https://"):
-                    full_url = base_dir + line_str
-                else:
-                    full_url = line_str
-                # Forzar IP directa en lugar de dominio para evitar bloqueo de SNI en el reproductor
-                full_url = full_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
-                
-                if base_proxy_url and ".m3u8" in full_url:
-                    lines.append(f"{base_proxy_url}?url={full_url}")
-                else:
-                    lines.append(full_url)
+    if not resp or resp.status_code != 200:
+        raise ValueError(f"Error descargando M3U8: HTTP {resp.status_code if resp else 'No response'}")
+        
+    lines = []
+    for line in resp.text.splitlines():
+        line_str = line.strip()
+        if line_str and not line_str.startswith("#"):
+            if not line_str.startswith("http://") and not line_str.startswith("https://"):
+                full_url = base_dir + line_str
             else:
-                lines.append(line_str)
+                full_url = line_str
                 
-        return "\n".join(lines)
+            if base_proxy_url and ".m3u8" in full_url:
+                lines.append(f"{base_proxy_url}?url={full_url}")
+            else:
+                lines.append(full_url)
+        else:
+            lines.append(line_str)
+            
+    return "\n".join(lines)
 
 
 
