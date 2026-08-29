@@ -32,6 +32,12 @@ module.exports = {
       script: "python3",
       args: "-m uvicorn app:app --host 0.0.0.0 --port 8000",
       cwd: "./yacinetv-api",
+    },
+    {
+      name: "api-movistar",
+      script: "python3",
+      args: "-m uvicorn main:app --host 0.0.0.0 --port 8070",
+      cwd: "./api-movistar",
     }
   ]
 };

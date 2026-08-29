@@ -410,6 +410,7 @@
 
                 // Botones Principales ESTRICTOS en la Sidebar
                 this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'all', label: 'Todos los canales', icon: 'ph-squares-four' }, false));
+                this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'movistar', label: 'Movistar & Deportes', icon: 'ph-television' }, false));
                 this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'bein', label: 'BeIN Sports', icon: 'ph-soccer-ball' }, false));
                 this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'spain', label: 'España', icon: 'ph-flag' }, false));
                 this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'deportes', label: 'Deportes', icon: 'ph-globe-hemisphere-west' }, false));
@@ -483,6 +484,9 @@
                     const name = (c.nombre || '').toLowerCase();
                     const id = (c.id || '').toLowerCase();
                     
+                    if (this.state.activeFilter === 'movistar') {
+                        return catName.includes('Movistar') || catName.includes('Xameleon') || id.startsWith('movistar_') || id.startsWith('xameleon_');
+                    }
                     if (this.state.activeFilter === 'spain') {
                         return catName === 'España' || id.startsWith('tdt_') || name.includes('la 1') || name.includes('antena 3');
                     }

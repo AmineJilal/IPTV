@@ -605,6 +605,20 @@ async function syncAllLists() {
             }
         } catch (e) { console.error('[Sync] Error en Yacine API:', e.message); }
 
+        // 5. Movistar+ & Xameleon API (Puerto 8070)
+        try {
+            const r = await safeFetch('http://127.0.0.1:8070/api/v1/channels', {}, 15000);
+            if (r.ok) {
+                const canalesMovistar = await r.json();
+                for (const c of canalesMovistar || []) {
+                    const id = c.id.startsWith('xameleon_') ? c.id : ('movistar_' + c.id);
+                    const cat = c.category || 'Movistar & Deportes';
+                    await db.execute(insertQuery, [id, c.name, cat, c.logo || '']);
+                    total++;
+                }
+            }
+        } catch (e) { console.error('[Sync] Error en Movistar API:', e.message); }
+
         io.emit('actualizar_streams', await obtenerStreamsDb());
     } catch (e) {
         console.error('Error sincronizando listas:', e);
@@ -859,6 +873,18 @@ app.get('/api/play/:channelId', async (req, res) => {
                             nuevaUrl = rawUrl;
                         }
                         if (d.headers) nuevosHeaders = JSON.stringify(d.headers);
+                    }
+                } else if (id.startsWith('movistar_') || id.startsWith('xameleon_')) {
+                    const chId = id.replace('movistar_', '');
+                    for (const base of bases) {
+                        try {
+                            r = await safeFetch(`${base}:8070/api/v1/channel/${encodeURIComponent(chId)}/m3u8`, {}, 25000);
+                            if (r && r.ok) break;
+                        } catch (e) { fetchError = e; }
+                    }
+                    if (r && r.ok) {
+                        const d = await r.json();
+                        nuevaUrl = d.stream_url || null;
                     }
                 }
 
