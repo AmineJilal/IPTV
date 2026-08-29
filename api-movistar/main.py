@@ -185,24 +185,36 @@ async def get_xameleon_stream_url(raw_id: str, request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error resolviendo stream de Xameleon: {str(e)}")
 
+import urllib.parse
+
 @app.get("/api/v1/xameleon/proxy-seg")
-async def proxy_xameleon_segment(url: str):
+async def proxy_xameleon_segment(request: Request):
     """
     Proxy directo y ultrarrápido en streaming para segmentos de vídeo (Cloudflare R2 / CDN)
     inyectando cabeceras CORS (Access-Control-Allow-Origin: *) para reproducción web.
-    Utiliza el pool de conexiones cdn_pool reutilizables y StreamingResponse.
+    Des-codifica correctamente los parámetros firmados S3 con ampersands (&).
     """
     try:
+        query_str = str(request.url.query)
+        if query_str.startswith("url="):
+            raw_target_url = query_str[4:]
+        else:
+            raw_target_url = request.query_params.get("url", "")
+            
+        target_url = urllib.parse.unquote(raw_target_url)
+        if not target_url or not target_url.startswith("http"):
+            raise HTTPException(status_code=400, detail="URL de segmento inválida")
+
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         }
         
-        req = cdn_pool.build_request("GET", url, headers=headers)
+        req = cdn_pool.build_request("GET", target_url, headers=headers)
         resp = await cdn_pool.send(req, stream=True)
         
         if resp.status_code != 200:
             await resp.aclose()
-            raise HTTPException(status_code=resp.status_code, detail="Error descargando segmento de vídeo")
+            raise HTTPException(status_code=resp.status_code, detail=f"Error descargando segmento de vídeo (HTTP {resp.status_code})")
 
         async def stream_bytes():
             try:
@@ -227,16 +239,24 @@ async def proxy_xameleon_segment(url: str):
         raise HTTPException(status_code=502, detail=f"Error en proxy-seg: {str(e)}")
 
 @app.get("/api/v1/xameleon/proxy-sub")
-async def proxy_xameleon_sub_manifest(url: str, request: Request):
+async def proxy_xameleon_sub_manifest(request: Request):
     """
     Proxy genérico para sub-manifiestos M3U8 inyectando cabeceras Referer y Host.
     """
     try:
+        query_str = str(request.url.query)
+        if query_str.startswith("url="):
+            raw_target_url = query_str[4:]
+        else:
+            raw_target_url = request.query_params.get("url", "")
+            
+        target_url = urllib.parse.unquote(raw_target_url)
+
         base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
         sub_proxy_url = f"{base_url}/api/v1/xameleon/proxy-sub"
         seg_proxy_url = f"{base_url}/api/v1/xameleon/proxy-seg"
         
-        manifest_content = await fetch_xameleon_m3u8_manifest(url, base_proxy_url=sub_proxy_url, base_seg_proxy_url=seg_proxy_url)
+        manifest_content = await fetch_xameleon_m3u8_manifest(target_url, base_proxy_url=sub_proxy_url, base_seg_proxy_url=seg_proxy_url)
         return Response(
             content=manifest_content,
             media_type="application/x-mpegURL",
@@ -247,6 +267,7 @@ async def proxy_xameleon_sub_manifest(url: str, request: Request):
             }
         )
     except Exception as e:
+        print(f"⚠️ [proxy-sub error]: {e}")
         raise HTTPException(status_code=502, detail=f"Error en proxy-sub: {str(e)}")
 
 @app.get("/api/v1/xameleon/channel/{raw_id}/proxy-stream")
