@@ -116,15 +116,15 @@ async def resolve_xameleon_stream(channel_raw_id: str) -> str:
     decoded_url = base64.b64decode(match.group(1)).decode("utf-8")
     return decoded_url
 
-async def fetch_xameleon_m3u8_manifest(m3u8_url: str, base_proxy_url: Optional[str] = None) -> str:
+async def fetch_xameleon_m3u8_manifest(m3u8_url: str, base_proxy_url: Optional[str] = None, base_seg_proxy_url: Optional[str] = None) -> str:
     """
     Descarga el contenido del manifiesto M3U8 aplicando bypass por Tor/Proxy o IP directa,
-    y reescribe las URLs relativas/submanifiestos para ser proxyeados a través de la API.
+    y reescribe las URLs relativas/submanifiestos y segmentos .ts para ser proxyeados a través de la API.
     """
     base_dir = m3u8_url.rsplit("/", 1)[0] + "/"
     headers = {
         **DEFAULT_HEADERS,
-        "Referer": f"https://{ROMPONALIS_HOST}/"
+        "Referer": "https://hamis.romponalis.st/"
     }
     
     resp = None
@@ -158,9 +158,18 @@ async def fetch_xameleon_m3u8_manifest(m3u8_url: str, base_proxy_url: Optional[s
                 
             if base_proxy_url and ".m3u8" in full_url:
                 lines.append(f"{base_proxy_url}?url={full_url}")
+            elif base_seg_proxy_url:
+                lines.append(f"{base_seg_proxy_url}?url={full_url}")
             else:
                 lines.append(full_url)
         else:
+            # Reescribir URI="..." en #EXT-X-KEY o #EXT-X-MAP
+            if 'URI="' in line_str and base_seg_proxy_url:
+                def replace_uri(match):
+                    uri = match.group(1)
+                    abs_uri = uri if uri.startswith("http") else base_dir + uri
+                    return f'URI="{base_seg_proxy_url}?url={abs_uri}"'
+                line_str = re.sub(r'URI="([^"]+)"', replace_uri, line_str)
             lines.append(line_str)
             
     return "\n".join(lines)

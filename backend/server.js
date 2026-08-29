@@ -884,7 +884,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                     }
                     if (r && r.ok) {
                         const d = await r.json();
-                        nuevaUrl = d.stream_url || null;
+                        nuevaUrl = d.proxy_stream_url || d.stream_url || null;
                     }
                 }
 

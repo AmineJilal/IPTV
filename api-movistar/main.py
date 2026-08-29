@@ -150,28 +150,63 @@ async def get_xameleon_channels_endpoint():
         raise HTTPException(status_code=500, detail=f"Error obteniendo catálogo Xameleon: {str(e)}")
 
 @app.get("/api/v1/xameleon/channel/{raw_id}/m3u8")
-async def get_xameleon_stream_url(raw_id: str):
+async def get_xameleon_stream_url(raw_id: str, request: Request):
     """
     Resuelve la URL M3U8 fresca de Xameleon con token de sesión activo.
     """
     try:
+        base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
         m3u8_url = await resolve_xameleon_stream(raw_id)
         return {
             "id": f"xameleon_{raw_id}",
             "raw_id": raw_id,
             "stream_url": m3u8_url,
+            "proxy_stream_url": f"{base_url}/api/v1/xameleon/channel/{raw_id}/proxy-stream",
             "status": "active"
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error resolviendo stream de Xameleon: {str(e)}")
 
+@app.get("/api/v1/xameleon/proxy-seg")
+async def proxy_xameleon_segment(url: str):
+    """
+    Proxy genérico para segmentos .ts / .m4s inyectando la cabecera Referer requerida por el CDN.
+    Soporta fallback a Tor SOCKS5 si la IP directa del CDN es bloqueada.
+    """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Referer": "https://hamis.romponalis.st/"
+    }
+    
+    resp = None
+    try:
+        async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=12.0) as client:
+            r = await client.get(url, headers=headers)
+            if r.status_code == 200:
+                resp = r
+    except Exception:
+        pass
+        
+    if not resp:
+        async with httpx.AsyncClient(verify=False, timeout=12.0) as client:
+            resp = await client.get(url, headers=headers)
+            
+    if not resp or resp.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"Error obteniendo segmento TS: HTTP {resp.status_code if resp else 'No response'}")
+        
+    return Response(content=resp.content, media_type=resp.headers.get("content-type", "video/MP2T"))
+
 @app.get("/api/v1/xameleon/proxy-sub")
-async def proxy_xameleon_sub_manifest(url: str):
+async def proxy_xameleon_sub_manifest(url: str, request: Request):
     """
     Proxy genérico para sub-manifiestos M3U8 inyectando cabeceras Referer y Host.
     """
     try:
-        manifest_content = await fetch_xameleon_m3u8_manifest(url)
+        base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
+        sub_proxy_url = f"{base_url}/api/v1/xameleon/proxy-sub"
+        seg_proxy_url = f"{base_url}/api/v1/xameleon/proxy-seg"
+        
+        manifest_content = await fetch_xameleon_m3u8_manifest(url, base_proxy_url=sub_proxy_url, base_seg_proxy_url=seg_proxy_url)
         return Response(content=manifest_content, media_type="application/x-mpegURL")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Error en proxy-sub: {str(e)}")
@@ -184,28 +219,30 @@ async def proxy_xameleon_manifest(raw_id: str, request: Request):
     try:
         base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
         sub_proxy_url = f"{base_url}/api/v1/xameleon/proxy-sub"
+        seg_proxy_url = f"{base_url}/api/v1/xameleon/proxy-seg"
         
         m3u8_url = await resolve_xameleon_stream(raw_id)
-        manifest_content = await fetch_xameleon_m3u8_manifest(m3u8_url, base_proxy_url=sub_proxy_url)
+        manifest_content = await fetch_xameleon_m3u8_manifest(m3u8_url, base_proxy_url=sub_proxy_url, base_seg_proxy_url=seg_proxy_url)
         return Response(content=manifest_content, media_type="application/x-mpegURL")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Error en proxy-stream Xameleon: {str(e)}")
 
 
 @app.get("/api/v1/channel/{channel_id}/m3u8")
-async def get_channel_stream_url(channel_id: str):
+async def get_channel_stream_url(channel_id: str, request: Request):
     """
     Obtiene la URL M3U8 fresca con token autenticado desofuscando el reproductor en tiempo real.
     Soporta IDs nativos y prefijados como xameleon_91.
     """
     if channel_id.startswith("xameleon_"):
         raw_id = channel_id.replace("xameleon_", "")
-        return await get_xameleon_stream_url(raw_id)
+        return await get_xameleon_stream_url(raw_id, request)
 
     channel = next((c for c in CHANNELS_DB if c["id"] == channel_id.lower()), None)
     if not channel:
         raise HTTPException(status_code=404, detail="Canal no encontrado")
         
+    base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
     try:
         # Detectar si el embed apunta a un stream de Xameleon/Daddy (ej. stream-538.php)
         embed_match = re.search(r"stream-(\d+)\.php", channel["embed_url"])
@@ -221,6 +258,7 @@ async def get_channel_stream_url(channel_id: str):
             "stream_key": channel["stream_key"],
             "embed_url": channel["embed_url"],
             "stream_url": m3u8_url,
+            "proxy_stream_url": f"{base_url}/api/v1/channel/{channel['id']}/proxy-stream",
             "status": "active"
         }
     except Exception as e:
@@ -235,6 +273,7 @@ async def get_channel_stream_url(channel_id: str):
                     "stream_key": channel["stream_key"],
                     "embed_url": channel["embed_url"],
                     "stream_url": m3u8_url,
+                    "proxy_stream_url": f"{base_url}/api/v1/channel/{channel['id']}/proxy-stream",
                     "status": "active"
                 }
             except Exception:
@@ -250,12 +289,16 @@ async def proxy_channel_manifest(channel_id: str, request: Request):
         raw_id = channel_id.replace("xameleon_", "")
         return await proxy_xameleon_manifest(raw_id, request)
 
-
     channel = next((c for c in CHANNELS_DB if c["id"] == channel_id.lower()), None)
     if not channel:
         raise HTTPException(status_code=404, detail="Canal no encontrado")
         
     try:
+        embed_match = re.search(r"stream-(\d+)\.php", channel["embed_url"])
+        if embed_match:
+            raw_id = embed_match.group(1)
+            return await proxy_xameleon_manifest(raw_id, request)
+
         m3u8_url = await resolve_embed_m3u8(channel["embed_url"])
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -265,6 +308,13 @@ async def proxy_channel_manifest(channel_id: str, request: Request):
             resp = await client.get(m3u8_url, headers=headers)
             return Response(content=resp.content, status_code=resp.status_code, media_type="application/x-mpegURL")
     except Exception as e:
+        # Fallback si falla el embed directo
+        embed_id_match = re.search(r"(\d+)", channel["embed_url"])
+        if embed_id_match:
+            try:
+                return await proxy_xameleon_manifest(embed_id_match.group(1), request)
+            except Exception:
+                pass
         raise HTTPException(status_code=502, detail=f"Error proxy-stream: {str(e)}")
 
 @app.get("/playlist.m3u", response_class=PlainTextResponse)
