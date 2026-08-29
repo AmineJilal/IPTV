@@ -7,7 +7,7 @@ import re
 import subprocess
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import PlainTextResponse, Response
+from fastapi.responses import PlainTextResponse, Response, StreamingResponse
 from pydantic import BaseModel
 
 from xameleon_extractor import (
@@ -30,6 +30,14 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+# Pool global de conexiones HTTP para descarga ultrarrápida de segmentos CDN
+cdn_pool = httpx.AsyncClient(
+    verify=False,
+    timeout=httpx.Timeout(15.0, connect=5.0),
+    limits=httpx.Limits(max_keepalive_connections=100, max_connections=200),
+    follow_redirects=True
 )
 
 # Base domain setting (defaults to environment variable BASE_DOMAIN if set)
@@ -180,22 +188,32 @@ async def get_xameleon_stream_url(raw_id: str, request: Request):
 @app.get("/api/v1/xameleon/proxy-seg")
 async def proxy_xameleon_segment(url: str):
     """
-    Proxy directo y ultrarrápido para segmentos de vídeo (Cloudflare R2 / CDN)
+    Proxy directo y ultrarrápido en streaming para segmentos de vídeo (Cloudflare R2 / CDN)
     inyectando cabeceras CORS (Access-Control-Allow-Origin: *) para reproducción web.
-    NO utiliza Tor SOCKS5 para evitar latencia y timeouts en los chunks de vídeo.
+    Utiliza el pool de conexiones cdn_pool reutilizables y StreamingResponse.
     """
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         }
-        async with httpx.AsyncClient(verify=False, timeout=12.0, follow_redirects=True) as client:
-            resp = await client.get(url, headers=headers)
-            
+        
+        req = cdn_pool.build_request("GET", url, headers=headers)
+        resp = await cdn_pool.send(req, stream=True)
+        
         if resp.status_code != 200:
+            await resp.aclose()
             raise HTTPException(status_code=resp.status_code, detail="Error descargando segmento de vídeo")
-            
-        return Response(
-            content=resp.content,
+
+        async def stream_bytes():
+            try:
+                async for chunk in resp.aiter_bytes():
+                    yield chunk
+            finally:
+                await resp.aclose()
+
+        return StreamingResponse(
+            stream_bytes(),
+            status_code=200,
             media_type=resp.headers.get("content-type", "video/MP2T"),
             headers={
                 "Access-Control-Allow-Origin": "*",
@@ -205,6 +223,7 @@ async def proxy_xameleon_segment(url: str):
             }
         )
     except Exception as e:
+        print(f"⚠️ [proxy-seg error]: {e}")
         raise HTTPException(status_code=502, detail=f"Error en proxy-seg: {str(e)}")
 
 @app.get("/api/v1/xameleon/proxy-sub")

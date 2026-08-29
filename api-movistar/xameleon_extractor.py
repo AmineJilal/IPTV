@@ -1,5 +1,6 @@
 import re
 import base64
+import time
 import httpx
 from typing import List, Dict, Optional
 
@@ -116,39 +117,60 @@ async def resolve_xameleon_stream(channel_raw_id: str) -> str:
     decoded_url = base64.b64decode(match.group(1)).decode("utf-8")
     return decoded_url
 
+MANIFEST_CACHE = {}  # url -> (timestamp, raw_text)
+
 async def fetch_xameleon_m3u8_manifest(m3u8_url: str, base_proxy_url: Optional[str] = None, base_seg_proxy_url: Optional[str] = None) -> str:
     """
     Descarga el contenido del manifiesto M3U8 aplicando bypass por Tor/Proxy o IP directa,
     y reescribe URLs de submanifiestos M3U8 y segmentos si se proporcionan base_proxy_url y base_seg_proxy_url.
+    Utiliza una memoria caché de 3s para evitar sobrecargar Tor con solicitudes repetidas de hls.js.
     """
-    base_dir = m3u8_url.rsplit("/", 1)[0] + "/"
-    headers = {
-        **DEFAULT_HEADERS,
-        "Referer": "https://hamis.romponalis.st/"
-    }
-    
-    resp = None
-    # 1. Intentar por SOCKS5 Tor primero para omitir bloqueos ISP
-    try:
-        async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=10.0, follow_redirects=True) as client:
-            res = await client.get(m3u8_url, headers=headers)
-            if res.status_code == 200:
-                resp = res
-    except Exception:
-        pass
+    now = time.time()
+    raw_text = None
+
+    if m3u8_url in MANIFEST_CACHE:
+        cached_time, cached_content = MANIFEST_CACHE[m3u8_url]
+        if now - cached_time < 3.0:
+            raw_text = cached_content
+
+    if not raw_text:
+        base_dir = m3u8_url.rsplit("/", 1)[0] + "/"
+        headers = {
+            **DEFAULT_HEADERS,
+            "Referer": "https://hamis.romponalis.st/"
+        }
         
-    # 2. Fallback a IP directa si no se usó SOCKS5
-    if not resp:
-        target_url = m3u8_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
-        headers_direct = {**headers, "Host": XAMELEON_HOST}
-        async with httpx.AsyncClient(verify=False, timeout=10.0, follow_redirects=True) as client:
-            resp = await client.get(target_url, headers=headers_direct)
+        resp = None
+        # 1. Intentar por SOCKS5 Tor primero para omitir bloqueos ISP
+        try:
+            async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=5.0, follow_redirects=True) as client:
+                res = await client.get(m3u8_url, headers=headers)
+                if res.status_code == 200:
+                    resp = res
+        except Exception:
+            pass
             
-    if not resp or resp.status_code != 200:
-        raise ValueError(f"Error descargando M3U8: HTTP {resp.status_code if resp else 'No response'}")
-        
+        # 2. Fallback a IP directa si no se usó SOCKS5
+        if not resp:
+            target_url = m3u8_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
+            headers_direct = {**headers, "Host": XAMELEON_HOST}
+            try:
+                async with httpx.AsyncClient(verify=False, timeout=5.0, follow_redirects=True) as client:
+                    res_direct = await client.get(target_url, headers=headers_direct)
+                    if res_direct.status_code == 200:
+                        resp = res_direct
+            except Exception:
+                pass
+                
+        if not resp or resp.status_code != 200:
+            raise ValueError(f"Error descargando M3U8: HTTP {resp.status_code if resp else 'No response'}")
+
+        raw_text = resp.text
+        MANIFEST_CACHE[m3u8_url] = (now, raw_text)
+
+    base_dir = m3u8_url.rsplit("/", 1)[0] + "/"
     lines = []
-    for line in resp.text.splitlines():
+    for line in raw_text.splitlines():
         line_str = line.strip()
         if line_str and not line_str.startswith("#"):
             if not line_str.startswith("http://") and not line_str.startswith("https://"):
