@@ -16,10 +16,20 @@ from xameleon_extractor import (
     fetch_xameleon_m3u8_manifest
 )
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="IPTV Channel & Stream API",
     description="API para gestionar y resolver listas de canales IPTV con desofuscación dinámica y soporte de proxy HTTP/SOCKS",
     version="2.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Base domain setting (defaults to environment variable BASE_DOMAIN if set)

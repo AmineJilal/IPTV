@@ -925,16 +925,17 @@ app.get('/api/play/:channelId', async (req, res) => {
             } catch (e) {}
         }
 
-        // hlsUrl: para canales Mediaset, /hls-m3u8 proxea solo el manifest (~2KB)
-        // y captura la cookie hdntl de Akamai que necesitan los segmentos.
-        // El navegador (hls.js) usa hlsUrl; Flutter usa streamUrl directamente.
+        // hlsUrl: para canales Mediaset (/hls-m3u8) o Movistar/Xameleon (proxy-stream).
+        // El navegador (hls.js) usa hlsUrl sin pasar por /proxy-video.
         const isMediaset = finalStreamUrl && (
             finalStreamUrl.includes('mediasetinfinity') ||
             finalStreamUrl.includes('dai.m3u8')
         );
+        const isMovistarXameleon = id.startsWith('movistar_') || id.startsWith('xameleon_') || (finalStreamUrl && finalStreamUrl.includes('/proxy-stream'));
+
         const hlsUrl = isMediaset
             ? `${req.protocol}://${req.get('host')}/hls-m3u8?url=${encodeURIComponent(finalStreamUrl)}`
-            : null;
+            : (isMovistarXameleon ? finalStreamUrl : null);
 
         return res.json({ 
             success: true, 

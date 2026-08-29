@@ -720,8 +720,8 @@
                 const esIframe = channel.tipo === 'iframe' && !isDirectM3u8;
 
                 // Solo wrapear con /proxy-video si la URL va a un host externo directamente
-                // (para canales no-Mediaset que no tienen hlsUrl)
-                if (!esIframe && finalUrl && !finalUrl.includes('/hls-m3u8') && !finalUrl.includes('/proxy-video') &&
+                // (para canales no-Mediaset/Movistar que no tienen hlsUrl directo o proxy dedicado)
+                if (!esIframe && finalUrl && !finalUrl.includes('/hls-m3u8') && !finalUrl.includes('/proxy-video') && !finalUrl.includes('/proxy-stream') && !finalUrl.includes(':8070') &&
                     (finalUrl.startsWith('http://') || finalUrl.startsWith('https://'))) {
                     finalUrl = `/proxy-video?url=${encodeURIComponent(finalUrl)}`;
                 }
