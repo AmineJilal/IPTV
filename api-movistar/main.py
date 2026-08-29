@@ -167,35 +167,6 @@ async def get_xameleon_stream_url(raw_id: str, request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error resolviendo stream de Xameleon: {str(e)}")
 
-@app.get("/api/v1/xameleon/proxy-seg")
-async def proxy_xameleon_segment(url: str):
-    """
-    Proxy genérico para segmentos .ts / .m4s inyectando la cabecera Referer requerida por el CDN.
-    Soporta fallback a Tor SOCKS5 si la IP directa del CDN es bloqueada.
-    """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Referer": "https://hamis.romponalis.st/"
-    }
-    
-    resp = None
-    try:
-        async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=12.0) as client:
-            r = await client.get(url, headers=headers)
-            if r.status_code == 200:
-                resp = r
-    except Exception:
-        pass
-        
-    if not resp:
-        async with httpx.AsyncClient(verify=False, timeout=12.0) as client:
-            resp = await client.get(url, headers=headers)
-            
-    if not resp or resp.status_code != 200:
-        raise HTTPException(status_code=502, detail=f"Error obteniendo segmento TS: HTTP {resp.status_code if resp else 'No response'}")
-        
-    return Response(content=resp.content, media_type=resp.headers.get("content-type", "video/MP2T"))
-
 @app.get("/api/v1/xameleon/proxy-sub")
 async def proxy_xameleon_sub_manifest(url: str, request: Request):
     """
@@ -204,9 +175,8 @@ async def proxy_xameleon_sub_manifest(url: str, request: Request):
     try:
         base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
         sub_proxy_url = f"{base_url}/api/v1/xameleon/proxy-sub"
-        seg_proxy_url = f"{base_url}/api/v1/xameleon/proxy-seg"
         
-        manifest_content = await fetch_xameleon_m3u8_manifest(url, base_proxy_url=sub_proxy_url, base_seg_proxy_url=seg_proxy_url)
+        manifest_content = await fetch_xameleon_m3u8_manifest(url, base_proxy_url=sub_proxy_url)
         return Response(content=manifest_content, media_type="application/x-mpegURL")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Error en proxy-sub: {str(e)}")
@@ -219,10 +189,9 @@ async def proxy_xameleon_manifest(raw_id: str, request: Request):
     try:
         base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
         sub_proxy_url = f"{base_url}/api/v1/xameleon/proxy-sub"
-        seg_proxy_url = f"{base_url}/api/v1/xameleon/proxy-seg"
         
         m3u8_url = await resolve_xameleon_stream(raw_id)
-        manifest_content = await fetch_xameleon_m3u8_manifest(m3u8_url, base_proxy_url=sub_proxy_url, base_seg_proxy_url=seg_proxy_url)
+        manifest_content = await fetch_xameleon_m3u8_manifest(m3u8_url, base_proxy_url=sub_proxy_url)
         return Response(content=manifest_content, media_type="application/x-mpegURL")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Error en proxy-stream Xameleon: {str(e)}")
