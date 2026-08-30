@@ -43,6 +43,18 @@ cdn_pool = httpx.AsyncClient(
 # Base domain setting (defaults to environment variable BASE_DOMAIN if set)
 DEFAULT_BASE_DOMAIN = os.getenv("BASE_DOMAIN", None)
 
+def get_dynamic_base_url(request: Request) -> str:
+    if DEFAULT_BASE_DOMAIN:
+        return DEFAULT_BASE_DOMAIN.rstrip("/")
+    
+    forwarded_host = request.headers.get("x-forwarded-host") or request.headers.get("host")
+    proto = request.headers.get("x-forwarded-proto", request.url.scheme)
+    
+    if forwarded_host and "127.0.0.1:8070" not in forwarded_host and "localhost:8070" not in forwarded_host:
+        return f"{proto}://{forwarded_host}".rstrip("/")
+        
+    return str(request.base_url).rstrip("/")
+
 # Catálogo extendido con URLs de embed en vivo
 CHANNELS_DB = [
     # Fútbol & Deportes
@@ -196,7 +208,7 @@ async def get_xameleon_stream_url(raw_id: str, request: Request):
     Resuelve la URL M3U8 fresca de Xameleon con token de sesión activo.
     """
     try:
-        base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
+        base_url = get_dynamic_base_url(request)
         m3u8_url = await resolve_xameleon_stream(raw_id)
         return {
             "id": f"xameleon_{raw_id}",
@@ -275,7 +287,7 @@ async def proxy_xameleon_sub_manifest(request: Request):
             
         target_url = urllib.parse.unquote(raw_target_url)
 
-        base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
+        base_url = get_dynamic_base_url(request)
         sub_proxy_url = f"{base_url}/api/v1/xameleon/proxy-sub"
         seg_proxy_url = f"{base_url}/api/v1/xameleon/proxy-seg"
         
@@ -299,7 +311,7 @@ async def proxy_xameleon_manifest(raw_id: str, request: Request):
     Servicio de proxy que desofusca el canal de Xameleon y sirve el contenido M3U8 directamente.
     """
     try:
-        base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
+        base_url = get_dynamic_base_url(request)
         sub_proxy_url = f"{base_url}/api/v1/xameleon/proxy-sub"
         seg_proxy_url = f"{base_url}/api/v1/xameleon/proxy-seg"
         
@@ -332,7 +344,7 @@ async def get_channel_stream_url(channel_id: str, request: Request):
     if not channel:
         raise HTTPException(status_code=404, detail="Canal no encontrado")
         
-    base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
+    base_url = get_dynamic_base_url(request)
     try:
         # Detectar si el embed apunta a un stream de Xameleon/Daddy (ej. stream-538.php)
         embed_match = re.search(r"stream-(\d+)\.php", channel["embed_url"])
@@ -413,7 +425,7 @@ async def get_m3u_playlist(request: Request):
     Genera la lista M3U dinámicamente apuntando a los endpoints de resolución de la API.
     Utiliza la variable de entorno BASE_DOMAIN o el host de la petición entrante.
     """
-    base_url = DEFAULT_BASE_DOMAIN or str(request.base_url).rstrip("/")
+    base_url = get_dynamic_base_url(request)
     lines = ["#EXTM3U"]
     for ch in CHANNELS_DB:
         url = f"{base_url}/api/v1/channel/{ch['id']}/proxy-stream"

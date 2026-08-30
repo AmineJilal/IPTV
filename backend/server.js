@@ -1023,14 +1023,43 @@ app.use(['/api/v1/xameleon', '/api/v1/channel'], async (req, res) => {
     try {
         const fullPath = req.baseUrl + req.url;
         const targetUrl = `http://127.0.0.1:8070${fullPath}`;
-        const reqHeaders = { ...req.headers };
-        delete reqHeaders.host;
+        
+        const clientHost = req.get('host') || '127.0.0.1:3000';
+        const clientProto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+        
+        const reqHeaders = { 
+            ...req.headers,
+            'x-forwarded-host': clientHost,
+            'x-forwarded-proto': clientProto,
+            'host': clientHost
+        };
 
         const response = await fetch(targetUrl, {
             method: req.method,
             headers: reqHeaders,
             body: ['GET', 'HEAD'].includes(req.method) ? undefined : req.body,
         });
+
+        const contentType = response.headers.get('content-type') || '';
+        const isManifestOrText = contentType.includes('mpegurl') || 
+                                 contentType.includes('text') || 
+                                 contentType.includes('json') || 
+                                 req.url.includes('proxy-stream') || 
+                                 req.url.includes('proxy-sub');
+
+        if (isManifestOrText) {
+            let text = await response.text();
+            const publicPrefix = `${clientProto}://${clientHost}`;
+            text = text.replace(/http:\/\/(127\.0\.0\.1|localhost):8070/g, publicPrefix);
+            
+            res.status(response.status);
+            response.headers.forEach((val, key) => {
+                if (key.toLowerCase() !== 'content-encoding' && key.toLowerCase() !== 'content-length') {
+                    res.setHeader(key, val);
+                }
+            });
+            return res.send(text);
+        }
 
         res.status(response.status);
         response.headers.forEach((val, key) => {
