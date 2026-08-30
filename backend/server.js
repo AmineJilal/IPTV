@@ -649,7 +649,7 @@ async function syncAllLists() {
                     if (rCh.ok) {
                         const chData = await rCh.json();
                         for (const c of chData.data || []) {
-                            const id = 'bein_' + c.id;
+                            const id = 'yacine_' + c.id;
                             await db.execute(insertQuery, [id, c.name, categoryName, c.logo || '', 'yacine']);
                             total++;
                         }
