@@ -81,11 +81,19 @@ class ChannelModel(BaseModel):
     server: str
     embed_url: str
 
-async def resolve_embed_m3u8(embed_url: str, referer: str = "https://nowfutbol.xyz/") -> str:
+EMBED_RESOLVE_CACHE = {} # embed_url -> (timestamp, resolved_url)
+
+async def resolve_embed_m3u8(embed_url: str, referer: str = "https://nowfutbol.xyz/", force_refresh: bool = False, ttl_seconds: float = 900.0) -> str:
     """
     Desofusca y extrae la URL M3U8 fresca con token activo desde la URL del reproductor iframe.
-    Soporta fallback a Tor SOCKS5 si el ISP de España bloquea la conexión directa.
+    Utiliza caché en RAM de 15 minutos (900s) para evitar ejecuciones repetidas de script node.js.
     """
+    now = time.time()
+    if not force_refresh and embed_url in EMBED_RESOLVE_CACHE:
+        cached_time, cached_url = EMBED_RESOLVE_CACHE[embed_url]
+        if now - cached_time < ttl_seconds:
+            return cached_url
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "Referer": referer
@@ -142,6 +150,7 @@ async def resolve_embed_m3u8(embed_url: str, referer: str = "https://nowfutbol.x
         if not resolved_url:
             raise ValueError("No se pudo extraer la variable playbackURL")
             
+        EMBED_RESOLVE_CACHE[embed_url] = (now, resolved_url)
         return resolved_url
     finally:
         if os.path.exists(script_path):

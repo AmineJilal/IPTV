@@ -83,11 +83,19 @@ async def fetch_xameleon_channels() -> List[Dict[str, str]]:
         
     return channels
 
-async def resolve_xameleon_stream(channel_raw_id: str) -> str:
+STREAM_RESOLVE_CACHE = {} # raw_id -> (timestamp, m3u8_url)
+
+async def resolve_xameleon_stream(channel_raw_id: str, force_refresh: bool = False, ttl_seconds: float = 900.0) -> str:
     """
     Desofusca el iframe del reproductor daddy4.php y extrae la URL M3U8 fresca.
-    Intenta mediante Tor/SOCKS5 primero para bypass del bloqueo de Vodafone/ISP y geobloqueos.
+    Utiliza caché en memoria RAM de 15 minutos (900s) para evitar consultas redundantes a la fuente externa.
     """
+    now = time.time()
+    if not force_refresh and channel_raw_id in STREAM_RESOLVE_CACHE:
+        cached_time, cached_url = STREAM_RESOLVE_CACHE[channel_raw_id]
+        if now - cached_time < ttl_seconds:
+            return cached_url
+
     url = f"https://{ROMPONALIS_HOST}/premiumtv/daddy4.php?id={channel_raw_id}"
     headers = {
         **DEFAULT_HEADERS,
@@ -119,6 +127,7 @@ async def resolve_xameleon_stream(channel_raw_id: str) -> str:
         raise ValueError("No se encontró la cadena base64 del stream en el reproductor")
         
     decoded_url = base64.b64decode(match.group(1)).decode("utf-8")
+    STREAM_RESOLVE_CACHE[channel_raw_id] = (now, decoded_url)
     return decoded_url
 
 import urllib.parse
