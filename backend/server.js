@@ -315,6 +315,7 @@ async function initDb() {
                 nombre TEXT,
                 categoria TEXT,
                 logo TEXT,
+                provider TEXT,
                 stream_url TEXT,
                 tipo TEXT,
                 headers TEXT,
@@ -323,6 +324,9 @@ async function initDb() {
                 updated_at INTEGER
             )
         `);
+        try {
+            await db.execute("ALTER TABLE channel_cache ADD COLUMN provider TEXT");
+        } catch (_) {}
         // Tabla de claves de acceso para autenticación JWT
         await db.execute(`
             CREATE TABLE IF NOT EXISTS auth_keys (
@@ -573,12 +577,13 @@ async function syncAllLists() {
     let total = 0;
     try {
         const insertQuery = `
-            INSERT INTO channel_cache (id, nombre, categoria, logo, tipo, stream_url, updated_at) 
-            VALUES (?, ?, ?, ?, 'hls', NULL, 0)
+            INSERT INTO channel_cache (id, nombre, categoria, logo, provider, tipo, stream_url, updated_at) 
+            VALUES (?, ?, ?, ?, ?, 'hls', NULL, 0)
             ON CONFLICT(id) DO UPDATE SET 
                 nombre = excluded.nombre,
                 logo = excluded.logo,
-                categoria = excluded.categoria
+                categoria = excluded.categoria,
+                provider = excluded.provider
         `;
 
         await db.execute("DELETE FROM channel_cache WHERE tipo = 'youtube' OR stream_url LIKE '%youtube%' OR stream_url LIKE '%youtu.be%'");
@@ -591,7 +596,7 @@ async function syncAllLists() {
                 for (const c of data.canales || []) {
                     if (c.url && (c.url.includes('youtube') || c.url.includes('youtu.be'))) continue;
                     const id = 'tdt_' + c.id;
-                    await db.execute(insertQuery, [id, c.name || c.nombre, 'España', c.logo]);
+                    await db.execute(insertQuery, [id, c.name || c.nombre, 'España', c.logo, 'tdt']);
                     total++;
                 }
             }
@@ -607,7 +612,7 @@ async function syncAllLists() {
                 for (const c of canalesIbero) {
                     if (c.stream_type === 'youtube') continue;
                     const id = 'ibero_' + c.id;
-                    await db.execute(insertQuery, [id, c.name, 'Deportes', c.logo]);
+                    await db.execute(insertQuery, [id, c.name, 'Deportes', c.logo, 'ibero']);
                     total++;
                 }
             }
@@ -622,24 +627,30 @@ async function syncAllLists() {
                     if (c.stream_type === 'youtube') continue;
                     const id = 'arabic_' + c.id;
                     const cat = 'Mundo Árabe - ' + (c.country_name || 'General');
-                    await db.execute(insertQuery, [id, c.name, cat, c.logo]);
+                    await db.execute(insertQuery, [id, c.name, cat, c.logo, 'arabic']);
                     total++;
                 }
             }
         } catch (e) { console.error('[Sync] Error en Arabic:', e.message); }
 
-        // 4. Yacine TV API (Todos los 317 canales dinámicos en la categoría BeIN Sports)
+        // 4. Yacine TV API (Todos los canales organizados en sus categorías reales de Yacine TV con provider='yacine')
         try {
             const rCat = await safeFetch('http://127.0.0.1:8000/categories', {}, 15000);
             if (rCat.ok) {
                 const cats = await rCat.json();
                 for (const cat of cats.data || []) {
+                    const rawCatName = (cat.name || 'Yacine TV').trim();
+                    let categoryName = rawCatName;
+                    if (rawCatName.toLowerCase().includes('bein sports')) {
+                        categoryName = 'BeIN Sports';
+                    }
+                    
                     const rCh = await safeFetch(`http://127.0.0.1:8000/categories/${cat.id}/channels`, {}, 15000);
                     if (rCh.ok) {
                         const chData = await rCh.json();
                         for (const c of chData.data || []) {
                             const id = 'bein_' + c.id;
-                            await db.execute(insertQuery, [id, c.name, 'BeIN Sports', c.logo || '']);
+                            await db.execute(insertQuery, [id, c.name, categoryName, c.logo || '', 'yacine']);
                             total++;
                         }
                     }
@@ -656,8 +667,14 @@ async function syncAllLists() {
                     const nameLower = (c.name || '').toLowerCase();
                     if (nameLower.includes('18+') || nameLower.includes('+18') || nameLower.includes('adult') || nameLower.includes('xxx') || nameLower.includes('erotic')) continue;
                     const id = c.id.startsWith('xameleon_') ? c.id : ('movistar_' + c.id);
-                    const cat = c.category || 'Movistar & Deportes';
-                    await db.execute(insertQuery, [id, c.name, cat, c.logo || '']);
+                    let cat = c.category;
+                    const provider = c.id.startsWith('xameleon_') ? 'xameleon' : 'movistar';
+                    if (provider === 'xameleon') {
+                        cat = 'Xameleon TV';
+                    } else if (!cat || cat === 'Sports' || cat === 'General' || cat === 'Cinema') {
+                        cat = 'Movistar & Deportes';
+                    }
+                    await db.execute(insertQuery, [id, c.name, cat, c.logo || '', provider]);
                     total++;
                 }
             }
@@ -840,8 +857,18 @@ app.get('/api/play/:channelId', async (req, res) => {
             try {
 
 
-                if (id.startsWith('tdt_')) {
-                    const rawPureId = id.replace('tdt_', '');
+                let providerName = stream.provider;
+                if (!providerName) {
+                    if (id.startsWith('tdt_')) providerName = 'tdt';
+                    else if (id.startsWith('ibero_')) providerName = 'ibero';
+                    else if (id.startsWith('bein_') || id.startsWith('yacine_')) providerName = 'yacine';
+                    else if (id.startsWith('arabic_')) providerName = 'arabic';
+                    else if (id.startsWith('movistar_')) providerName = 'movistar';
+                    else if (id.startsWith('xameleon_')) providerName = 'xameleon';
+                }
+
+                if (providerName === 'tdt' || id.startsWith('tdt_')) {
+                    const rawPureId = id.replace(/^tdt_/, '');
                     let responseBodyText = '';
                     for (const base of bases) {
                         const targetUrl = `${base}:8080/api/stream/${rawPureId}`;
@@ -889,8 +916,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                             if (nuevosHeaders && typeof nuevosHeaders === 'object') nuevosHeaders = JSON.stringify(nuevosHeaders);
                         }
                     }
-                } else if (id.startsWith('ibero_')) {
-                    const pureId = id.replace('ibero_', '');
+                } else if (providerName === 'ibero' || id.startsWith('ibero_')) {
+                    const pureId = id.replace(/^ibero_/, '');
                     for (const base of bases) {
                         try { r = await safeFetch(`${base}:8090/api/channels/${pureId}`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
@@ -901,8 +928,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                         if (d.referer_required) iberoHeaders['Referer'] = d.referer_required;
                         if (Object.keys(iberoHeaders).length > 0) nuevosHeaders = JSON.stringify(iberoHeaders);
                     }
-                } else if (id.startsWith('bein_')) {
-                    const pureId = id.replace('bein_', '');
+                } else if (providerName === 'yacine' || id.startsWith('bein_') || id.startsWith('yacine_')) {
+                    const pureId = id.replace(/^yacine_/, '').replace(/^bein_/, '');
                     for (const base of bases) {
                         try { r = await safeFetch(`${base}:8000/channel/${pureId}`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
@@ -913,8 +940,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                             if (d.data[0].headers) nuevosHeaders = JSON.stringify(d.data[0].headers);
                         }
                     }
-                } else if (id.startsWith('arabic_')) {
-                    const pureId = id.replace('arabic_', '');
+                } else if (providerName === 'arabic' || id.startsWith('arabic_')) {
+                    const pureId = id.replace(/^arabic_/, '');
                     for (const base of bases) {
                         try { r = await safeFetch(`${base}:9080/api/channels/${pureId}/stream?redirect=false`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
@@ -927,8 +954,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                         }
                         if (d.headers) nuevosHeaders = JSON.stringify(d.headers);
                     }
-                } else if (id.startsWith('movistar_') || id.startsWith('xameleon_')) {
-                    const chId = id.replace('movistar_', '');
+                } else if (providerName === 'movistar' || providerName === 'xameleon' || id.startsWith('movistar_') || id.startsWith('xameleon_')) {
+                    const chId = id.replace(/^movistar_/, '');
                     for (const base of bases) {
                         try {
                             r = await safeFetch(`${base}:8070/api/v1/channel/${encodeURIComponent(chId)}/m3u8`, {}, 25000);
