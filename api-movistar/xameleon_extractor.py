@@ -67,6 +67,10 @@ async def fetch_xameleon_channels() -> List[Dict[str, str]]:
         clean_title = re.sub(r"\s+", " ", clean_title)
         clean_title = re.sub(r"ID:\s*\d+", "", clean_title).strip()
         
+        clean_lower = clean_title.lower()
+        if "18+" in clean_lower or "+18" in clean_lower or "adult" in clean_lower or "xxx" in clean_lower or "erotic" in clean_lower:
+            continue
+            
         channels.append({
             "id": f"xameleon_{ch_id}",
             "raw_id": ch_id,

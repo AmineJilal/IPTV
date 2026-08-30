@@ -495,12 +495,38 @@ async function obtenerStreamsDb() {
         return res.rows.map(r => ({
             ...r,
             favorito: r.favorito === 1
-        }));
+        })).filter(r => {
+            const nameLower = (r.nombre || '').toLowerCase();
+            return !nameLower.includes('18+') && !nameLower.includes('+18') && !nameLower.includes('adult') && !nameLower.includes('xxx') && !nameLower.includes('erotic');
+        });
     } catch (e) {
         console.error("Error al obtener streams de Turso:", e.message);
         return [];
     }
 }
+
+app.patch('/api/streams/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, categoria, favorito } = req.body;
+
+        let query = "UPDATE channel_cache SET ";
+        const args = [];
+        if (nombre !== undefined) { query += "nombre = ?, "; args.push(nombre); }
+        if (categoria !== undefined) { query += "categoria = ?, "; args.push(categoria); }
+        if (favorito !== undefined) { query += "favorito = ?, "; args.push(favorito ? 1 : 0); }
+        if (args.length === 0) return res.json({ success: true });
+        
+        query = query.slice(0, -2) + " WHERE id = ?";
+        args.push(id);
+
+        await db.execute(query, args);
+        io.emit('actualizar_streams', await obtenerStreamsDb());
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
 
 function emitStreamsUpdate(streams) {
     io.emit('actualizar_streams', streams);
@@ -611,6 +637,8 @@ async function syncAllLists() {
             if (r.ok) {
                 const canalesMovistar = await r.json();
                 for (const c of canalesMovistar || []) {
+                    const nameLower = (c.name || '').toLowerCase();
+                    if (nameLower.includes('18+') || nameLower.includes('+18') || nameLower.includes('adult') || nameLower.includes('xxx') || nameLower.includes('erotic')) continue;
                     const id = c.id.startsWith('xameleon_') ? c.id : ('movistar_' + c.id);
                     const cat = c.category || 'Movistar & Deportes';
                     await db.execute(insertQuery, [id, c.name, cat, c.logo || '']);
@@ -618,6 +646,11 @@ async function syncAllLists() {
                 }
             }
         } catch (e) { console.error('[Sync] Error en Movistar API:', e.message); }
+
+        // Purgar cualquier canal 18+ residual de la DB
+        try {
+            await db.execute("DELETE FROM channel_cache WHERE LOWER(nombre) LIKE '%18+%' OR LOWER(nombre) LIKE '%+18%' OR LOWER(nombre) LIKE '%adult%' OR LOWER(nombre) LIKE '%xxx%' OR LOWER(nombre) LIKE '%erotic%'");
+        } catch (e) {}
 
         io.emit('actualizar_streams', await obtenerStreamsDb());
     } catch (e) {

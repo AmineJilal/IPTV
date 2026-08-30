@@ -149,7 +149,7 @@ async def resolve_embed_m3u8(embed_url: str, referer: str = "https://nowfutbol.x
 
 @app.get("/api/v1/channels", response_model=List[ChannelModel])
 async def get_channels(include_xameleon: bool = Query(True, description="Incluir catálogo dinámico de Xameleon")):
-    """Retorna la lista completa de canales con sus metadatos (incluyendo Xameleon)"""
+    """Retorna la lista completa de canales con sus metadatos (incluyendo Xameleon) filtrando 18+"""
     channels = list(CHANNELS_DB)
     if include_xameleon:
         try:
@@ -157,13 +157,27 @@ async def get_channels(include_xameleon: bool = Query(True, description="Incluir
             channels.extend(x_channels)
         except Exception as e:
             print(f"Warning: No se pudo obtener el catálogo de Xameleon: {e}")
-    return channels
+            
+    filtered = []
+    for ch in channels:
+        name_lower = ch.get("name", "").lower()
+        if "18+" in name_lower or "+18" in name_lower or "adult" in name_lower or "xxx" in name_lower or "erotic" in name_lower:
+            continue
+        filtered.append(ch)
+    return filtered
 
 @app.get("/api/v1/xameleon/channels", response_model=List[ChannelModel])
 async def get_xameleon_channels_endpoint():
-    """Retorna exclusivamente los canales obtenidos del catálogo de Xameleon"""
+    """Retorna exclusivamente los canales obtenidos del catálogo de Xameleon filtrando 18+"""
     try:
-        return await fetch_xameleon_channels()
+        channels = await fetch_xameleon_channels()
+        filtered = []
+        for ch in channels:
+            name_lower = ch.get("name", "").lower()
+            if "18+" in name_lower or "+18" in name_lower or "adult" in name_lower or "xxx" in name_lower or "erotic" in name_lower:
+                continue
+            filtered.append(ch)
+        return filtered
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error obteniendo catálogo Xameleon: {str(e)}")
 

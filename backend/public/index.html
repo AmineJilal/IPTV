@@ -176,6 +176,7 @@
                     activeSubFilter: 'all_sub',
                     searchQuery: '',
                     activeChannelId: null,
+                    favorites: this.loadFavorites()
                 };
                 
                 // Controladores Externos
@@ -206,6 +207,54 @@
                 this.init();
             }
 
+            loadFavorites() {
+                try {
+                    const saved = localStorage.getItem('iptv_favorites');
+                    return new Set(saved ? JSON.parse(saved) : []);
+                } catch(e) {
+                    return new Set();
+                }
+            }
+
+            saveFavorites() {
+                try {
+                    localStorage.setItem('iptv_favorites', JSON.stringify(Array.from(this.state.favorites)));
+                } catch(e) {}
+            }
+
+            processStreams(data) {
+                if (!Array.isArray(data)) return [];
+                return data.filter(c => {
+                    const nameLower = (c.nombre || '').toLowerCase();
+                    return !nameLower.includes('18+') && !nameLower.includes('+18') && !nameLower.includes('adult') && !nameLower.includes('xxx') && !nameLower.includes('erotic');
+                }).map(c => ({
+                    ...c,
+                    favorito: c.favorito || this.state.favorites.has(c.id)
+                }));
+            }
+
+            toggleFavorite(channel) {
+                if (this.state.favorites.has(channel.id) || channel.favorito) {
+                    this.state.favorites.delete(channel.id);
+                    channel.favorito = false;
+                    this.showToast(`⭐ Quitado de Favoritos: ${channel.nombre}`, 'red');
+                } else {
+                    this.state.favorites.add(channel.id);
+                    channel.favorito = true;
+                    this.showToast(`⭐ Añadido a Favoritos: ${channel.nombre}`, 'green');
+                }
+                this.saveFavorites();
+
+                fetch('/api/streams/' + encodeURIComponent(channel.id), {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ favorito: channel.favorito })
+                }).catch(() => {});
+
+                this.renderCategories();
+                this.renderChannels();
+            }
+
             init() {
                 this.bindEvents();
                 this.connectSocket();
@@ -218,11 +267,11 @@
                     if (res.ok) {
                         const data = await res.json();
                         if (Array.isArray(data) && data.length > 0) {
-                            this.state.channels = data;
+                            this.state.channels = this.processStreams(data);
                             this.extractDynamicCategories();
                             this.renderCategories();
                             this.renderChannels();
-                            this.showToast(`✅ ${data.length} canales cargados desde la Base de Datos`, 'green');
+                            this.showToast(`✅ ${this.state.channels.length} canales cargados desde la Base de Datos`, 'green');
                         }
                     }
                 } catch (e) {
@@ -338,7 +387,7 @@
                     });
                     
                     this.socket.on('actualizar_streams', (data) => {
-                        this.state.channels = data;
+                        this.state.channels = this.processStreams(data);
                         this.extractDynamicCategories();
                         this.renderCategories();
                         this.renderChannels();
@@ -368,6 +417,7 @@
                 else if (this.state.activeFilter === 'deportes') text = 'Refrescar Deportes';
                 else if (this.state.activeFilter === 'arabic_channels') text = 'Refrescar Arabic Channels';
                 else if (this.state.activeFilter === 'bein') text = 'Refrescar BeIN Sports';
+                else if (this.state.activeFilter === 'favs') text = 'Refrescar Favoritos';
                 this.dom.btnRefreshText.innerText = text;
             }
 
@@ -408,14 +458,16 @@
                 this.dom.categoryContainer.innerHTML = '';
                 this.dom.subCategoryFilters.innerHTML = '';
 
+                const favCount = this.state.channels.filter(c => c.favorito === true || this.state.favorites.has(c.id)).length;
+
                 // Botones Principales ESTRICTOS en la Sidebar
                 this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'all', label: 'Todos los canales', icon: 'ph-squares-four' }, false));
+                this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'favs', label: `Favoritos (${favCount})`, icon: 'ph-star' }, false));
                 this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'movistar', label: 'Movistar & Deportes', icon: 'ph-television' }, false));
                 this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'bein', label: 'BeIN Sports', icon: 'ph-soccer-ball' }, false));
                 this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'spain', label: 'España', icon: 'ph-flag' }, false));
                 this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'deportes', label: 'Deportes', icon: 'ph-globe-hemisphere-west' }, false));
                 this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'arabic_channels', label: 'Arabic Channels', icon: 'ph-planet' }, false));
-                this.dom.categoryContainer.appendChild(this.createCategoryBtn({ id: 'favs', label: 'Favoritos', icon: 'ph-star' }, false));
                 
                 // Botones Secundarios (Subcategorías de Arabic Channels)
                 if (this.state.activeFilter === 'arabic_channels') {
@@ -475,26 +527,28 @@
             // ─── LOGIC: LISTA DE CANALES ─────────────────────────────
             getFilteredChannels() {
                 return this.state.channels.filter(c => {
-                    if (this.state.searchQuery && !c.nombre.toLowerCase().includes(this.state.searchQuery)) return false;
+                    const nameLower = (c.nombre || '').toLowerCase();
+                    if (nameLower.includes('18+') || nameLower.includes('+18') || nameLower.includes('adult') || nameLower.includes('xxx') || nameLower.includes('erotic')) return false;
+
+                    if (this.state.searchQuery && !nameLower.includes(this.state.searchQuery)) return false;
                     
                     if (this.state.activeFilter === 'all') return true;
-                    if (this.state.activeFilter === 'favs') return c.favorito === true;
+                    if (this.state.activeFilter === 'favs') return c.favorito === true || this.state.favorites.has(c.id);
                     
                     const catName = c.categoria || 'Otros';
-                    const name = (c.nombre || '').toLowerCase();
                     const id = (c.id || '').toLowerCase();
                     
                     if (this.state.activeFilter === 'movistar') {
                         return catName.includes('Movistar') || catName.includes('Xameleon') || id.startsWith('movistar_') || id.startsWith('xameleon_');
                     }
                     if (this.state.activeFilter === 'spain') {
-                        return catName === 'España' || id.startsWith('tdt_') || name.includes('la 1') || name.includes('antena 3');
+                        return catName === 'España' || id.startsWith('tdt_') || nameLower.includes('la 1') || nameLower.includes('antena 3');
                     }
                     if (this.state.activeFilter === 'deportes') {
                         return catName === 'Deportes' || id.startsWith('ibero_');
                     }
                     if (this.state.activeFilter === 'bein') {
-                        return catName === 'BeIN Sports' || id.startsWith('bein_') || name.includes('bein');
+                        return catName === 'BeIN Sports' || id.startsWith('bein_') || nameLower.includes('bein');
                     }
                     
                     if (this.state.activeFilter === 'arabic_channels') {
@@ -522,7 +576,7 @@
                                 <i class="ph-fill ph-ghost text-3xl opacity-50"></i>
                             </div>
                             <h3 class="text-white font-medium mb-1">Sin Resultados</h3>
-                            <p class="text-sm">No hay canales que coincidan con el filtro.</p>
+                            <p class="text-sm">${this.state.activeFilter === 'favs' ? 'No tienes canales en favoritos. Toca la estrella ⭐ de cualquier canal para añadirlo.' : 'No hay canales que coincidan con el filtro.'}</p>
                         </div>
                     `;
                     return;
@@ -569,7 +623,7 @@
                             </div>
                         </div>
 
-                        <!-- Ecualizador (Activo) + Ruedita de Ajustes de Emergencia -->
+                        <!-- Ecualizador (Activo) + Botón Favorito + Ruedita de Ajustes -->
                         <div class="relative shrink-0 z-20 flex items-center gap-1">
                             ${isActive ? `
                             <div class="flex items-end gap-[3px] h-3.5 mr-1 text-brand-400">
@@ -578,6 +632,10 @@
                                 <div class="w-1 bg-brand-400 rounded-t-sm animate-[bounce_1s_infinite_0.4s] h-1.5"></div>
                             </div>
                             ` : ''}
+
+                            <button type="button" class="btn-fav p-2 rounded-xl text-slate-400 hover:bg-slate-700/70 transition-all focus:outline-none" title="${channel.favorito ? 'Quitar de favoritos' : 'Añadir a favoritos'}">
+                                <i class="ph-fill ph-star text-xl ${channel.favorito ? 'text-amber-400 scale-110' : 'text-slate-500 hover:text-amber-300'}"></i>
+                            </button>
                             
                             <button type="button" class="btn-gear p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/70 transition-all focus:outline-none" title="Opciones de emergencia">
                                 <i class="ph-bold ph-gear-six text-xl text-slate-300"></i>
@@ -595,9 +653,16 @@
 
                     // Click card: Reproducir canal
                     el.addEventListener('click', (e) => {
-                        // Si hace clic en la ruedita o dentro de su menú, no reproducir
-                        if (e.target.closest('.btn-gear') || e.target.closest('.gear-menu')) return;
+                        // Si hace clic en la estrella, la ruedita o dentro de su menú, no reproducir
+                        if (e.target.closest('.btn-fav') || e.target.closest('.btn-gear') || e.target.closest('.gear-menu')) return;
                         this.playChannel(channel);
+                    });
+
+                    // Evento de Botón Favoritos
+                    const btnFav = el.querySelector('.btn-fav');
+                    btnFav.addEventListener('click', (evt) => {
+                        evt.stopPropagation();
+                        this.toggleFavorite(channel);
                     });
 
                     // Eventos de la Ruedita
