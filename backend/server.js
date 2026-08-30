@@ -966,9 +966,22 @@ app.get('/api/play/:channelId', async (req, res) => {
         );
         const isMovistarXameleon = id.startsWith('movistar_') || id.startsWith('xameleon_') || (finalStreamUrl && finalStreamUrl.includes('/proxy-stream'));
 
-        const hlsUrl = isMediaset
+        let hlsUrl = isMediaset
             ? `${req.protocol}://${req.get('host')}/hls-m3u8?url=${encodeURIComponent(finalStreamUrl)}`
             : (isMovistarXameleon ? finalStreamUrl : null);
+
+        // ── Reescribir 127.0.0.1:8070 con el Host/IP real del cliente para acceso en Móvil / Smart TV / Render ──
+        const clientHost = req.get('host') || '127.0.0.1:3000';
+        const clientProto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+        const publicPrefix = `${clientProto}://${clientHost}`;
+
+        if (finalStreamUrl && (finalStreamUrl.includes('127.0.0.1:8070') || finalStreamUrl.includes('localhost:8070'))) {
+            finalStreamUrl = finalStreamUrl.replace(/http:\/\/(127\.0\.0\.1|localhost):8070/, publicPrefix);
+        }
+
+        if (hlsUrl && (hlsUrl.includes('127.0.0.1:8070') || hlsUrl.includes('localhost:8070'))) {
+            hlsUrl = hlsUrl.replace(/http:\/\/(127\.0\.0\.1|localhost):8070/, publicPrefix);
+        }
 
         return res.json({ 
             success: true, 
@@ -997,6 +1010,45 @@ app.get('/api/play/:channelId', async (req, res) => {
 //   - /hls-seg?url=<encoded>&sid=<session>  → 302 redirect directo al CDN
 //                                              (0 bytes de vídeo por el servidor)
 // ─────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────
+// PROXY TRANSPARENTE HACIA MICROSERVICIO PYTHON MOVISTAR / XAMELEON (puerto 8070)
+// Permite que móviles, TV Box y Smart TVs accedan a través del puerto 3000 o Render sin depender de loopback 127.0.0.1:8070.
+// ─────────────────────────────────────────────────────────────────────────
+app.use(['/api/v1/xameleon', '/api/v1/channel'], async (req, res) => {
+    try {
+        const fullPath = req.baseUrl + req.url;
+        const targetUrl = `http://127.0.0.1:8070${fullPath}`;
+        const reqHeaders = { ...req.headers };
+        delete reqHeaders.host;
+
+        const response = await fetch(targetUrl, {
+            method: req.method,
+            headers: reqHeaders,
+            body: ['GET', 'HEAD'].includes(req.method) ? undefined : req.body,
+        });
+
+        res.status(response.status);
+        response.headers.forEach((val, key) => {
+            if (key.toLowerCase() !== 'content-encoding' && key.toLowerCase() !== 'content-length') {
+                res.setHeader(key, val);
+            }
+        });
+
+        if (response.body) {
+            const reader = response.body.getReader();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                res.write(value);
+            }
+        }
+        res.end();
+    } catch (err) {
+        console.error('🔥 [Proxy Movistar/Xameleon Error]', err.message);
+        res.status(502).json({ error: 'Error conectando con microservicio Movistar/Xameleon (8070).' });
+    }
+});
 
 // Cookiejar por sesión: { sid → { host → { name → value } } }
 // TTL máximo 5 min (duración del token hdntl de Akamai)
