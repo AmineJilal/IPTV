@@ -494,7 +494,7 @@ async function obtenerStreamsDb() {
         const res = await db.execute("SELECT * FROM channel_cache");
         return res.rows.map(r => ({
             ...r,
-            favorito: r.favorito === 1
+            favorito: r.favorito === 1 || r.favorito === true || r.favorito === '1'
         })).filter(r => {
             const nameLower = (r.nombre || '').toLowerCase();
             return !nameLower.includes('18+') && !nameLower.includes('+18') && !nameLower.includes('adult') && !nameLower.includes('xxx') && !nameLower.includes('erotic');
@@ -698,12 +698,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.patch('/api/streams/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, categoria } = req.body;
+        const { nombre, categoria, favorito } = req.body;
 
         let query = "UPDATE channel_cache SET ";
         const args = [];
         if (nombre) { query += "nombre = ?, "; args.push(nombre); }
         if (categoria) { query += "categoria = ?, "; args.push(categoria); }
+        if (favorito !== undefined) { query += "favorito = ?, "; args.push(favorito ? 1 : 0); }
+
+        if (args.length === 0) return res.json({ success: true, message: 'Sin cambios.' });
+
         query = query.slice(0, -2) + " WHERE id = ?";
         args.push(id);
 
@@ -1295,7 +1299,9 @@ io.on('connection', async (socket) => {
         try {
             const str = await db.execute("SELECT favorito FROM channel_cache WHERE id = ?", [id]);
             if (str.rows[0]) {
-                const nuevo = str.rows[0].favorito === 1 ? 0 : 1;
+                const raw = str.rows[0].favorito;
+                const isFav = raw === 1 || raw === true || raw === '1';
+                const nuevo = isFav ? 0 : 1;
                 await db.execute("UPDATE channel_cache SET favorito = ? WHERE id = ?", [nuevo, id]);
                 io.emit('actualizar_streams', await obtenerStreamsDb());
             }
