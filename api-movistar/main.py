@@ -7,7 +7,7 @@ import re
 import subprocess
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import PlainTextResponse, Response, StreamingResponse
+from fastapi.responses import PlainTextResponse, Response, StreamingResponse, RedirectResponse
 from pydantic import BaseModel
 
 from xameleon_extractor import (
@@ -204,9 +204,9 @@ import urllib.parse
 @app.get("/api/v1/xameleon/proxy-seg")
 async def proxy_xameleon_segment(request: Request):
     """
-    Proxy directo y ultrarrápido en streaming para segmentos de vídeo (Cloudflare R2 / CDN)
-    inyectando cabeceras CORS (Access-Control-Allow-Origin: *) para reproducción web.
-    Des-codifica correctamente los parámetros firmados S3 con ampersands (&).
+    Redirección ultrarrápida (HTTP 307) a la CDN de Cloudflare R2 / AWS S3.
+    Esto ahorra el 100% de la memoria RAM y el 99.9% del Ancho de Banda de Render,
+    evitando consumir la cuota mensual de 5 GB / 100 GB.
     """
     try:
         query_str = str(request.url.query)
@@ -219,35 +219,7 @@ async def proxy_xameleon_segment(request: Request):
         if not target_url or not target_url.startswith("http"):
             raise HTTPException(status_code=400, detail="URL de segmento inválida")
 
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        }
-        
-        req = cdn_pool.build_request("GET", target_url, headers=headers)
-        resp = await cdn_pool.send(req, stream=True)
-        
-        if resp.status_code != 200:
-            await resp.aclose()
-            raise HTTPException(status_code=resp.status_code, detail=f"Error descargando segmento de vídeo (HTTP {resp.status_code})")
-
-        async def stream_bytes():
-            try:
-                async for chunk in resp.aiter_bytes():
-                    yield chunk
-            finally:
-                await resp.aclose()
-
-        return StreamingResponse(
-            stream_bytes(),
-            status_code=200,
-            media_type=resp.headers.get("content-type", "video/MP2T"),
-            headers={
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, OPTIONS",
-                "Access-Control-Allow-Headers": "*",
-                "Cache-Control": "public, max-age=86400"
-            }
-        )
+        return RedirectResponse(url=target_url, status_code=307)
     except Exception as e:
         print(f"⚠️ [proxy-seg error]: {e}")
         raise HTTPException(status_code=502, detail=f"Error en proxy-seg: {str(e)}")
