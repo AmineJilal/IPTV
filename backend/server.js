@@ -511,7 +511,18 @@ app.get('/api/auth/validate', async (req, res) => {
 
 async function obtenerStreamsDb() {
     try {
-        const res = await db.execute("SELECT * FROM channel_cache");
+        const res = await db.execute(`
+            SELECT * FROM channel_cache 
+            ORDER BY 
+                CASE 
+                    WHEN provider = 'yacine' THEN 0 
+                    WHEN categoria = 'BeIN Sports' THEN 1 
+                    WHEN provider = 'movistar' THEN 2 
+                    WHEN provider = 'tdt' THEN 3 
+                    ELSE 4 
+                END, 
+                id ASC
+        `);
         return res.rows.map(r => ({
             ...r,
             favorito: r.favorito === 1 || r.favorito === true || r.favorito === '1'
@@ -667,21 +678,18 @@ async function syncAllLists() {
                     const nameLower = (c.name || '').toLowerCase();
                     if (nameLower.includes('18+') || nameLower.includes('+18') || nameLower.includes('adult') || nameLower.includes('xxx') || nameLower.includes('erotic')) continue;
                     const id = c.id.startsWith('xameleon_') ? c.id : ('movistar_' + c.id);
-                    let cat = c.category;
                     const provider = c.id.startsWith('xameleon_') ? 'xameleon' : 'movistar';
-                    if (provider === 'xameleon') {
-                        cat = 'Xameleon TV';
-                    } else if (!cat || cat === 'Sports' || cat === 'General' || cat === 'Cinema') {
-                        cat = 'Movistar & Deportes';
-                    }
+                    const cat = (provider === 'xameleon') ? 'Xameleon TV' : 'Movistar & Deportes';
                     await db.execute(insertQuery, [id, c.name, cat, c.logo || '', provider]);
                     total++;
                 }
             }
         } catch (e) { console.error('[Sync] Error en Movistar API:', e.message); }
 
-        // Purgar cualquier canal 18+ residual de la DB
+        // Limpieza estricta de categorías por proveedor en DB
         try {
+            await db.execute("UPDATE channel_cache SET categoria = 'Movistar & Deportes' WHERE provider = 'movistar'");
+            await db.execute("UPDATE channel_cache SET categoria = 'Xameleon TV' WHERE provider = 'xameleon'");
             await db.execute("DELETE FROM channel_cache WHERE LOWER(nombre) LIKE '%18+%' OR LOWER(nombre) LIKE '%+18%' OR LOWER(nombre) LIKE '%adult%' OR LOWER(nombre) LIKE '%xxx%' OR LOWER(nombre) LIKE '%erotic%'");
         } catch (e) {}
 
