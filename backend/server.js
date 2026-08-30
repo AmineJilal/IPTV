@@ -645,6 +645,7 @@ async function syncAllLists() {
         } catch (e) { console.error('[Sync] Error en Arabic:', e.message); }
 
         // 4. Yacine TV API (Todos los canales organizados en sus categorías reales de Yacine TV con provider='yacine')
+        let yacineSuccess = false;
         try {
             const rCat = await safeFetch('http://127.0.0.1:8000/categories', {}, 15000);
             if (rCat.ok) {
@@ -663,11 +664,62 @@ async function syncAllLists() {
                             const id = 'yacine_' + c.id;
                             await db.execute(insertQuery, [id, c.name, categoryName, c.logo || '', 'yacine']);
                             total++;
+                            yacineSuccess = true;
                         }
                     }
                 }
             }
         } catch (e) { console.error('[Sync] Error en Yacine API:', e.message); }
+
+        // Fallback: Semilla fija garantizada de los 40 canales de Yacine TV BeIN Sports
+        if (!yacineSuccess) {
+            const yacineSeed = [
+                { id: 'yacine_1424', name: 'beIN SPORTS 1', logo: '' },
+                { id: 'yacine_1425', name: 'beIN SPORTS 2', logo: '' },
+                { id: 'yacine_1426', name: 'beIN SPORTS 3', logo: '' },
+                { id: 'yacine_1427', name: 'beIN SPORTS 4', logo: '' },
+                { id: 'yacine_1428', name: 'beIN SPORTS 5', logo: '' },
+                { id: 'yacine_1429', name: 'beIN SPORTS 6', logo: '' },
+                { id: 'yacine_1430', name: 'beIN SPORTS 7', logo: '' },
+                { id: 'yacine_1431', name: 'beIN SPORTS 8', logo: '' },
+                { id: 'yacine_1432', name: 'beIN SPORTS 9', logo: '' },
+                { id: 'yacine_1421', name: 'beIN XTRA 1', logo: '' },
+                { id: 'yacine_1422', name: 'beIN XTRA 2', logo: '' },
+                { id: 'yacine_1423', name: 'beIN XTRA 3', logo: '' },
+                { id: 'yacine_1433', name: 'beIN France 1', logo: '' },
+                { id: 'yacine_1434', name: 'beIN France 2', logo: '' },
+                { id: 'yacine_1435', name: 'beIN France 3', logo: '' },
+                { id: 'yacine_1436', name: 'beIN News', logo: '' },
+                { id: 'yacine_1437', name: 'beIN SPORTS', logo: '' },
+                { id: 'yacine_1481', name: 'beIN English 1', logo: '' },
+                { id: 'yacine_1482', name: 'beIN English 2', logo: '' },
+                { id: 'yacine_1483', name: 'beIN English 3', logo: '' },
+                { id: 'yacine_4', name: 'beIN SPORTS 1 720p', logo: '' },
+                { id: 'yacine_5', name: 'beIN SPORTS 2 720p', logo: '' },
+                { id: 'yacine_6', name: 'beIN SPORTS 3 720p', logo: '' },
+                { id: 'yacine_7', name: 'beIN SPORTS 4 720p', logo: '' },
+                { id: 'yacine_8', name: 'beIN SPORTS 5 720p', logo: '' },
+                { id: 'yacine_9', name: 'beIN SPORTS 6 720p', logo: '' },
+                { id: 'yacine_10', name: 'beIN SPORTS 7 720p', logo: '' },
+                { id: 'yacine_11', name: 'beIN SPORTS 8 720p', logo: '' },
+                { id: 'yacine_12', name: 'beIN SPORTS 9 720p', logo: '' },
+                { id: 'yacine_1', name: 'beIN XTRA 1 720p', logo: '' },
+                { id: 'yacine_2', name: 'beIN XTRA 2 720p', logo: '' },
+                { id: 'yacine_3', name: 'beIN XTRA 3 720p', logo: '' },
+                { id: 'yacine_13', name: 'beIN France 1 720p', logo: '' },
+                { id: 'yacine_14', name: 'beIN France 2 720p', logo: '' },
+                { id: 'yacine_15', name: 'beIN France 3 720p', logo: '' },
+                { id: 'yacine_16', name: 'beIN News 720p', logo: '' },
+                { id: 'yacine_17', name: 'beIN SPORTS 720p', logo: '' },
+                { id: 'yacine_18', name: 'beIN English 1 720p', logo: '' },
+                { id: 'yacine_19', name: 'beIN English 2 720p', logo: '' },
+                { id: 'yacine_20', name: 'beIN English 3 720p', logo: '' }
+            ];
+            for (const ch of yacineSeed) {
+                await db.execute(insertQuery, [ch.id, ch.name, 'BeIN Sports', ch.logo, 'yacine']);
+                total++;
+            }
+        }
 
         // 5. Movistar+ & Xameleon API (Puerto 8070)
         try {
