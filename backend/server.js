@@ -742,6 +742,7 @@ async function syncAllLists() {
         try {
             await db.execute("UPDATE channel_cache SET categoria = 'Movistar & Deportes' WHERE provider = 'movistar'");
             await db.execute("UPDATE channel_cache SET categoria = 'Xameleon TV' WHERE provider = 'xameleon'");
+            await db.execute("DELETE FROM channel_cache WHERE categoria = 'BeIN Sports' AND provider != 'yacine'");
             await db.execute("DELETE FROM channel_cache WHERE LOWER(nombre) LIKE '%18+%' OR LOWER(nombre) LIKE '%+18%' OR LOWER(nombre) LIKE '%adult%' OR LOWER(nombre) LIKE '%xxx%' OR LOWER(nombre) LIKE '%erotic%'");
         } catch (e) {}
 

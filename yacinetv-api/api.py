@@ -31,21 +31,18 @@ class YacineTV:
         "Connection": "Keep-Alive",
         "Accept-Encoding": "gzip"
     }
-    r = requests.get(self.api_url + path, headers=headers)
-    timestamp = str(int(time.time()))
-    if "t" in r.headers:
-      timestamp = r.headers["t"]
-
     try:
+      r = requests.get(self.api_url + path, headers=headers, timeout=10)
+      timestamp = str(int(time.time()))
+      if "t" in r.headers:
+        timestamp = r.headers["t"]
       return json.loads(self.decrypt(r.text, key=self.key + timestamp))
-
     except Exception as e:
-      print(f"[-] Error de parseo o bloqueo en {path}: Código {r.status_code} - Respuesta: {r.text[:100]}")
+      print(f"[-] Error de red/timeout o parseo en {path}: {str(e)}")
       return {
           "success": False, 
-          "error": "can't parse json.",
-          "status_code": r.status_code,
-          "raw_response": r.text[:200]
+          "error": str(e),
+          "data": []
       }
 
   def get_categories(self):
