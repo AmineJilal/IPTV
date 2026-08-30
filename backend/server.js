@@ -411,8 +411,24 @@ app.post('/api/auth/login', async (req, res) => {
     const { key, deviceId } = req.body || {};
     if (!key || !deviceId) return res.status(400).json({ error: 'key y deviceId requeridos.' });
 
+    const cleanKey = key.trim();
+    const isAdminKey = cleanKey.toLowerCase() === 'admin';
+
     try {
-        const result = await db.execute("SELECT * FROM auth_keys WHERE key = ?", [key.trim()]);
+        let result;
+        if (isAdminKey) {
+            result = await db.execute("SELECT * FROM auth_keys WHERE LOWER(key) = 'admin'");
+            if (!result.rows || result.rows.length === 0) {
+                await db.execute(
+                    "INSERT INTO auth_keys (key, label, created_at, active) VALUES ('admin', 'Administrador', ?, 1)",
+                    [Date.now()]
+                );
+                result = await db.execute("SELECT * FROM auth_keys WHERE LOWER(key) = 'admin'");
+            }
+        } else {
+            result = await db.execute("SELECT * FROM auth_keys WHERE key = ?", [cleanKey]);
+        }
+
         const row = result.rows[0];
         if (!row) return res.status(401).json({ error: 'Clave de acceso inválida.' });
         if (!row.active) return res.status(403).json({ error: 'Clave desactivada.' });

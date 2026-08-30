@@ -10,10 +10,13 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import PlainTextResponse, Response, StreamingResponse, RedirectResponse
 from pydantic import BaseModel
 
+# Asegúrate de importar XAMELEON_HOST y XAMELEON_IP
 from xameleon_extractor import (
     fetch_xameleon_channels,
     resolve_xameleon_stream,
-    fetch_xameleon_m3u8_manifest
+    fetch_xameleon_m3u8_manifest,
+    XAMELEON_HOST,
+    XAMELEON_IP
 )
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -224,32 +227,34 @@ import urllib.parse
 
 @app.get("/api/v1/xameleon/proxy-seg")
 async def proxy_xameleon_segment(request: Request):
-    """
-    Proxy directo en streaming para segmentos de vídeo (Cloudflare R2 / CDN)
-    inyectando cabeceras CORS (Access-Control-Allow-Origin: *) obligatorias para reproducción en navegadores web.
-    Des-codifica correctamente los parámetros firmados S3 con ampersands (&).
-    """
     try:
         query_str = str(request.url.query)
-        if query_str.startswith("url="):
-            raw_target_url = query_str[4:]
-        else:
-            raw_target_url = request.query_params.get("url", "")
-            
+        raw_target_url = query_str[4:] if query_str.startswith("url=") else request.query_params.get("url", "")
         target_url = urllib.parse.unquote(raw_target_url)
+
         if not target_url or not target_url.startswith("http"):
             raise HTTPException(status_code=400, detail="URL de segmento inválida")
 
-        headers = {
+        # 1. Cabeceras condicionales: Host/Referer solo para Xameleon, no para Cloudflare R2 / S3
+        headers_direct = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         }
+        if XAMELEON_HOST in target_url:
+            alt_url = target_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
+            headers_direct["Referer"] = "https://hamis.romponalis.st/"
+            headers_direct["Host"] = XAMELEON_HOST
+        else:
+            alt_url = target_url
         
-        req = cdn_pool.build_request("GET", target_url, headers=headers)
-        resp = await cdn_pool.send(req, stream=True)
-        
-        if resp.status_code != 200:
+        # 2. Cliente fresco sin Pool para evitar mezcla de cabeceras Host/SNI
+        client = httpx.AsyncClient(verify=False, timeout=10.0, follow_redirects=True)
+        req = client.build_request("GET", alt_url, headers=headers_direct)
+        resp = await client.send(req, stream=True)
+
+        # 3. Si el servidor rechaza, lanzamos el HTTP Error real (ej. 403)
+        if resp.status_code not in (200, 206):
             await resp.aclose()
-            raise HTTPException(status_code=resp.status_code, detail=f"Error descargando segmento de vídeo (HTTP {resp.status_code})")
+            raise HTTPException(status_code=resp.status_code, detail=f"HTTP {resp.status_code}")
 
         async def stream_bytes():
             try:
@@ -271,8 +276,7 @@ async def proxy_xameleon_segment(request: Request):
         )
     except Exception as e:
         print(f"⚠️ [proxy-seg error]: {e}")
-        raise HTTPException(status_code=502, detail=f"Error en proxy-seg: {str(e)}")
-
+        raise HTTPException(status_code=502, detail=str(e))
 @app.get("/api/v1/xameleon/proxy-sub")
 async def proxy_xameleon_sub_manifest(request: Request):
     """
@@ -302,7 +306,7 @@ async def proxy_xameleon_sub_manifest(request: Request):
             }
         )
     except Exception as e:
-        print(f"⚠️ [proxy-sub error]: {e}")
+        print(f"⚠️ [proxy-sub error]: {str(e)}")
         raise HTTPException(status_code=502, detail=f"Error en proxy-sub: {str(e)}")
 
 @app.get("/api/v1/xameleon/channel/{raw_id}/proxy-stream")
@@ -447,4 +451,3 @@ async def get_m3u_playlist(request: Request):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8070)
-
