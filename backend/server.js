@@ -836,6 +836,7 @@ app.get('/api/play/:channelId', async (req, res) => {
         let headersList = stream.headers;
         let finalTipo = stream.tipo || 'hls';
         let fetchError = null;
+        let customHlsUrl = null;
 
         if (!finalStreamUrl || finalStreamUrl === 'null' || finalStreamUrl === 'undefined' || (typeof finalStreamUrl === 'string' && !finalStreamUrl.startsWith('http'))) {
             finalStreamUrl = null;
@@ -928,6 +929,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                         const d = await r.json();
                         if (d.data && d.data[0] && d.data[0].url) {
                             nuevaUrl = d.data[0].url;
+                            if (d.hls_url) customHlsUrl = d.hls_url;
                             const yHeaders = d.data[0].headers || {
                                 'Referer': 'https://x.com/',
                                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'
@@ -1022,11 +1024,13 @@ app.get('/api/play/:channelId', async (req, res) => {
         );
         const isYacineStream = id.startsWith('bein_') || id.startsWith('yacine_') || (finalStreamUrl && (finalStreamUrl.includes('new-redirect') || finalStreamUrl.includes('buzz') || finalStreamUrl.includes('mediox') || finalStreamUrl.includes('korvario')));
 
-        // hlsUrl: para el reproductor web (hls.js). Proxea /hls-m3u8 para evitar bloqueos CORS y Referer del navegador.
+        // hlsUrl: para el reproductor web (hls.js). Proxea vía la API de origen o /hls-m3u8 para evitar bloqueos CORS/Referer.
         // streamUrl: URL directa de origen (usada por apps externas/Flutter para Zero-Bandwidth).
-        let hlsUrl = (isMediaset || isYacineStream)
+        let hlsUrl = customHlsUrl || (isMediaset
             ? `${req.protocol}://${req.get('host')}/hls-m3u8?url=${encodeURIComponent(finalStreamUrl)}`
-            : finalStreamUrl;
+            : (isYacineStream
+                ? `${req.protocol}://${(req.get('host') || '127.0.0.1:3000').split(':')[0]}:8000/proxy/m3u8?url=${encodeURIComponent(finalStreamUrl)}`
+                : finalStreamUrl));
 
         // ── Reescribir 127.0.0.1:8070 con el Host/IP real del cliente para acceso en Móvil / Smart TV / Render ──
         const clientHost = req.get('host') || '127.0.0.1:3000';
