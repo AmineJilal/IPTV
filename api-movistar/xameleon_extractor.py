@@ -117,35 +117,52 @@ async def resolve_xameleon_stream(channel_raw_id: str, force_refresh: bool = Fal
 
     last_decoded = None
 
-    async with httpx.AsyncClient(verify=False, timeout=2.5) as client:
-        for ep in endpoints:
-            try:
+    import asyncio
+
+    async def check_endpoint(ep: str) -> Optional[str]:
+        # 1. Probar por Tor SOCKS5 (Bypass de bloqueo ISP Vodafone/Movistar y dominio CDN)
+        try:
+            async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=5.0) as client:
                 direct_url = f"https://{DLSTREAMS_IP}/premiumtv/{ep}?id={channel_raw_id}"
                 resp = await client.get(direct_url, headers=headers_direct)
-                if resp.status_code != 200:
-                    continue
+                if resp.status_code == 200:
+                    match = re.search(r"window\.atob\([\x22\x27]([^\x22\x27]+)[\x22\x27]\)", resp.text)
+                    if match:
+                        decoded_url = base64.b64decode(match.group(1)).decode("utf-8")
+                        m3u8_resp = await client.get(decoded_url, headers=headers_xam)
+                        if m3u8_resp.status_code == 200 and "#EXTM3U" in m3u8_resp.text:
+                            return decoded_url
+        except Exception:
+            pass
 
-                match = re.search(r"window\.atob\([\x22\x27]([^\x22\x27]+)[\x22\x27]\)", resp.text)
-                if not match:
-                    continue
+        # 2. Fallback a IP directa si Tor no está activo
+        try:
+            async with httpx.AsyncClient(verify=False, timeout=3.5) as client:
+                direct_url = f"https://{DLSTREAMS_IP}/premiumtv/{ep}?id={channel_raw_id}"
+                resp = await client.get(direct_url, headers=headers_direct)
+                if resp.status_code == 200:
+                    match = re.search(r"window\.atob\([\x22\x27]([^\x22\x27]+)[\x22\x27]\)", resp.text)
+                    if match:
+                        decoded_url = base64.b64decode(match.group(1)).decode("utf-8")
+                        alt_url = decoded_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
+                        m3u8_resp = await client.get(alt_url, headers={**headers_xam, "Host": XAMELEON_HOST})
+                        if m3u8_resp.status_code == 200 and "#EXTM3U" in m3u8_resp.text:
+                            return decoded_url
+        except Exception:
+            pass
+        return None
 
-                decoded_url = base64.b64decode(match.group(1)).decode("utf-8")
-                last_decoded = decoded_url
+    tasks = [asyncio.create_task(check_endpoint(ep)) for ep in endpoints]
+    for completed in asyncio.as_completed(tasks):
+        res = await completed
+        if res:
+            for t in tasks:
+                if not t.done():
+                    t.cancel()
+            STREAM_RESOLVE_CACHE[channel_raw_id] = (now, res)
+            return res
 
-                # Verificar si este espejo está emitiendo activamente (#EXTM3U)
-                alt_url = decoded_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
-                m3u8_resp = await client.get(alt_url, headers=headers_xam)
-                if m3u8_resp.status_code == 200 and "#EXTM3U" in m3u8_resp.text:
-                    STREAM_RESOLVE_CACHE[channel_raw_id] = (now, decoded_url)
-                    return decoded_url
-            except Exception:
-                continue
-
-    if last_decoded:
-        STREAM_RESOLVE_CACHE[channel_raw_id] = (now, last_decoded)
-        return last_decoded
-
-    raise ValueError("No se pudo obtener una señal activa desde ningún servidor espejo (daddy 1-5)")
+    raise ValueError("El canal no está emitiendo activamente en ningún servidor espejo en este momento")
 
 MANIFEST_CACHE = {}
 
@@ -159,18 +176,39 @@ async def fetch_xameleon_m3u8_manifest(m3u8_url: str, base_proxy_url: Optional[s
             raw_text = cached_content
 
     if not raw_text:
-        headers_direct = {
+        headers_xam = {
             **DEFAULT_HEADERS,
-            "Referer": "https://hamis.romponalis.st/",
-            "Host": XAMELEON_HOST
+            "Referer": "https://hamis.romponalis.st/"
         }
-        target_url = m3u8_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
         
-        async with httpx.AsyncClient(verify=False, timeout=10.0, follow_redirects=True) as client:
-            resp = await client.get(target_url, headers=headers_direct)
+        resp = None
+        # 1. Intentar descargar manifiesto vía Tor con dominio oficial (Bypass 500 de IP directa)
+        try:
+            async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=8.0) as client:
+                res = await client.get(m3u8_url, headers=headers_xam)
+                if res.status_code == 200 and "#EXTM3U" in res.text:
+                    resp = res
+                else:
+                    print(f"[xameleon_manifest] Tor status: {res.status_code}, body: {res.text[:100]}")
+        except Exception as err:
+            print(f"[xameleon_manifest] Tor exception: {err}")
+
+        # 2. Fallback a IP directa si Tor no responde
+        if not resp:
+            headers_direct = {**headers_xam, "Host": XAMELEON_HOST}
+            target_url = m3u8_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
+            try:
+                async with httpx.AsyncClient(verify=False, timeout=8.0, follow_redirects=True) as client:
+                    res_direct = await client.get(target_url, headers=headers_direct)
+                    if res_direct.status_code == 200 and "#EXTM3U" in res_direct.text:
+                        resp = res_direct
+                    else:
+                        print(f"[xameleon_manifest] Direct status: {res_direct.status_code}, body: {res_direct.text[:100]}")
+            except Exception as err:
+                print(f"[xameleon_manifest] Direct exception: {err}")
             
-        if resp.status_code != 200:
-            raise ValueError(f"Error descargando M3U8: HTTP {resp.status_code}")
+        if not resp:
+            raise ValueError(f"Error descargando M3U8 desde el proveedor ({m3u8_url})")
 
         raw_text = resp.text
         MANIFEST_CACHE[m3u8_url] = (now, raw_text)

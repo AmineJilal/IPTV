@@ -246,10 +246,9 @@ async def proxy_xameleon_segment(request: Request):
         else:
             alt_url = target_url
         
-        # 2. Cliente fresco sin Pool para evitar mezcla de cabeceras Host/SNI
-        client = httpx.AsyncClient(verify=False, timeout=10.0, follow_redirects=True)
-        req = client.build_request("GET", alt_url, headers=headers_direct)
-        resp = await client.send(req, stream=True)
+        # 2. Reutilizar el pool global cdn_pool con Keep-Alive para eliminar la latencia TLS por segmento
+        req = cdn_pool.build_request("GET", alt_url, headers=headers_direct)
+        resp = await cdn_pool.send(req, stream=True)
 
         # 3. Si el servidor rechaza, lanzamos el HTTP Error real (ej. 403)
         if resp.status_code not in (200, 206):
