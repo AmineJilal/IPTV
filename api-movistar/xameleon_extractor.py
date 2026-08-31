@@ -16,40 +16,78 @@ DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 }
 
+FALLBACK_SPANISH_CHANNELS = [
+    {"raw_id": "538", "name": "DAZN LaLiga"},
+    {"raw_id": "537", "name": "DAZN F1 ES"},
+    {"raw_id": "445", "name": "DAZN 1 Spain"},
+    {"raw_id": "446", "name": "DAZN 2 Spain"},
+    {"raw_id": "447", "name": "DAZN 3 Spain"},
+    {"raw_id": "448", "name": "DAZN 4 Spain"},
+    {"raw_id": "435", "name": "Movistar Liga de Campeones"},
+    {"raw_id": "84",  "name": "Movistar LaLiga"},
+    {"raw_id": "436", "name": "Movistar Deportes Spain"},
+    {"raw_id": "438", "name": "Movistar Deportes 2 Spain"},
+    {"raw_id": "526", "name": "Movistar Deportes 3 Spain"},
+    {"raw_id": "527", "name": "Movistar Deportes 4 Spain"},
+    {"raw_id": "528", "name": "Movistar Golf Spain"},
+    {"raw_id": "523", "name": "Real Madrid TV Spain"},
+    {"raw_id": "539", "name": "LaLiga SmartBank TV"},
+    {"raw_id": "533", "name": "TVE La 1 Spain"},
+    {"raw_id": "531", "name": "Antena 3 Spain"},
+    {"raw_id": "535", "name": "Cuatro Spain"},
+    {"raw_id": "532", "name": "Telecinco Spain"},
+    {"raw_id": "534", "name": "La Sexta Spain"}
+]
+
 async def fetch_xameleon_channels() -> List[Dict[str, str]]:
-    direct_url = f"https://{DLSTREAMS_IP}/24-7-channels.php"
-    headers_direct = {**DEFAULT_HEADERS, "Host": DLSTREAMS_HOST, "Referer": f"https://{DLSTREAMS_HOST}/"}
-    
-    async with httpx.AsyncClient(verify=False, timeout=10.0) as client:
-        resp = await client.get(direct_url, headers=headers_direct)
-        
-    if resp.status_code != 200:
-        raise ValueError(f"Error accediendo al catálogo: HTTP {resp.status_code}")
-        
-    matches = re.findall(r"<a[^>]+href=[\x22\x27]/watch\.php\?id=(\d+)[\x22\x27][^>]*>(.*?)</a>", resp.text, re.DOTALL)
-    
     channels = []
-    seen = set()
-    for ch_id, title_raw in matches:
-        if ch_id in seen: continue
-        seen.add(ch_id)
-        clean_title = re.sub(r"<[^>]+>", "", title_raw).strip()
-        clean_title = re.sub(r"\s+", " ", clean_title)
-        clean_title = re.sub(r"ID:\s*\d+", "", clean_title).strip()
+    try:
+        direct_url = f"https://{DLSTREAMS_IP}/24-7-channels.php"
+        headers_direct = {**DEFAULT_HEADERS, "Host": DLSTREAMS_HOST, "Referer": f"https://{DLSTREAMS_HOST}/"}
         
-        clean_lower = clean_title.lower()
-        if "18+" in clean_lower or "+18" in clean_lower or "adult" in clean_lower or "xxx" in clean_lower or "erotic" in clean_lower:
-            continue
+        async with httpx.AsyncClient(verify=False, timeout=3.0) as client:
+            resp = await client.get(direct_url, headers=headers_direct)
             
-        channels.append({
-            "id": f"xameleon_{ch_id}",
-            "raw_id": ch_id,
-            "name": clean_title or f"Canal {ch_id}",
-            "stream_key": f"XAMELEON_{ch_id}",
-            "category": "Xameleon TV",
-            "server": DLSTREAMS_HOST,
-            "embed_url": f"https://{DLSTREAMS_HOST}/watch.php?id={ch_id}"
-        })
+        if resp.status_code == 200:
+            matches = re.findall(r"<a[^>]+href=[\x22\x27]/watch\.php\?id=(\d+)[\x22\x27][^>]*>(.*?)</a>", resp.text, re.DOTALL)
+            seen = set()
+            for ch_id, title_raw in matches:
+                if ch_id in seen: continue
+                seen.add(ch_id)
+                clean_title = re.sub(r"<[^>]+>", "", title_raw).strip()
+                clean_title = re.sub(r"\s+", " ", clean_title)
+                clean_title = re.sub(r"ID:\s*\d+", "", clean_title).strip()
+                
+                clean_lower = clean_title.lower()
+                if "18+" in clean_lower or "+18" in clean_lower or "adult" in clean_lower or "xxx" in clean_lower or "erotic" in clean_lower:
+                    continue
+                    
+                channels.append({
+                    "id": f"xameleon_{ch_id}",
+                    "raw_id": ch_id,
+                    "name": clean_title or f"Canal {ch_id}",
+                    "stream_key": f"XAMELEON_{ch_id}",
+                    "category": "Xameleon TV",
+                    "server": DLSTREAMS_HOST,
+                    "embed_url": f"https://{DLSTREAMS_HOST}/watch.php?id={ch_id}"
+                })
+    except Exception as e:
+        print(f"⚠️ Error cargando catálogo remoto ({e}). Usando catálogo fallback.")
+
+    if not channels:
+        for item in FALLBACK_SPANISH_CHANNELS:
+            ch_id = item["raw_id"]
+            name = item["name"]
+            channels.append({
+                "id": f"xameleon_{ch_id}",
+                "raw_id": ch_id,
+                "name": name,
+                "stream_key": f"XAMELEON_{ch_id}",
+                "category": "Movistar / DAZN",
+                "server": DLSTREAMS_HOST,
+                "embed_url": f"https://{DLSTREAMS_HOST}/watch.php?id={ch_id}"
+            })
+
     return channels
 
 STREAM_RESOLVE_CACHE = {}
@@ -79,7 +117,7 @@ async def resolve_xameleon_stream(channel_raw_id: str, force_refresh: bool = Fal
 
     last_decoded = None
 
-    async with httpx.AsyncClient(verify=False, timeout=6.0) as client:
+    async with httpx.AsyncClient(verify=False, timeout=2.5) as client:
         for ep in endpoints:
             try:
                 direct_url = f"https://{DLSTREAMS_IP}/premiumtv/{ep}?id={channel_raw_id}"

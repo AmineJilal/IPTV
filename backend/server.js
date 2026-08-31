@@ -315,7 +315,6 @@ async function initDb() {
                 nombre TEXT,
                 categoria TEXT,
                 logo TEXT,
-                provider TEXT,
                 stream_url TEXT,
                 tipo TEXT,
                 headers TEXT,
@@ -324,9 +323,6 @@ async function initDb() {
                 updated_at INTEGER
             )
         `);
-        try {
-            await db.execute("ALTER TABLE channel_cache ADD COLUMN provider TEXT");
-        } catch (_) {}
         // Tabla de claves de acceso para autenticación JWT
         await db.execute(`
             CREATE TABLE IF NOT EXISTS auth_keys (
@@ -509,30 +505,24 @@ app.get('/api/auth/validate', async (req, res) => {
     }
 });
 
+// ── Caché Ultra-Rápida en Memoria RAM para lectura sub-milisegundo (<1ms) ──
+const fastRamDbCache = new Map();
+
 async function obtenerStreamsDb() {
     try {
-        const res = await db.execute(`
-            SELECT * FROM channel_cache 
-            ORDER BY 
-                CASE 
-                    WHEN provider = 'yacine' THEN 0 
-                    WHEN categoria = 'BeIN Sports' THEN 1 
-                    WHEN provider = 'movistar' THEN 2 
-                    WHEN provider = 'tdt' THEN 3 
-                    ELSE 4 
-                END, 
-                id ASC
-        `);
-        return res.rows.map(r => ({
+        const res = await db.execute("SELECT * FROM channel_cache");
+        const rows = res.rows.map(r => ({
             ...r,
             favorito: r.favorito === 1 || r.favorito === true || r.favorito === '1'
         })).filter(r => {
             const nameLower = (r.nombre || '').toLowerCase();
             return !nameLower.includes('18+') && !nameLower.includes('+18') && !nameLower.includes('adult') && !nameLower.includes('xxx') && !nameLower.includes('erotic');
         });
+        rows.forEach(r => fastRamDbCache.set(r.id, r));
+        return rows;
     } catch (e) {
         console.error("Error al obtener streams de Turso:", e.message);
-        return [];
+        return Array.from(fastRamDbCache.values());
     }
 }
 
@@ -588,13 +578,12 @@ async function syncAllLists() {
     let total = 0;
     try {
         const insertQuery = `
-            INSERT INTO channel_cache (id, nombre, categoria, logo, provider, tipo, stream_url, updated_at) 
-            VALUES (?, ?, ?, ?, ?, 'hls', NULL, 0)
+            INSERT INTO channel_cache (id, nombre, categoria, logo, tipo, stream_url, updated_at) 
+            VALUES (?, ?, ?, ?, 'hls', NULL, 0)
             ON CONFLICT(id) DO UPDATE SET 
                 nombre = excluded.nombre,
                 logo = excluded.logo,
-                categoria = excluded.categoria,
-                provider = excluded.provider
+                categoria = excluded.categoria
         `;
 
         await db.execute("DELETE FROM channel_cache WHERE tipo = 'youtube' OR stream_url LIKE '%youtube%' OR stream_url LIKE '%youtu.be%'");
@@ -607,7 +596,7 @@ async function syncAllLists() {
                 for (const c of data.canales || []) {
                     if (c.url && (c.url.includes('youtube') || c.url.includes('youtu.be'))) continue;
                     const id = 'tdt_' + c.id;
-                    await db.execute(insertQuery, [id, c.name || c.nombre, 'España', c.logo, 'tdt']);
+                    await db.execute(insertQuery, [id, c.name || c.nombre, 'España', c.logo]);
                     total++;
                 }
             }
@@ -623,7 +612,9 @@ async function syncAllLists() {
                 for (const c of canalesIbero) {
                     if (c.stream_type === 'youtube') continue;
                     const id = 'ibero_' + c.id;
-                    await db.execute(insertQuery, [id, c.name, 'Deportes', c.logo, 'ibero']);
+                    let catName = 'Deportes';
+                    if ((c.name || '').toLowerCase().includes('bein')) catName = 'Otros Deportes';
+                    await db.execute(insertQuery, [id, c.name, catName, c.logo]);
                     total++;
                 }
             }
@@ -637,89 +628,55 @@ async function syncAllLists() {
                 for (const c of data.channels || []) {
                     if (c.stream_type === 'youtube') continue;
                     const id = 'arabic_' + c.id;
-                    const cat = 'Mundo Árabe - ' + (c.country_name || 'General');
-                    await db.execute(insertQuery, [id, c.name, cat, c.logo, 'arabic']);
+                    let cat = 'Mundo Árabe - ' + (c.country_name || 'General');
+                    if (cat.toLowerCase().includes('bein')) cat = 'Mundo Árabe - Deportes';
+                    await db.execute(insertQuery, [id, c.name, cat, c.logo]);
                     total++;
                 }
             }
         } catch (e) { console.error('[Sync] Error en Arabic:', e.message); }
 
-        // 4. Yacine TV API (Todos los canales organizados en sus categorías reales de Yacine TV con provider='yacine')
-        let yacineSuccess = false;
+        // 4. Yacine TV API (TODOS los canales de Yacine TV en 'BeIN Sports', con beIN Sports ordenados arriba del todo)
         try {
+            await db.execute("DELETE FROM channel_cache WHERE categoria = 'BeIN Sports' OR id LIKE 'bein_%' OR id LIKE 'yacine_%'");
+
             const rCat = await safeFetch('http://127.0.0.1:8000/categories', {}, 15000);
             if (rCat.ok) {
                 const cats = await rCat.json();
-                for (const cat of cats.data || []) {
-                    const rawCatName = (cat.name || 'Yacine TV').trim();
-                    let categoryName = rawCatName;
-                    if (rawCatName.toLowerCase().includes('bein sports')) {
-                        categoryName = 'BeIN Sports';
-                    }
+                let categoriesList = cats.data || [];
+
+                // Ordenar categorías: 4 (1080P), 5 (720P), 6 (360P), 7 (244P), 8 (Entertainment) primero
+                const priorityOrder = [4, 5, 6, 7, 8, 9, 11, 12, 88, 13, 87, 94];
+                categoriesList.sort((a, b) => {
+                    let idxA = priorityOrder.indexOf(a.id);
+                    let idxB = priorityOrder.indexOf(b.id);
+                    if (idxA === -1) idxA = 999;
+                    if (idxB === -1) idxB = 999;
+                    return idxA - idxB;
+                });
+
+                for (const cat of categoriesList) {
+                    let prefix = `yacine_${cat.id}_`;
+                    let suffix = '';
+                    if (cat.id === 4) { prefix = 'bein_1080_'; suffix = ' (1080p)'; }
+                    else if (cat.id === 5) { prefix = 'bein_720_'; suffix = ' (720p)'; }
+                    else if (cat.id === 6) { prefix = 'bein_360_'; suffix = ' (360p)'; }
+                    else if (cat.id === 7) { prefix = 'bein_244_'; suffix = ' (244p)'; }
                     
                     const rCh = await safeFetch(`http://127.0.0.1:8000/categories/${cat.id}/channels`, {}, 15000);
                     if (rCh.ok) {
                         const chData = await rCh.json();
                         for (const c of chData.data || []) {
-                            const id = 'yacine_' + c.id;
-                            await db.execute(insertQuery, [id, c.name, categoryName, c.logo || '', 'yacine']);
+                            const id = prefix + c.id;
+                            let name = (c.name || 'Canal Yacine') + suffix;
+                            const logo = c.logo || c.img || c.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/BeIN_Sports_logo.svg/512px-BeIN_Sports_logo.svg.png';
+                            await db.execute(insertQuery, [id, name, 'BeIN Sports', logo]);
                             total++;
-                            yacineSuccess = true;
                         }
                     }
                 }
             }
         } catch (e) { console.error('[Sync] Error en Yacine API:', e.message); }
-
-        // Fallback: Semilla fija garantizada de los 40 canales de Yacine TV BeIN Sports
-        if (!yacineSuccess) {
-            const yacineSeed = [
-                { id: 'yacine_1424', name: 'beIN SPORTS 1', logo: '' },
-                { id: 'yacine_1425', name: 'beIN SPORTS 2', logo: '' },
-                { id: 'yacine_1426', name: 'beIN SPORTS 3', logo: '' },
-                { id: 'yacine_1427', name: 'beIN SPORTS 4', logo: '' },
-                { id: 'yacine_1428', name: 'beIN SPORTS 5', logo: '' },
-                { id: 'yacine_1429', name: 'beIN SPORTS 6', logo: '' },
-                { id: 'yacine_1430', name: 'beIN SPORTS 7', logo: '' },
-                { id: 'yacine_1431', name: 'beIN SPORTS 8', logo: '' },
-                { id: 'yacine_1432', name: 'beIN SPORTS 9', logo: '' },
-                { id: 'yacine_1421', name: 'beIN XTRA 1', logo: '' },
-                { id: 'yacine_1422', name: 'beIN XTRA 2', logo: '' },
-                { id: 'yacine_1423', name: 'beIN XTRA 3', logo: '' },
-                { id: 'yacine_1433', name: 'beIN France 1', logo: '' },
-                { id: 'yacine_1434', name: 'beIN France 2', logo: '' },
-                { id: 'yacine_1435', name: 'beIN France 3', logo: '' },
-                { id: 'yacine_1436', name: 'beIN News', logo: '' },
-                { id: 'yacine_1437', name: 'beIN SPORTS', logo: '' },
-                { id: 'yacine_1481', name: 'beIN English 1', logo: '' },
-                { id: 'yacine_1482', name: 'beIN English 2', logo: '' },
-                { id: 'yacine_1483', name: 'beIN English 3', logo: '' },
-                { id: 'yacine_4', name: 'beIN SPORTS 1 720p', logo: '' },
-                { id: 'yacine_5', name: 'beIN SPORTS 2 720p', logo: '' },
-                { id: 'yacine_6', name: 'beIN SPORTS 3 720p', logo: '' },
-                { id: 'yacine_7', name: 'beIN SPORTS 4 720p', logo: '' },
-                { id: 'yacine_8', name: 'beIN SPORTS 5 720p', logo: '' },
-                { id: 'yacine_9', name: 'beIN SPORTS 6 720p', logo: '' },
-                { id: 'yacine_10', name: 'beIN SPORTS 7 720p', logo: '' },
-                { id: 'yacine_11', name: 'beIN SPORTS 8 720p', logo: '' },
-                { id: 'yacine_12', name: 'beIN SPORTS 9 720p', logo: '' },
-                { id: 'yacine_1', name: 'beIN XTRA 1 720p', logo: '' },
-                { id: 'yacine_2', name: 'beIN XTRA 2 720p', logo: '' },
-                { id: 'yacine_3', name: 'beIN XTRA 3 720p', logo: '' },
-                { id: 'yacine_13', name: 'beIN France 1 720p', logo: '' },
-                { id: 'yacine_14', name: 'beIN France 2 720p', logo: '' },
-                { id: 'yacine_15', name: 'beIN France 3 720p', logo: '' },
-                { id: 'yacine_16', name: 'beIN News 720p', logo: '' },
-                { id: 'yacine_17', name: 'beIN SPORTS 720p', logo: '' },
-                { id: 'yacine_18', name: 'beIN English 1 720p', logo: '' },
-                { id: 'yacine_19', name: 'beIN English 2 720p', logo: '' },
-                { id: 'yacine_20', name: 'beIN English 3 720p', logo: '' }
-            ];
-            for (const ch of yacineSeed) {
-                await db.execute(insertQuery, [ch.id, ch.name, 'BeIN Sports', ch.logo, 'yacine']);
-                total++;
-            }
-        }
 
         // 5. Movistar+ & Xameleon API (Puerto 8070)
         try {
@@ -730,19 +687,19 @@ async function syncAllLists() {
                     const nameLower = (c.name || '').toLowerCase();
                     if (nameLower.includes('18+') || nameLower.includes('+18') || nameLower.includes('adult') || nameLower.includes('xxx') || nameLower.includes('erotic')) continue;
                     const id = c.id.startsWith('xameleon_') ? c.id : ('movistar_' + c.id);
-                    const provider = c.id.startsWith('xameleon_') ? 'xameleon' : 'movistar';
-                    const cat = (provider === 'xameleon') ? 'Xameleon TV' : 'Movistar & Deportes';
-                    await db.execute(insertQuery, [id, c.name, cat, c.logo || '', provider]);
+                    let cat = c.category || 'Movistar & Deportes';
+                    // EXCLUSIVIDAD ESTRICTA: Solo canales que pertenezcan a la API de Yacine entran en 'BeIN Sports'
+                    if (cat.toLowerCase().includes('bein') || nameLower.includes('bein')) {
+                        cat = 'Movistar & Deportes';
+                    }
+                    await db.execute(insertQuery, [id, c.name, cat, c.logo || '']);
                     total++;
                 }
             }
         } catch (e) { console.error('[Sync] Error en Movistar API:', e.message); }
 
-        // Limpieza estricta de categorías por proveedor en DB
+        // Purgar cualquier canal 18+ residual de la DB
         try {
-            await db.execute("UPDATE channel_cache SET categoria = 'Movistar & Deportes' WHERE provider = 'movistar'");
-            await db.execute("UPDATE channel_cache SET categoria = 'Xameleon TV' WHERE provider = 'xameleon'");
-            await db.execute("DELETE FROM channel_cache WHERE categoria = 'BeIN Sports' AND provider != 'yacine'");
             await db.execute("DELETE FROM channel_cache WHERE LOWER(nombre) LIKE '%18+%' OR LOWER(nombre) LIKE '%+18%' OR LOWER(nombre) LIKE '%adult%' OR LOWER(nombre) LIKE '%xxx%' OR LOWER(nombre) LIKE '%erotic%'");
         } catch (e) {}
 
@@ -882,8 +839,12 @@ app.get('/api/play/:channelId', async (req, res) => {
     console.log(`\n▶️ [PLAY] Solicitud para ID: ${id}`);
 
     try {
-        const result = await db.execute("SELECT * FROM channel_cache WHERE id = ?", [id]);
-        let stream = result.rows[0];
+        let stream = fastRamDbCache.get(id);
+        if (!stream) {
+            const result = await db.execute("SELECT * FROM channel_cache WHERE id = ?", [id]);
+            stream = result.rows[0];
+            if (stream) fastRamDbCache.set(id, stream);
+        }
 
         if (!stream) {
             stream = { id: id, stream_url: null, headers: null, updated_at: 0, tipo: 'hls' };
@@ -891,7 +852,8 @@ app.get('/api/play/:channelId', async (req, res) => {
 
         const ahora = Date.now();
         const isTokenizedStream = (id.toLowerCase().includes('telecinco') || id.toLowerCase().includes('cuatro') || id.toLowerCase().includes('fdf') || id.toLowerCase().includes('energy') || id.toLowerCase().includes('divinity') || id.toLowerCase().includes('bemad') || id.toLowerCase().includes('boing') || (stream.stream_url && stream.stream_url.includes('hdnea=')));
-        const ttl = isTokenizedStream ? 240000 : 3600000; // 4 minutos de TTL para Mediaset (token hdnea dura 5 min)
+        const isYacine = id.startsWith('bein_') || id.startsWith('yacine_');
+        const ttl = isTokenizedStream ? 240000 : (isYacine ? 3600000 : 7200000); // 1h para Yacine, 4min Mediaset, 2h resto
         let finalStreamUrl = stream.stream_url;
         let headersList = stream.headers;
         let finalTipo = stream.tipo || 'hls';
@@ -918,18 +880,8 @@ app.get('/api/play/:channelId', async (req, res) => {
             try {
 
 
-                let providerName = stream.provider;
-                if (!providerName) {
-                    if (id.startsWith('tdt_')) providerName = 'tdt';
-                    else if (id.startsWith('ibero_')) providerName = 'ibero';
-                    else if (id.startsWith('bein_') || id.startsWith('yacine_')) providerName = 'yacine';
-                    else if (id.startsWith('arabic_')) providerName = 'arabic';
-                    else if (id.startsWith('movistar_')) providerName = 'movistar';
-                    else if (id.startsWith('xameleon_')) providerName = 'xameleon';
-                }
-
-                if (providerName === 'tdt' || id.startsWith('tdt_')) {
-                    const rawPureId = id.replace(/^tdt_/, '');
+                if (id.startsWith('tdt_')) {
+                    const rawPureId = id.replace('tdt_', '');
                     let responseBodyText = '';
                     for (const base of bases) {
                         const targetUrl = `${base}:8080/api/stream/${rawPureId}`;
@@ -977,8 +929,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                             if (nuevosHeaders && typeof nuevosHeaders === 'object') nuevosHeaders = JSON.stringify(nuevosHeaders);
                         }
                     }
-                } else if (providerName === 'ibero' || id.startsWith('ibero_')) {
-                    const pureId = id.replace(/^ibero_/, '');
+                } else if (id.startsWith('ibero_')) {
+                    const pureId = id.replace('ibero_', '');
                     for (const base of bases) {
                         try { r = await safeFetch(`${base}:8090/api/channels/${pureId}`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
@@ -989,8 +941,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                         if (d.referer_required) iberoHeaders['Referer'] = d.referer_required;
                         if (Object.keys(iberoHeaders).length > 0) nuevosHeaders = JSON.stringify(iberoHeaders);
                     }
-                } else if (providerName === 'yacine' || id.startsWith('bein_') || id.startsWith('yacine_')) {
-                    const pureId = id.replace(/^yacine_/, '').replace(/^bein_/, '');
+                } else if (id.startsWith('bein_') || id.startsWith('yacine_')) {
+                    const pureId = id.replace('bein_1080_', '').replace('bein_720_', '').replace('bein_', '').replace('yacine_', '');
                     for (const base of bases) {
                         try { r = await safeFetch(`${base}:8000/channel/${pureId}`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
@@ -998,11 +950,15 @@ app.get('/api/play/:channelId', async (req, res) => {
                         const d = await r.json();
                         if (d.data && d.data[0] && d.data[0].url) {
                             nuevaUrl = d.data[0].url;
-                            if (d.data[0].headers) nuevosHeaders = JSON.stringify(d.data[0].headers);
+                            const yHeaders = d.data[0].headers || {
+                                'Referer': 'https://x.com/',
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'
+                            };
+                            nuevosHeaders = JSON.stringify(yHeaders);
                         }
                     }
-                } else if (providerName === 'arabic' || id.startsWith('arabic_')) {
-                    const pureId = id.replace(/^arabic_/, '');
+                } else if (id.startsWith('arabic_')) {
+                    const pureId = id.replace('arabic_', '');
                     for (const base of bases) {
                         try { r = await safeFetch(`${base}:9080/api/channels/${pureId}/stream?redirect=false`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
@@ -1015,8 +971,8 @@ app.get('/api/play/:channelId', async (req, res) => {
                         }
                         if (d.headers) nuevosHeaders = JSON.stringify(d.headers);
                     }
-                } else if (providerName === 'movistar' || providerName === 'xameleon' || id.startsWith('movistar_') || id.startsWith('xameleon_')) {
-                    const chId = id.replace(/^movistar_/, '');
+                } else if (id.startsWith('movistar_') || id.startsWith('xameleon_')) {
+                    const chId = id.replace('movistar_', '');
                     for (const base of bases) {
                         try {
                             r = await safeFetch(`${base}:8070/api/v1/channel/${encodeURIComponent(chId)}/m3u8`, {}, 25000);
@@ -1032,11 +988,20 @@ app.get('/api/play/:channelId', async (req, res) => {
                 if (nuevaUrl && nuevaUrl !== 'null') {
                     finalStreamUrl = nuevaUrl;
                     headersList = nuevosHeaders || '';
-                    await db.execute(
+                    
+                    // Actualización instantánea en memoria RAM (0ms)
+                    stream.stream_url = finalStreamUrl;
+                    stream.headers = headersList;
+                    stream.updated_at = ahora;
+                    stream.tipo = finalTipo;
+                    fastRamDbCache.set(id, stream);
+
+                    // Persistencia asíncrona en Turso DB en segundo plano (no bloquea el response HTTP)
+                    db.execute(
                         "INSERT INTO channel_cache (id, stream_url, headers, updated_at, tipo) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET stream_url=excluded.stream_url, headers=excluded.headers, updated_at=excluded.updated_at, tipo=excluded.tipo",
                         [id, finalStreamUrl, headersList, ahora, finalTipo]
-                    );
-                    console.log(`✅ [Cache] Guardado OK.`);
+                    ).then(() => console.log(`✅ [Cache] Guardado OK en Turso (asíncrono).`))
+                     .catch(e => console.error(`⚠️ [Cache] Error guardando en Turso DB: ${e.message}`));
                 } else {
                     console.error(`⚠️ [API PLAY] No se obtuvo nueva URL, usando la caché anterior si existe.`);
                     // fallback to database stream URL if API fails, so we don't wipe it out!
@@ -1073,8 +1038,9 @@ app.get('/api/play/:channelId', async (req, res) => {
             finalStreamUrl.includes('dai.m3u8')
         );
         const isMovistarXameleon = id.startsWith('movistar_') || id.startsWith('xameleon_') || (finalStreamUrl && finalStreamUrl.includes('/proxy-stream'));
+        const isYacineStream = id.startsWith('bein_') || id.startsWith('yacine_') || (finalStreamUrl && (finalStreamUrl.includes('new-redirect') || finalStreamUrl.includes('buzz') || finalStreamUrl.includes('mediox')));
 
-        let hlsUrl = isMediaset
+        let hlsUrl = (isMediaset || isYacineStream)
             ? `${req.protocol}://${req.get('host')}/hls-m3u8?url=${encodeURIComponent(finalStreamUrl)}`
             : (isMovistarXameleon ? finalStreamUrl : null);
 
@@ -1223,9 +1189,11 @@ function getHlsUpstreamHeaders(targetUrl, sid) {
     const isMediaset = host.includes('mediaset');
     const isAtres = host.includes('atresmedia') || host.includes('atresplayer');
     const isMbc = host.includes('edgenextcdn') || host.includes('shahid') || targetUrl.includes('mbc');
+    const isYacine = host.includes('buzz') || host.includes('online') || host.includes('yacine') || host.includes('mediox') || targetUrl.includes('/0021012254/') || targetUrl.includes('.pdf') || targetUrl.includes('.js');
 
     let referer = 'https://www.mediasetinfinity.es/';
     let origin = 'https://www.mediasetinfinity.es';
+    let ua = UA;
 
     if (isAtres) {
         referer = 'https://www.atresplayer.com/';
@@ -1233,10 +1201,14 @@ function getHlsUpstreamHeaders(targetUrl, sid) {
     } else if (isMbc) {
         referer = 'https://shahid.mbc.net/';
         origin = 'https://shahid.mbc.net';
+    } else if (isYacine) {
+        referer = 'https://x.com/';
+        origin = 'https://x.com';
+        ua = 'Dalvik/2.1.0 (Linux; U; Android 12; M2007J3SG Build/SKQ1.210908.001)';
     }
 
     const headers = {
-        'User-Agent': UA,
+        'User-Agent': ua,
         'Accept': '*/*',
         'Referer': referer,
         'Origin': origin,
@@ -1250,6 +1222,8 @@ function getHlsUpstreamHeaders(targetUrl, sid) {
 
 function rewriteHlsManifest(text, targetUrl, sid) {
     const encoded = sid ? `&sid=${encodeURIComponent(sid)}` : '';
+    const isYacine = targetUrl.includes('new-redirect') || targetUrl.includes('buzz') || targetUrl.includes('mediox') || targetUrl.includes('online');
+
     return text.split(/\r?\n/).map(line => {
         const t = line.trim();
         if (!t) return line;
@@ -1261,6 +1235,7 @@ function rewriteHlsManifest(text, targetUrl, sid) {
                     try {
                         const abs = new URL(p1, targetUrl).href;
                         const isManifest = /\.m3u8(\?|$)/i.test(abs) || abs.includes('manifest');
+                        if (isYacine && !isManifest) return `URI="${abs}"`;
                         const ep = `/hls-${isManifest ? 'm3u8' : 'seg'}?url=${encodeURIComponent(abs)}${encoded}`;
                         return `URI="${ep}"`;
                     } catch (_) { return `URI="${p1}"`; }
@@ -1273,10 +1248,13 @@ function rewriteHlsManifest(text, targetUrl, sid) {
         try {
             const abs = new URL(t, targetUrl).href;
             const isManifest = /\.m3u8(\?|$)/i.test(abs) || abs.includes('manifest');
+            if (isYacine && !isManifest) return abs; // URL directa de la CDN -> 0 MB de consumo de ancho de banda en Node!
             return `/hls-${isManifest ? 'm3u8' : 'seg'}?url=${encodeURIComponent(abs)}${encoded}`;
         } catch (_) { return line; }
     }).join('\n');
 }
+
+const m3u8MemoryCache = new Map();
 
 // ── /hls-m3u8 — Solo proxea manifiestos (texto, ~2–15 KB) ────────────────
 app.get('/hls-m3u8', async (req, res) => {
@@ -1285,6 +1263,15 @@ app.get('/hls-m3u8', async (req, res) => {
     let targetUrl;
     try { targetUrl = decodeURIComponent(rawUrl); } catch (_) { return res.status(400).send('URL inválida.'); }
     if (!targetUrl.startsWith('http')) return res.status(400).send('URL inválida.');
+
+    const now = Date.now();
+    const isYacineTarget = targetUrl.includes('new-redirect') || targetUrl.includes('buzz') || targetUrl.includes('mediox') || targetUrl.includes('online');
+    const cached = m3u8MemoryCache.get(targetUrl);
+    if (!isYacineTarget && cached && (now - cached.ts < 3500)) {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Content-Type', 'application/vnd.apple.mpegurl');
+        return res.status(200).send(cached.rewritten);
+    }
 
     // Generar o reutilizar session id (lo manda el cliente como ?sid=)
     const sid = req.query.sid || `s_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -1308,9 +1295,12 @@ app.get('/hls-m3u8', async (req, res) => {
         }
 
         const text = await response.text();
-        const rewritten = rewriteHlsManifest(text, targetUrl, sid);
+        const finalUrl = response.url || targetUrl;
+        const rewritten = rewriteHlsManifest(text, finalUrl, sid);
 
-        console.log(`📋 [HLS-M3U8] ${response.status} sid=${sid.slice(-6)} ${targetUrl.substring(0, 70)}`);
+        m3u8MemoryCache.set(targetUrl, { rewritten, ts: now });
+
+        console.log(`📋 [HLS-M3U8] ${response.status} (Cached 3.5s) sid=${sid.slice(-6)} ${targetUrl.substring(0, 70)}`);
 
         res.header('Access-Control-Allow-Origin', '*');
         res.header('Content-Type', 'application/vnd.apple.mpegurl');
@@ -1353,7 +1343,8 @@ app.get('/hls-seg', async (req, res) => {
         }
 
         res.header('Access-Control-Allow-Origin', '*');
-        res.header('Content-Type', response.headers.get('content-type') || 'video/MP2T');
+        res.header('Access-Control-Allow-Headers', '*');
+        res.header('Content-Type', 'video/MP2T');
         
         // Convertimos a arrayBuffer y mandamos el binario para evitar saturar RAM con strings
         const buffer = await response.arrayBuffer();

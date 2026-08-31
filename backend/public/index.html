@@ -548,14 +548,14 @@
                         return catName === 'Deportes' || id.startsWith('ibero_');
                     }
                     if (this.state.activeFilter === 'bein') {
-                        return catName === 'BeIN Sports' || id.startsWith('yacine_') || id.startsWith('bein_') || (nameLower.includes('bein') && !id.startsWith('movistar_'));
+                        return catName === 'BeIN Sports' || id.startsWith('bein_') || nameLower.includes('bein');
                     }
                     
                     if (this.state.activeFilter === 'arabic_channels') {
-                        if (!catName.includes('Árabe') && !catName.toLowerCase().includes('arabic') && !id.startsWith('arabic_')) return false;
+                        if (!catName.startsWith('Árabe - ') && !id.startsWith('arabic_')) return false;
                         if (this.state.activeSubFilter === 'all_sub') return true;
                         
-                        const subName = catName.replace('Mundo Árabe - ', '').replace('Árabe - ', '');
+                        const subName = catName.replace('Árabe - ', '');
                         const subId = `arabic_sub_${subName.toLowerCase().replace(/\s+/g, '_')}`;
                         return subId === this.state.activeSubFilter;
                     }
