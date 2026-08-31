@@ -92,7 +92,7 @@ async def fetch_xameleon_channels() -> List[Dict[str, str]]:
 
 STREAM_RESOLVE_CACHE = {}
 
-async def resolve_xameleon_stream(channel_raw_id: str, force_refresh: bool = False, ttl_seconds: float = 60.0) -> str:
+async def resolve_xameleon_stream(channel_raw_id: str, force_refresh: bool = False, ttl_seconds: float = 12.0) -> str:
     now = time.time()
     if force_refresh:
         STREAM_RESOLVE_CACHE.pop(channel_raw_id, None)

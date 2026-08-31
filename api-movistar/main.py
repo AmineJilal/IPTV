@@ -313,24 +313,30 @@ async def proxy_xameleon_manifest(raw_id: str, request: Request):
     """
     Servicio de proxy que desofusca el canal de Xameleon y sirve el contenido M3U8 directamente.
     """
+    base_url = get_dynamic_base_url(request)
+    sub_proxy_url = f"{base_url}/api/v1/xameleon/proxy-sub"
+    seg_proxy_url = f"{base_url}/api/v1/xameleon/proxy-seg"
+    
     try:
-        base_url = get_dynamic_base_url(request)
-        sub_proxy_url = f"{base_url}/api/v1/xameleon/proxy-sub"
-        seg_proxy_url = f"{base_url}/api/v1/xameleon/proxy-seg"
-        
         m3u8_url = await resolve_xameleon_stream(raw_id)
         manifest_content = await fetch_xameleon_m3u8_manifest(m3u8_url, base_proxy_url=sub_proxy_url, base_seg_proxy_url=seg_proxy_url)
-        return Response(
-            content=manifest_content,
-            media_type="application/x-mpegURL",
-            headers={
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, OPTIONS",
-                "Access-Control-Allow-Headers": "*"
-            }
-        )
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Error en proxy-stream Xameleon: {str(e)}")
+    except Exception as e1:
+        print(f"⚠️ [proxy-stream Token Expired/Cache miss]: {e1}. Reintentando desofuscación fresca...")
+        try:
+            m3u8_url = await resolve_xameleon_stream(raw_id, force_refresh=True)
+            manifest_content = await fetch_xameleon_m3u8_manifest(m3u8_url, base_proxy_url=sub_proxy_url, base_seg_proxy_url=seg_proxy_url)
+        except Exception as e2:
+            raise HTTPException(status_code=502, detail=f"Error en proxy-stream Xameleon: {str(e2)}")
+
+    return Response(
+        content=manifest_content,
+        media_type="application/x-mpegURL",
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "*"
+        }
+    )
 
 
 @app.get("/api/v1/channel/{channel_id}/m3u8")
