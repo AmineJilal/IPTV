@@ -799,29 +799,7 @@ async function initDirectories() {
     }
 }
 
-async function startServer() {
-    await initDirectories();
-    const PORT = process.env.PORT || 3000;
 
-    server.on('error', (e) => {
-        if (e.code === 'EADDRINUSE') {
-            console.error(`⚠️ Puerto ${PORT} ocupado. Reintentando escuchar en 3 segundos...`);
-            setTimeout(() => {
-                server.close();
-                server.listen(PORT, '0.0.0.0');
-            }, 3000);
-        } else {
-            console.error('🔥 Error en el servidor HTTP:', e);
-        }
-    });
-
-    server.listen(PORT, '0.0.0.0', () => {
-        console.log(`\n🟢 Servidor IPTV corriendo en http://localhost:${PORT}`);
-        console.log(`📡 Acceso en red local: http://192.168.0.17:${PORT}\n`);
-    });
-}
-
-startServer();
 
 // ─────────────────────────────────────────────
 // API PLAY — GET /api/play/:channelId
@@ -942,7 +920,7 @@ app.get('/api/play/:channelId', async (req, res) => {
                         if (Object.keys(iberoHeaders).length > 0) nuevosHeaders = JSON.stringify(iberoHeaders);
                     }
                 } else if (id.startsWith('bein_') || id.startsWith('yacine_')) {
-                    const pureId = id.replace('bein_1080_', '').replace('bein_720_', '').replace('bein_', '').replace('yacine_', '');
+                    const pureId = id.replace(/^(yacine_\d+_|bein_\d+_|bein_|yacine_)/, '').split('_').pop();
                     for (const base of bases) {
                         try { r = await safeFetch(`${base}:8000/channel/${pureId}`, {}, 30000); if (r && r.ok) break; } catch (e) { fetchError = e; }
                     }
@@ -1033,18 +1011,21 @@ app.get('/api/play/:channelId', async (req, res) => {
             } catch (e) {}
         }
 
-        // hlsUrl: para canales Mediaset (/hls-m3u8) o Movistar/Xameleon (proxy-stream).
-        // El navegador (hls.js) usa hlsUrl sin pasar por /proxy-video.
+        if ((id.startsWith('bein_') || id.startsWith('yacine_')) && !ref) {
+            ref = 'https://x.com/';
+        }
+
+        // Arquitectura Zero-Bandwidth / Zero-Latency:
+        // /hls-m3u8 SOLO se usa para canales Mediaset (requieren cookies de sesión DAI).
+        // Yacine, beIN, Movistar/Xameleon, Ibero, Arabic y TDT reciben la URL directa finalStreamUrl.
         const isMediaset = finalStreamUrl && (
             finalStreamUrl.includes('mediasetinfinity') ||
             finalStreamUrl.includes('dai.m3u8')
         );
-        const isMovistarXameleon = id.startsWith('movistar_') || id.startsWith('xameleon_') || (finalStreamUrl && finalStreamUrl.includes('/proxy-stream'));
-        const isYacineStream = id.startsWith('bein_') || id.startsWith('yacine_') || (finalStreamUrl && (finalStreamUrl.includes('new-redirect') || finalStreamUrl.includes('buzz') || finalStreamUrl.includes('mediox')));
 
-        let hlsUrl = (isMediaset || isYacineStream)
+        let hlsUrl = isMediaset
             ? `${req.protocol}://${req.get('host')}/hls-m3u8?url=${encodeURIComponent(finalStreamUrl)}`
-            : (isMovistarXameleon ? finalStreamUrl : null);
+            : finalStreamUrl;
 
         // ── Reescribir 127.0.0.1:8070 con el Host/IP real del cliente para acceso en Móvil / Smart TV / Render ──
         const clientHost = req.get('host') || '127.0.0.1:3000';
