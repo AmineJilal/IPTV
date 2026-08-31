@@ -190,7 +190,7 @@ async def fetch_xameleon_m3u8_manifest(m3u8_url: str, base_proxy_url: Optional[s
 
     if m3u8_url in MANIFEST_CACHE:
         cached_time, cached_content = MANIFEST_CACHE[m3u8_url]
-        if now - cached_time < 3.0:
+        if now - cached_time < 4.0:
             raw_text = cached_content
 
     if not raw_text:
@@ -200,30 +200,26 @@ async def fetch_xameleon_m3u8_manifest(m3u8_url: str, base_proxy_url: Optional[s
         }
         
         resp = None
-        # 1. Intentar descargar manifiesto vía Tor con dominio oficial (Bypass 500 de IP directa)
+        # 1. Intentar descargar manifiesto directamente por IP en <0.2s (Ultra-Rápido)
+        headers_direct = {**headers_xam, "Host": XAMELEON_HOST}
+        target_url = m3u8_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
         try:
-            async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=8.0) as client:
-                res = await client.get(m3u8_url, headers=headers_xam)
-                if res.status_code == 200 and "#EXTM3U" in res.text:
-                    resp = res
-                else:
-                    print(f"[xameleon_manifest] Tor status: {res.status_code}, body: {res.text[:100]}")
+            async with httpx.AsyncClient(verify=False, timeout=2.5, follow_redirects=True) as client:
+                res_direct = await client.get(target_url, headers=headers_direct)
+                if res_direct.status_code == 200 and "#EXTM3U" in res_direct.text:
+                    resp = res_direct
         except Exception as err:
-            print(f"[xameleon_manifest] Tor exception: {err}")
+            pass
 
-        # 2. Fallback a IP directa si Tor no responde
+        # 2. Fallback a Tor SOCKS5 si la IP directa falla o es bloqueada por el ISP
         if not resp:
-            headers_direct = {**headers_xam, "Host": XAMELEON_HOST}
-            target_url = m3u8_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
             try:
-                async with httpx.AsyncClient(verify=False, timeout=8.0, follow_redirects=True) as client:
-                    res_direct = await client.get(target_url, headers=headers_direct)
-                    if res_direct.status_code == 200 and "#EXTM3U" in res_direct.text:
-                        resp = res_direct
-                    else:
-                        print(f"[xameleon_manifest] Direct status: {res_direct.status_code}, body: {res_direct.text[:100]}")
+                async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=5.0) as client:
+                    res_tor = await client.get(m3u8_url, headers=headers_xam)
+                    if res_tor.status_code == 200 and "#EXTM3U" in res_tor.text:
+                        resp = res_tor
             except Exception as err:
-                print(f"[xameleon_manifest] Direct exception: {err}")
+                pass
             
         if not resp:
             raise ValueError(f"Error descargando M3U8 desde el proveedor ({m3u8_url})")
