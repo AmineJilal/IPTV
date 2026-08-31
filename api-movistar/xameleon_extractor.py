@@ -147,7 +147,7 @@ async def resolve_xameleon_stream(channel_raw_id: str, force_refresh: bool = Fal
                         alt_url = decoded_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
                         m3u8_resp = await client.get(alt_url, headers={**headers_xam, "Host": XAMELEON_HOST})
                         if m3u8_resp.status_code == 200 and "#EXTM3U" in m3u8_resp.text:
-                            return decoded_url
+                            return alt_url
         except Exception:
             pass
         return None
@@ -215,8 +215,16 @@ async def fetch_xameleon_m3u8_manifest(m3u8_url: str, base_proxy_url: Optional[s
 
     base_dir = m3u8_url.rsplit("/", 1)[0] + "/"
     lines = []
+    has_added_start_offset = False
+
     for line in raw_text.splitlines():
         line_str = line.strip()
+        if line_str == "#EXTM3U" and base_seg_proxy_url and not has_added_start_offset:
+            lines.append(line_str)
+            lines.append("#EXT-X-START:TIME-OFFSET=-8")
+            has_added_start_offset = True
+            continue
+
         if line_str and not line_str.startswith("#"):
             if not line_str.startswith("http://") and not line_str.startswith("https://"):
                 full_url = base_dir + line_str
