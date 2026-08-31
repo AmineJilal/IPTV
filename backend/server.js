@@ -1326,10 +1326,19 @@ app.get('/hls-seg', async (req, res) => {
         res.header('Access-Control-Allow-Origin', '*');
         res.header('Access-Control-Allow-Headers', '*');
         res.header('Content-Type', 'video/MP2T');
-        
-        // Convertimos a arrayBuffer y mandamos el binario para evitar saturar RAM con strings
-        const buffer = await response.arrayBuffer();
-        return res.send(Buffer.from(buffer));
+        if (response.headers.get('content-length')) {
+            res.header('Content-Length', response.headers.get('content-length'));
+        }
+
+        // PIPELINING DE STREAMING EN TIEMPO REAL: Transmitir paquetes inmediatamente al reproductor
+        // sin esperar a descargar el fragmento completo en la memoria RAM (Latencia al primer byte < 10ms)
+        const { Readable } = require('stream');
+        if (response.body && typeof Readable.fromWeb === 'function') {
+            return Readable.fromWeb(response.body).pipe(res);
+        } else {
+            const buffer = await response.arrayBuffer();
+            return res.send(Buffer.from(buffer));
+        }
     } catch (e) {
         console.error(`🔥 [HLS-SEG] Error proxiando segmento: ${e.message}`);
         res.header('Access-Control-Allow-Origin', '*');
