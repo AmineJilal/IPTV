@@ -1022,8 +1022,11 @@ app.get('/api/play/:channelId', async (req, res) => {
             finalStreamUrl.includes('mediasetinfinity') ||
             finalStreamUrl.includes('dai.m3u8')
         );
+        const isYacineStream = id.startsWith('bein_') || id.startsWith('yacine_') || (finalStreamUrl && (finalStreamUrl.includes('new-redirect') || finalStreamUrl.includes('buzz') || finalStreamUrl.includes('mediox') || finalStreamUrl.includes('korvario')));
 
-        let hlsUrl = isMediaset
+        // hlsUrl: para el reproductor web (hls.js). Proxea /hls-m3u8 para evitar bloqueos CORS y Referer del navegador.
+        // streamUrl: URL directa de origen (usada por apps externas/Flutter para Zero-Bandwidth).
+        let hlsUrl = (isMediaset || isYacineStream)
             ? `${req.protocol}://${req.get('host')}/hls-m3u8?url=${encodeURIComponent(finalStreamUrl)}`
             : finalStreamUrl;
 
@@ -1205,7 +1208,6 @@ function getHlsUpstreamHeaders(targetUrl, sid) {
 
 function rewriteHlsManifest(text, targetUrl, sid) {
     const encoded = sid ? `&sid=${encodeURIComponent(sid)}` : '';
-    const isYacine = targetUrl.includes('new-redirect') || targetUrl.includes('buzz') || targetUrl.includes('mediox') || targetUrl.includes('online');
 
     return text.split(/\r?\n/).map(line => {
         const t = line.trim();
@@ -1218,7 +1220,6 @@ function rewriteHlsManifest(text, targetUrl, sid) {
                     try {
                         const abs = new URL(p1, targetUrl).href;
                         const isManifest = /\.m3u8(\?|$)/i.test(abs) || abs.includes('manifest');
-                        if (isYacine && !isManifest) return `URI="${abs}"`;
                         const ep = `/hls-${isManifest ? 'm3u8' : 'seg'}?url=${encodeURIComponent(abs)}${encoded}`;
                         return `URI="${ep}"`;
                     } catch (_) { return `URI="${p1}"`; }
@@ -1231,7 +1232,6 @@ function rewriteHlsManifest(text, targetUrl, sid) {
         try {
             const abs = new URL(t, targetUrl).href;
             const isManifest = /\.m3u8(\?|$)/i.test(abs) || abs.includes('manifest');
-            if (isYacine && !isManifest) return abs; // URL directa de la CDN -> 0 MB de consumo de ancho de banda en Node!
             return `/hls-${isManifest ? 'm3u8' : 'seg'}?url=${encodeURIComponent(abs)}${encoded}`;
         } catch (_) { return line; }
     }).join('\n');
