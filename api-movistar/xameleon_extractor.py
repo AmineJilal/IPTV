@@ -91,6 +91,8 @@ async def fetch_xameleon_channels() -> List[Dict[str, str]]:
     return channels
 
 STREAM_RESOLVE_CACHE = {}
+LAST_SUCCESSFUL_MIRROR = {}
+MANIFEST_CACHE = {}
 
 async def resolve_xameleon_stream(channel_raw_id: str, force_refresh: bool = False, ttl_seconds: float = 12.0) -> str:
     now = time.time()
@@ -101,66 +103,82 @@ async def resolve_xameleon_stream(channel_raw_id: str, force_refresh: bool = Fal
         if now - cached_time < ttl_seconds:
             return cached_url
 
-    # El proveedor cuenta con 5 servidores espejo (daddy.php, daddy2.php, daddy3.php, daddy4.php, daddy5.php)
-    endpoints = ["daddy2.php", "daddy3.php", "daddy.php", "daddy4.php", "daddy5.php"]
+    # Servidores espejo priorizados (daddy4.php y daddy2.php primero por máxima disponibilidad)
+    endpoints = ["daddy4.php", "daddy2.php", "daddy3.php", "daddy.php", "daddy5.php"]
+    
+    # Si este canal ya se resolvió exitosamente antes, poner su último espejo en el índice 0
+    ch_eps = list(endpoints)
+    if channel_raw_id in LAST_SUCCESSFUL_MIRROR:
+        last_ep = LAST_SUCCESSFUL_MIRROR[channel_raw_id]
+        if last_ep in ch_eps:
+            ch_eps.remove(last_ep)
+            ch_eps.insert(0, last_ep)
+
     headers_direct = {
         **DEFAULT_HEADERS,
         "Referer": f"https://{DLSTREAMS_HOST}/",
         "Host": ROMPONALIS_HOST
     }
-
     headers_xam = {
         **DEFAULT_HEADERS,
         "Referer": "https://hamis.romponalis.st/",
         "Host": XAMELEON_HOST
     }
 
-    last_decoded = None
-
     import asyncio
 
-    async def check_endpoint(ep: str) -> Optional[str]:
-        # 1. Probar por Tor SOCKS5 (Bypass de bloqueo ISP Vodafone/Movistar y dominio CDN)
-        try:
-            async with httpx.AsyncClient(proxy="socks5://127.0.0.1:9050", verify=False, timeout=5.0) as client:
-                direct_url = f"https://{DLSTREAMS_IP}/premiumtv/{ep}?id={channel_raw_id}"
-                resp = await client.get(direct_url, headers=headers_direct)
-                if resp.status_code == 200:
-                    match = re.search(r"window\.atob\([\x22\x27]([^\x22\x27]+)[\x22\x27]\)", resp.text)
-                    if match:
-                        decoded_url = base64.b64decode(match.group(1)).decode("utf-8")
-                        m3u8_resp = await client.get(decoded_url, headers=headers_xam)
-                        if m3u8_resp.status_code == 200 and "#EXTM3U" in m3u8_resp.text:
-                            return decoded_url
-        except Exception:
-            pass
+    async def check_endpoint(ep: str):
+        async def try_fetch(use_tor=False):
+            try:
+                kwargs = {"verify": False, "timeout": 2.5}
+                if use_tor:
+                    kwargs["proxy"] = "socks5://127.0.0.1:9050"
+                async with httpx.AsyncClient(**kwargs) as client:
+                    direct_url = f"https://{DLSTREAMS_IP}/premiumtv/{ep}?id={channel_raw_id}"
+                    resp = await client.get(direct_url, headers=headers_direct)
+                    if resp.status_code == 200:
+                        match = re.search(r"window\.atob\([\x22\x27]([^\x22\x27]+)[\x22\x27]\)", resp.text)
+                        if match:
+                            decoded_url = base64.b64decode(match.group(1)).decode("utf-8")
+                            alt_url = decoded_url if use_tor else decoded_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
+                            h = headers_xam if use_tor else {**headers_xam, "Host": XAMELEON_HOST}
+                            m3u8_resp = await client.get(alt_url, headers=h)
+                            if m3u8_resp.status_code == 200 and "#EXTM3U" in m3u8_resp.text:
+                                return decoded_url, m3u8_resp.text
+            except Exception:
+                pass
+            return None
 
-        # 2. Fallback a IP directa si Tor no está activo
-        try:
-            async with httpx.AsyncClient(verify=False, timeout=3.5) as client:
-                direct_url = f"https://{DLSTREAMS_IP}/premiumtv/{ep}?id={channel_raw_id}"
-                resp = await client.get(direct_url, headers=headers_direct)
-                if resp.status_code == 200:
-                    match = re.search(r"window\.atob\([\x22\x27]([^\x22\x27]+)[\x22\x27]\)", resp.text)
-                    if match:
-                        decoded_url = base64.b64decode(match.group(1)).decode("utf-8")
-                        alt_url = decoded_url.replace(f"https://{XAMELEON_HOST}", f"https://{XAMELEON_IP}")
-                        m3u8_resp = await client.get(alt_url, headers={**headers_xam, "Host": XAMELEON_HOST})
-                        if m3u8_resp.status_code == 200 and "#EXTM3U" in m3u8_resp.text:
-                            return alt_url
-        except Exception:
-            pass
+        # 1. Probar por IP Directa primero (<0.6s)
+        task_dir = asyncio.create_task(try_fetch(use_tor=False))
+        done, pending = await asyncio.wait([task_dir], timeout=0.7)
+        if done and task_dir.result():
+            res = task_dir.result()
+            return ep, res[0], res[1]
+
+        # 2. Si no responde en 0.7s, lanzar Tor SOCKS5 en paralelo como respaldo
+        task_tor = asyncio.create_task(try_fetch(use_tor=True))
+        all_done, _ = await asyncio.wait([task_dir, task_tor], return_when=asyncio.FIRST_COMPLETED)
+        for t in all_done:
+            res = t.result()
+            if res:
+                for p in pending: p.cancel()
+                task_tor.cancel()
+                return ep, res[0], res[1]
         return None
 
-    tasks = [asyncio.create_task(check_endpoint(ep)) for ep in endpoints]
+    tasks = [asyncio.create_task(check_endpoint(ep)) for ep in ch_eps]
     for completed in asyncio.as_completed(tasks):
         res = await completed
         if res:
             for t in tasks:
                 if not t.done():
                     t.cancel()
-            STREAM_RESOLVE_CACHE[channel_raw_id] = (now, res)
-            return res
+            ep, decoded_url, manifest_text = res
+            LAST_SUCCESSFUL_MIRROR[channel_raw_id] = ep
+            STREAM_RESOLVE_CACHE[channel_raw_id] = (now, decoded_url)
+            MANIFEST_CACHE[decoded_url] = (now, manifest_text)
+            return decoded_url
 
     raise ValueError("El canal no está emitiendo activamente en ningún servidor espejo en este momento")
 
