@@ -508,9 +508,17 @@ app.get('/api/auth/validate', async (req, res) => {
 // ── Caché Ultra-Rápida en Memoria RAM para lectura sub-milisegundo (<1ms) ──
 const fastRamDbCache = new Map();
 
-async function obtenerStreamsDb() {
+async function obtenerStreamsDb(forceRefresh = false) {
+    if (!forceRefresh && fastRamDbCache.size > 0) {
+        return Array.from(fastRamDbCache.values()).filter(r => {
+            const nameLower = (r.nombre || '').toLowerCase();
+            return !nameLower.includes('18+') && !nameLower.includes('+18') && !nameLower.includes('adult') && !nameLower.includes('xxx') && !nameLower.includes('erotic');
+        });
+    }
+
     try {
         const res = await db.execute("SELECT * FROM channel_cache");
+        fastRamDbCache.clear();
         const rows = res.rows.map(r => ({
             ...r,
             favorito: r.favorito === 1 || r.favorito === true || r.favorito === '1'
@@ -542,7 +550,7 @@ app.patch('/api/streams/:id', async (req, res) => {
         args.push(id);
 
         await db.execute(query, args);
-        io.emit('actualizar_streams', await obtenerStreamsDb());
+        io.emit('actualizar_streams', await obtenerStreamsDb(true));
         res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -667,8 +675,14 @@ async function syncAllLists() {
                     if (rCh.ok) {
                         const chData = await rCh.json();
                         for (const c of chData.data || []) {
-                            const id = prefix + c.id;
                             let name = (c.name || 'Canal Yacine') + suffix;
+                            
+                            // Filtro estricto: si no se llama "bein", no lo cargamos
+                            if (!name.toLowerCase().includes('bein')) {
+                                continue;
+                            }
+                            
+                            const id = prefix + c.id;
                             const logo = c.logo || c.img || c.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/BeIN_Sports_logo.svg/512px-BeIN_Sports_logo.svg.png';
                             await db.execute(insertQuery, [id, name, 'BeIN Sports', logo]);
                             total++;
@@ -703,7 +717,7 @@ async function syncAllLists() {
             await db.execute("DELETE FROM channel_cache WHERE LOWER(nombre) LIKE '%18+%' OR LOWER(nombre) LIKE '%+18%' OR LOWER(nombre) LIKE '%adult%' OR LOWER(nombre) LIKE '%xxx%' OR LOWER(nombre) LIKE '%erotic%'");
         } catch (e) {}
 
-        io.emit('actualizar_streams', await obtenerStreamsDb());
+        io.emit('actualizar_streams', await obtenerStreamsDb(true));
     } catch (e) {
         console.error('Error sincronizando listas:', e);
     }
@@ -731,7 +745,7 @@ app.get('/api/streams', async (req, res) => {
             isSyncingLists = true;
             await syncAllLists();
             isSyncingLists = false;
-            streams = await obtenerStreamsDb();
+            streams = await obtenerStreamsDb(true);
         }
         res.json(streams);
     } catch (e) {
@@ -906,6 +920,17 @@ app.get('/api/play/:channelId', async (req, res) => {
                             nuevosHeaders = d.headers_required || d.headers || null;
                             console.log(`[DEBUG] URL extraída: ${nuevaUrl}`);
                             if (nuevosHeaders && typeof nuevosHeaders === 'object') nuevosHeaders = JSON.stringify(nuevosHeaders);
+                            
+                            // MINI-PROXY ESPAÑA: Envolver los enlaces de España en el proxy de cabeceras
+                            if (id.startsWith('tdt_') && nuevaUrl) {
+                                const encUrl = encodeURIComponent(nuevaUrl);
+                                const encHeaders = encodeURIComponent(nuevosHeaders || '{}');
+                                // Obtener host original (Koyeb/Render)
+                                const host = req.headers.host || '127.0.0.1:3000';
+                                const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+                                customHlsUrl = `${proto}://${host}/api/proxy/m3u8?url=${encUrl}&headers=${encHeaders}`;
+                                console.log(`[DEBUG] URL de España envuelta en Proxy local: ${customHlsUrl}`);
+                            }
                         }
                     }
                 } else if (id.startsWith('ibero_')) {
@@ -1028,9 +1053,7 @@ app.get('/api/play/:channelId', async (req, res) => {
         // streamUrl: URL directa de origen (usada por apps externas/Flutter para Zero-Bandwidth).
         let hlsUrl = customHlsUrl || (isMediaset
             ? `${req.protocol}://${req.get('host')}/hls-m3u8?url=${encodeURIComponent(finalStreamUrl)}`
-            : (isYacineStream
-                ? `${req.protocol}://${(req.get('host') || '127.0.0.1:3000').split(':')[0]}:8000/proxy/m3u8?url=${encodeURIComponent(finalStreamUrl)}`
-                : finalStreamUrl));
+            : finalStreamUrl);
 
         // ── Reescribir 127.0.0.1:8070 con el Host/IP real del cliente para acceso en Móvil / Smart TV / Render ──
         const clientHost = req.get('host') || '127.0.0.1:3000';
@@ -1351,7 +1374,50 @@ app.get('/hls-seg', async (req, res) => {
 });
 
 // ── /api/play/:channelId — Devuelve hlsUrl para usar con /hls-m3u8 ───────
-// (El endpoint ya existe más arriba; esta función solo añade hlsUrl al JSON)
+// ─────────────────────────────────────────────
+// MINI-PROXY EXCLUSIVO PARA CABECERAS DE ESPAÑA (TIZEN)
+// ─────────────────────────────────────────────
+app.get('/api/proxy/m3u8', async (req, res) => {
+    const rawUrl = req.query.url;
+    const rawHeaders = req.query.headers;
+    if (!rawUrl) return res.status(400).send('Missing url');
+    
+    let parsedHeaders = {};
+    try {
+        if (rawHeaders) parsedHeaders = JSON.parse(decodeURIComponent(rawHeaders));
+    } catch(e) {}
+
+    try {
+        const targetUrl = decodeURIComponent(rawUrl);
+        const response = await fetch(targetUrl, { headers: parsedHeaders });
+        
+        if (!response.ok) {
+            return res.status(response.status).send(`Proxy Error: ${response.status}`);
+        }
+        
+        let text = await response.text();
+        const baseUrl = new URL(targetUrl);
+        const basePath = baseUrl.origin + baseUrl.pathname.substring(0, baseUrl.pathname.lastIndexOf('/') + 1);
+        
+        // Reescribir URLs relativas a absolutas para que el player de Tizen
+        // descargue los chunks y sub-manifiestos directamente del CDN original.
+        const rewritten = text.split('\n').map(line => {
+            line = line.trim();
+            if (line && !line.startsWith('#')) {
+                if (!line.startsWith('http')) {
+                    line = new URL(line, basePath).href;
+                }
+            }
+            return line;
+        }).join('\n');
+        
+        res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.send(rewritten);
+    } catch(e) {
+        res.status(502).send(e.message);
+    }
+});
 
 // ─────────────────────────────────────────────
 // REDIRECT LIMPIO — Para canales no-Mediaset (sin proxy de vídeo)

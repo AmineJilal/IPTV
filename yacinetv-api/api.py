@@ -11,6 +11,7 @@ class YacineTV:
 
     def __init__(self):
         self.session = requests.Session()
+        self.cache = {}
 
     def decrypt(self, enc, key=key):
         try:
@@ -26,7 +27,14 @@ class YacineTV:
             return "{}"
 
     def req(self, path):
-        # Extract host dynamically from api_url
+        # Usar caché en memoria (10 minutos TTL) para listados (no para resolver canales)
+        is_list = "/api/categories" in path
+        now = time.time()
+        if is_list and path in self.cache:
+            data, timestamp = self.cache[path]
+            if now - timestamp < 600:
+                return data
+
         domain = self.api_url.split("//")[-1].split("/")[0]
         
         headers = {
@@ -37,26 +45,20 @@ class YacineTV:
             "Accept-Encoding": "gzip"
         }
         
-        # Estrategia 1: Conexión Directa
-        # Estrategia 2: Fallback por Tor SOCKS5 (en caso de bloqueo por ISP/Vodafone)
-        methods = [
-            {"proxies": None, "timeout": 3.0},
-            {"proxies": {"http": "socks5h://127.0.0.1:9050", "https": "socks5h://127.0.0.1:9050"}, "timeout": 8.0}
-        ]
-
-        for method in methods:
-            try:
-                r = self.session.get(self.api_url + path, headers=headers, proxies=method["proxies"], timeout=method["timeout"])
-                if r.status_code == 200 and "t" in r.headers:
-                    timestamp = r.headers["t"]
-                    decrypted = self.decrypt(r.text, key=self.key + timestamp)
-                    res = json.loads(decrypted)
-                    if res and (res.get("data") is not None or "data" in res or "vt" in res):
-                        return res
-            except Exception as e:
-                pass
+        # Petición Directa (Tor eliminado por lentitud y bloqueo innecesario)
+        try:
+            r = self.session.get(self.api_url + path, headers=headers, timeout=5.0)
+            if r.status_code == 200 and "t" in r.headers:
+                timestamp_str = r.headers["t"]
+                decrypted = self.decrypt(r.text, key=self.key + timestamp_str)
+                res = json.loads(decrypted)
+                if res and (res.get("data") is not None or "data" in res or "vt" in res):
+                    if is_list:
+                        self.cache[path] = (res, now)
+                    return res
+        except Exception as e:
+            print(f"[-] Error req {path}: Petición directa falló ({e}).")
         
-        print(f"[-] Error req {path}: No se pudo obtener respuesta válida (Directo + Tor fallaron).")
         return {"success": False, "data": []}
 
     def get_categories(self):
