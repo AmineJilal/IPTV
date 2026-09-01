@@ -21,7 +21,14 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Extractor eliminado del servidor principal (Se ejecuta en pc_worker.js)
 
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+
 const app = express();
+app.use(compression({
+    level: 6,
+    threshold: 1024
+}));
 const server = http.createServer(app);
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
@@ -759,6 +766,12 @@ app.get('/api/streams', async (req, res) => {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+const zappingLimiter = rateLimit({
+    windowMs: 1000, 
+    max: 5, 
+    message: { error: 'Zapping demasiado rápido. Espere 1 segundo.' }
+});
+
 
 app.patch('/api/streams/:id', async (req, res) => {
     try {
@@ -824,7 +837,7 @@ async function initDirectories() {
 // ─────────────────────────────────────────────
 // API PLAY — GET /api/play/:channelId
 // ─────────────────────────────────────────────
-app.get('/api/play/:channelId', async (req, res) => {
+app.get('/api/play/:channelId', zappingLimiter, async (req, res) => {
     let id = req.params.channelId;
     if (id.endsWith('.m3u8')) id = id.slice(0, -5);
 
@@ -1005,8 +1018,10 @@ app.get('/api/play/:channelId', async (req, res) => {
                     db.execute(
                         "INSERT INTO channel_cache (id, stream_url, headers, updated_at, tipo) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET stream_url=excluded.stream_url, headers=excluded.headers, updated_at=excluded.updated_at, tipo=excluded.tipo",
                         [id, finalStreamUrl, headersList, ahora, finalTipo]
-                    ).then(() => console.log(`✅ [Cache] Guardado OK en Turso (asíncrono).`))
-                     .catch(e => console.error(`⚠️ [Cache] Error guardando en Turso DB: ${e.message}`));
+                    ).then(() => {
+                        console.log(`✅ [Cache] Guardado OK en Turso (asíncrono).`);
+                        io.emit('canal_actualizado', { id, stream_url: finalStreamUrl, headers: headersList, updated_at: ahora, tipo: finalTipo });
+                    }).catch(e => console.error(`⚠️ [Cache] Error guardando en Turso DB: ${e.message}`));
                 } else {
                     console.error(`⚠️ [API PLAY] No se obtuvo nueva URL, usando la caché anterior si existe.`);
                     // fallback to database stream URL if API fails, so we don't wipe it out!
@@ -1387,9 +1402,13 @@ app.get('/api/proxy/m3u8', async (req, res) => {
         if (rawHeaders) parsedHeaders = JSON.parse(decodeURIComponent(rawHeaders));
     } catch(e) {}
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
     try {
         const targetUrl = decodeURIComponent(rawUrl);
-        const response = await fetch(targetUrl, { headers: parsedHeaders });
+        const response = await fetch(targetUrl, { headers: parsedHeaders, signal: controller.signal });
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
             return res.status(response.status).send(`Proxy Error: ${response.status}`);
@@ -1415,7 +1434,8 @@ app.get('/api/proxy/m3u8', async (req, res) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.send(rewritten);
     } catch(e) {
-        res.status(502).send(e.message);
+        clearTimeout(timeoutId);
+        res.status(504).send(e.message);
     }
 });
 
@@ -1431,7 +1451,7 @@ app.all('/proxy-video', (req, res) => {
     return res.redirect(302, cleanUrl);
 });
 
-app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
+app.get(['/play/:channelId', '/play/:channelId.m3u8'], zappingLimiter, async (req, res) => {
     const channelId = req.params.channelId.endsWith('.m3u8') ? req.params.channelId.slice(0, -5) : req.params.channelId;
     try {
         const streams = await obtenerStreamsDb();
@@ -1446,6 +1466,12 @@ app.get(['/play/:channelId', '/play/:channelId.m3u8'], async (req, res) => {
 });
 
 // Eliminado proxy interno HLS para liberar Termux (Zero-Latency)
+
+// Catch-All Error Handler (Global)
+app.use((err, req, res, next) => {
+    console.error('🔥 [CRÍTICO] Error no capturado en Express:', err.stack);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+});
 
 io.on('connection', async (socket) => {
     const clientIp = socket.handshake.address;
