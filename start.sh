@@ -18,4 +18,4 @@ echo "🚀 Iniciando API Movistar..."
 (cd "$DIR/api-movistar" && python3 -m uvicorn main:app --host 0.0.0.0 --port 8070) &
 
 echo "🚀 Iniciando Node.js Backend..."
-cd "$DIR/backend" && npm start
+(cd "$DIR/backend" && node server.js)
