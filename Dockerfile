@@ -3,7 +3,7 @@ FROM python:3.10-slim
 # Instalar dependencias del sistema, Node.js (v18) y utilidades
 RUN apt-get update && apt-get install -y curl gnupg && \
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
+    apt-get install -y nodejs tor && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Configurar el directorio de trabajo
