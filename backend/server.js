@@ -524,7 +524,7 @@ async function obtenerStreamsDb(forceRefresh = false) {
     }
 
     try {
-        const res = await db.execute("SELECT * FROM channel_cache");
+        const res = await db.execute("SELECT * FROM channel_cache ORDER BY categoria ASC, nombre ASC");
         fastRamDbCache.clear();
         const rows = res.rows.map(r => ({
             ...r,
