@@ -2,6 +2,12 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+# FIX #10: Matar procesos anteriores para evitar procesos zombis duplicados
+echo "🧹 Limpiando procesos anteriores..."
+pkill -f "uvicorn" 2>/dev/null || true
+pkill -f "tor" 2>/dev/null || true
+sleep 1
+
 echo "🚀 Iniciando red Tor en background (SOCKS5)..."
 tor > /dev/null 2>&1 &
 sleep 3

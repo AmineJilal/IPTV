@@ -512,8 +512,20 @@ app.get('/api/auth/validate', async (req, res) => {
     }
 });
 
-// ── Caché Ultra-Rápida en Memoria RAM para lectura sub-milisegundo (<1ms) ──
+// ── Caché Ultra-Rápida en Memoria RAM — LRU con límite de 2000 entradas ──
 const fastRamDbCache = new Map();
+const FAST_RAM_CACHE_MAX = 2000;
+
+function fastRamCacheSet(id, value) {
+    // Si ya existe, borrarlo primero para refrescarlo al final (LRU)
+    if (fastRamDbCache.has(id)) fastRamDbCache.delete(id);
+    // Si llegamos al límite, eliminar la entrada más antigua (primera insertada)
+    if (fastRamDbCache.size >= FAST_RAM_CACHE_MAX) {
+        const oldestKey = fastRamDbCache.keys().next().value;
+        fastRamDbCache.delete(oldestKey);
+    }
+    fastRamDbCache.set(id, value);
+}
 
 async function obtenerStreamsDb(forceRefresh = false) {
     if (!forceRefresh && fastRamDbCache.size > 0) {
@@ -533,7 +545,27 @@ async function obtenerStreamsDb(forceRefresh = false) {
             const nameLower = (r.nombre || '').toLowerCase();
             return !nameLower.includes('18+') && !nameLower.includes('+18') && !nameLower.includes('adult') && !nameLower.includes('xxx') && !nameLower.includes('erotic');
         });
-        rows.forEach(r => fastRamDbCache.set(r.id, r));
+        
+        // ORDEN ESTRICTO: Para BeIN Sports, agrupar exactamente por el nombre base y luego por calidad
+        rows.sort((a, b) => {
+            if (a.categoria === 'BeIN Sports' && b.categoria === 'BeIN Sports') {
+                const baseA = (a.nombre.split(' (')[0] || '').trim();
+                const baseB = (b.nombre.split(' (')[0] || '').trim();
+                
+                if (baseA !== baseB) {
+                    // Orden alfanumérico para agrupar "beIN SPORTS 1", "beIN SPORTS 2", etc.
+                    return baseA.localeCompare(baseB, undefined, { numeric: true, sensitivity: 'base' });
+                }
+                
+                // Si es exactamente el mismo canal (ej. beIN SPORTS 1), ordenar por calidad descendente
+                const qA = (a.nombre.match(/\((\d+)p\)/) || [])[1] ? parseInt((a.nombre.match(/\((\d+)p\)/))[1]) : 0;
+                const qB = (b.nombre.match(/\((\d+)p\)/) || [])[1] ? parseInt((b.nombre.match(/\((\d+)p\)/))[1]) : 0;
+                return qB - qA;
+            }
+            return 0; // Orden natural del SQL para los demás
+        });
+
+        rows.forEach(r => fastRamCacheSet(r.id, r));
         return rows;
     } catch (e) {
         console.error("Error al obtener streams de Turso:", e.message);
@@ -660,15 +692,10 @@ async function syncAllLists() {
                 const cats = await rCat.json();
                 let categoriesList = cats.data || [];
 
-                // Ordenar categorías: 4 (1080P), 5 (720P), 6 (360P), 7 (244P), 8 (Entertainment) primero
-                const priorityOrder = [4, 5, 6, 7, 8, 9, 11, 12, 88, 13, 87, 94];
-                categoriesList.sort((a, b) => {
-                    let idxA = priorityOrder.indexOf(a.id);
-                    let idxB = priorityOrder.indexOf(b.id);
-                    if (idxA === -1) idxA = 999;
-                    if (idxB === -1) idxB = 999;
-                    return idxA - idxB;
-                });
+                // Filtrar SOLO las categorías de BeIN Sports en orden estricto de resolución
+                const priorityOrder = [4, 5, 6, 7]; // 1080p, 720p, 360p, 244p
+                categoriesList = categoriesList.filter(c => priorityOrder.includes(c.id));
+                categoriesList.sort((a, b) => priorityOrder.indexOf(a.id) - priorityOrder.indexOf(b.id));
 
                 for (const cat of categoriesList) {
                     let prefix = `yacine_${cat.id}_`;
@@ -681,18 +708,18 @@ async function syncAllLists() {
                     const rCh = await safeFetch(`http://127.0.0.1:8000/categories/${cat.id}/channels`, {}, 15000);
                     if (rCh.ok) {
                         const chData = await rCh.json();
+                        // FIX #8: Agrupar todos los inserts en una sola transacción batch (de 80 queries a 1)
+                        const batchStatements = [];
                         for (const c of chData.data || []) {
                             let name = (c.name || 'Canal Yacine') + suffix;
-                            
-                            // Filtro estricto: si no se llama "bein", no lo cargamos
-                            if (!name.toLowerCase().includes('bein')) {
-                                continue;
-                            }
-                            
+                            if (!name.toLowerCase().includes('bein')) continue;
                             const id = prefix + c.id;
                             const logo = c.logo || c.img || c.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/BeIN_Sports_logo.svg/512px-BeIN_Sports_logo.svg.png';
-                            await db.execute(insertQuery, [id, name, 'BeIN Sports', logo]);
+                            batchStatements.push({ sql: insertQuery, args: [id, name, 'BeIN Sports', logo] });
                             total++;
+                        }
+                        if (batchStatements.length > 0) {
+                            await db.batch(batchStatements, 'write');
                         }
                     }
                 }
@@ -848,7 +875,7 @@ app.get('/api/play/:channelId', zappingLimiter, async (req, res) => {
         if (!stream) {
             const result = await db.execute("SELECT * FROM channel_cache WHERE id = ?", [id]);
             stream = result.rows[0];
-            if (stream) fastRamDbCache.set(id, stream);
+            if (stream) fastRamCacheSet(id, stream);
         }
 
         if (!stream) {
@@ -1012,7 +1039,7 @@ app.get('/api/play/:channelId', zappingLimiter, async (req, res) => {
                     stream.headers = headersList;
                     stream.updated_at = ahora;
                     stream.tipo = finalTipo;
-                    fastRamDbCache.set(id, stream);
+                    fastRamCacheSet(id, stream);
 
                     // Persistencia asíncrona en Turso DB en segundo plano (no bloquea el response HTTP)
                     db.execute(
@@ -1070,17 +1097,17 @@ app.get('/api/play/:channelId', zappingLimiter, async (req, res) => {
             ? `${req.protocol}://${req.get('host')}/hls-m3u8?url=${encodeURIComponent(finalStreamUrl)}`
             : finalStreamUrl);
 
-        // ── Reescribir 127.0.0.1:8070 con el Host/IP real del cliente para acceso en Móvil / Smart TV / Render ──
+        // ── Reescribir 127.0.0.1:8070 y 8000 con el Host/IP real del cliente para acceso en Móvil / Smart TV / Render ──
         const clientHost = req.get('host') || '127.0.0.1:3000';
         const clientProto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
         const publicPrefix = `${clientProto}://${clientHost}`;
 
-        if (finalStreamUrl && (finalStreamUrl.includes('127.0.0.1:8070') || finalStreamUrl.includes('localhost:8070'))) {
-            finalStreamUrl = finalStreamUrl.replace(/http:\/\/(127\.0\.0\.1|localhost):8070/, publicPrefix);
+        if (finalStreamUrl && (finalStreamUrl.includes('127.0.0.1:8070') || finalStreamUrl.includes('localhost:8070') || finalStreamUrl.includes('127.0.0.1:8000') || finalStreamUrl.includes('localhost:8000'))) {
+            finalStreamUrl = finalStreamUrl.replace(/http:\/\/(127\.0\.0\.1|localhost):(8070|8000)/, publicPrefix);
         }
 
-        if (hlsUrl && (hlsUrl.includes('127.0.0.1:8070') || hlsUrl.includes('localhost:8070'))) {
-            hlsUrl = hlsUrl.replace(/http:\/\/(127\.0\.0\.1|localhost):8070/, publicPrefix);
+        if (hlsUrl && (hlsUrl.includes('127.0.0.1:8070') || hlsUrl.includes('localhost:8070') || hlsUrl.includes('127.0.0.1:8000') || hlsUrl.includes('localhost:8000'))) {
+            hlsUrl = hlsUrl.replace(/http:\/\/(127\.0\.0\.1|localhost):(8070|8000)/, publicPrefix);
         }
 
         return res.json({ 
@@ -1112,13 +1139,23 @@ app.get('/api/play/:channelId', zappingLimiter, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────
-// PROXY TRANSPARENTE HACIA MICROSERVICIO PYTHON MOVISTAR / XAMELEON (puerto 8070)
-// Permite que móviles, TV Box y Smart TVs accedan a través del puerto 3000 o Render sin depender de loopback 127.0.0.1:8070.
 // ─────────────────────────────────────────────────────────────────────────
-app.use(['/api/v1/xameleon', '/api/v1/channel'], async (req, res) => {
+// PROXY TRANSPARENTE HACIA MICROSERVICIO PYTHON MOVISTAR / XAMELEON (puerto 8070) y YACINE (8000)
+// Permite que móviles, TV Box y Smart TVs accedan a través del puerto 3000 o Render sin depender de loopback.
+// ─────────────────────────────────────────────────────────────────────────
+app.use(['/api/v1/xameleon', '/api/v1/channel', '/proxy-yacine', '/proxy-yacine-seg'], async (req, res) => {
+    // AbortController para cancelar la petición al microservicio Python si el cliente se desconecta
+    const proxyAbort = new AbortController();
+    req.on('close', () => {
+        if (!res.writableEnded) proxyAbort.abort();
+    });
+
     try {
-        const fullPath = req.baseUrl + req.url;
-        const targetUrl = `http://127.0.0.1:8070${fullPath}`;
+        let fullPath = req.baseUrl + req.url;
+        // Evitar el 307 Temporary Redirect de FastAPI eliminando la barra antes del query params
+        fullPath = fullPath.replace(/\/\?/, '?');
+        const targetPort = fullPath.includes('proxy-yacine') ? 8000 : 8070;
+        const targetUrl = `http://127.0.0.1:${targetPort}${fullPath}`;
         
         const clientHost = req.get('host') || '127.0.0.1:3000';
         const clientProto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
@@ -1134,6 +1171,7 @@ app.use(['/api/v1/xameleon', '/api/v1/channel'], async (req, res) => {
             method: req.method,
             headers: reqHeaders,
             body: ['GET', 'HEAD'].includes(req.method) ? undefined : req.body,
+            signal: proxyAbort.signal,
         });
 
         const contentType = response.headers.get('content-type') || '';
@@ -1146,7 +1184,7 @@ app.use(['/api/v1/xameleon', '/api/v1/channel'], async (req, res) => {
         if (isManifestOrText) {
             let text = await response.text();
             const publicPrefix = `${clientProto}://${clientHost}`;
-            text = text.replace(/http:\/\/(127\.0\.0\.1|localhost):8070/g, publicPrefix);
+            text = text.replace(/http:\/\/(127\.0\.0\.1|localhost):(8070|8000)/g, publicPrefix);
             
             res.status(response.status);
             response.headers.forEach((val, key) => {
@@ -1164,18 +1202,32 @@ app.use(['/api/v1/xameleon', '/api/v1/channel'], async (req, res) => {
             }
         });
 
+        // Streaming pipeline con detección de desconexión del cliente (FIX: evita quemar 5GB)
         if (response.body) {
+            const { Readable } = require('stream');
+            if (typeof Readable.fromWeb === 'function') {
+                const readable = Readable.fromWeb(response.body);
+                readable.on('error', () => {});
+                res.on('close', () => readable.destroy());
+                return readable.pipe(res);
+            }
+            // Fallback: lectura manual con cancelación
             const reader = response.body.getReader();
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                res.write(value);
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done || proxyAbort.signal.aborted) break;
+                    res.write(value);
+                }
+            } finally {
+                reader.cancel();
             }
         }
         res.end();
     } catch (err) {
+        if (err.name === 'AbortError') return; // Cliente se desconectó, ignorar
         console.error('🔥 [Proxy Movistar/Xameleon Error]', err.message);
-        res.status(502).json({ error: 'Error conectando con microservicio Movistar/Xameleon (8070).' });
+        if (!res.headersSent) res.status(502).json({ error: 'Error conectando con microservicio (8070/8000).' });
     }
 });
 
@@ -1203,10 +1255,16 @@ function hlsSetCookiesFromResponse(sid, setCookieHeaders) {
     session.ts = Date.now();
 }
 
-// Limpieza periódica de sesiones expiradas (cada 5 min)
+// Limpieza periódica de sesiones HLS, caché m3u8 y Maps de validación (cada 5 min)
 setInterval(() => {
     const now = Date.now();
+    // 1. Sesiones HLS expiradas
     for (const [sid, s] of hlsSessions) if (now - s.ts > HLS_SESSION_TTL) hlsSessions.delete(sid);
+    // 2. Entradas expiradas de m3u8MemoryCache (TTL 10s)
+    for (const [url, entry] of m3u8MemoryCache) if (now - entry.ts > 10000) m3u8MemoryCache.delete(url);
+    // 3. failCounts y lastProbeAt para IDs que ya no están en la caché RAM
+    for (const [id] of failCounts) if (!fastRamDbCache.has(id)) { failCounts.delete(id); lastProbeAt.delete(id); }
+    console.log(`[GC] HLS sessions: ${hlsSessions.size} | m3u8Cache: ${m3u8MemoryCache.size} | RAM cache: ${fastRamDbCache.size}`);
 }, HLS_SESSION_TTL);
 
 function getHlsUpstreamHeaders(targetUrl, sid) {
@@ -1277,7 +1335,7 @@ function rewriteHlsManifest(text, targetUrl, sid) {
     }).join('\n');
 }
 
-const m3u8MemoryCache = new Map();
+const m3u8MemoryCache = new Map(); // Limpiado cada 5 min por el setInterval de hlsSessions
 
 // ── /hls-m3u8 — Solo proxea manifiestos (texto, ~2–15 KB) ────────────────
 app.get('/hls-m3u8', async (req, res) => {
